@@ -73,6 +73,10 @@ the scanned count (merges stay out unless `--include-merges`).
 
 ### A. Verasic style (spec: `conventions.md` § Message style)
 
+Git-generated subjects (`Merge …`, `Revert "…"`, `fixup!`, `squash!`) are
+exempt from the prefix and casing checks — their bodies are still scanned for
+trailers and AI-session language.
+
 | Check               | Fail when                                                                                        |
 | ------------------- | ------------------------------------------------------------------------------------------------ |
 | Conventional prefix | subject type is not on the canonical type list in `conventions.md`                               |
