@@ -30,6 +30,10 @@ git log -1 --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER PRESENT' 
 - **TRAILER PRESENT** + not pushed → use the `git commit-tree` escape hatch in `references/commit-protocol.md`; **do not** loop on `--amend` (the wrapper re-injects)
 - already pushed → no force-push; report and fix on a follow-up with approval
 
+Repos with the verasic `commit-msg` hook wired (lefthook or `core.hooksPath`)
+strip trailers automatically and reject mechanical style violations — verify
+stays as the cheap proof.
+
 ## Pre-push audit
 
 Run `/verasic-audit-commits` before the first push of a branch or opening a PR

@@ -10,13 +10,41 @@ packaged here.
 
 ## Parts
 
-| File                                                | Role                                              |
-| --------------------------------------------------- | -------------------------------------------------- |
-| `.cursor/skills/verasic-git-commits/references/`    | The spec + both protocols — single source of truth |
-| `.cursor/skills/verasic-git-commits/SKILL.md`       | Auto-trigger + orchestration                       |
-| `.cursor/rules/verasic-git-commits.mdc`             | Always-applied digest — enforcement at commit time |
-| `.cursor/commands/verasic-audit-commits.md`         | `/verasic-audit-commits` slash command             |
-| `.cursor/agents/verasic-commit-auditor.md`          | Audit subagent — isolated context, read-only       |
+| File                                             | Role                                               |
+| ------------------------------------------------ | -------------------------------------------------- |
+| `.cursor/skills/verasic-git-commits/references/` | The spec + both protocols — single source of truth |
+| `.cursor/skills/verasic-git-commits/hooks/`      | `commit-msg` git hook — deterministic layer        |
+| `.cursor/skills/verasic-git-commits/SKILL.md`    | Auto-trigger + orchestration                       |
+| `.cursor/rules/verasic-git-commits.mdc`          | Always-applied digest — enforcement at commit time |
+| `.cursor/commands/verasic-audit-commits.md`      | `/verasic-audit-commits` slash command             |
+| `.cursor/agents/verasic-commit-auditor.md`       | Audit subagent — isolated context, read-only       |
+
+## Three enforcement layers
+
+| Layer             | What                                | Catches                                                                                          | Cost                     |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+| 0 — deterministic | `hooks/commit-msg` git hook         | trailer/attribution strip (any casing, pre-write), bad prefix, casing, period, emoji, blank line | zero tokens, can't drift |
+| 1 — write time    | always-applied rule digest          | message _quality_: why-not-what body, backticks, AI voice avoidance                              | ~35 lines per context    |
+| 2 — judgment      | `/verasic-audit-commits` (subagent) | AI-session language in history, artifact files, anything regex can't judge                       | one run before push/PR   |
+
+Wire the hook per repo (once):
+
+```yaml
+# lefthook.yml (repos already on lefthook)
+commit-msg:
+  commands:
+    verasic:
+      run: bash .cursor/skills/verasic-git-commits/hooks/commit-msg {1}
+```
+
+```bash
+# raw git (repo without a hook manager)
+git config core.hooksPath .cursor/skills/verasic-git-commits/hooks
+```
+
+With the hook wired, injected trailers (Cursor, Claude Code, …) are stripped
+before the commit object exists — the `commit-tree` escape hatch is only
+needed in unwired repos.
 
 ## How the pieces relate
 

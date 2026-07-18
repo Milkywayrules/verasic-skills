@@ -56,6 +56,8 @@ verasic-skills/
 │   └── verasic-git-commits/
 │       ├── SKILL.md
 │       ├── README.md
+│       ├── hooks/
+│       │   └── commit-msg             # deterministic layer: strip trailers, reject style breaks
 │       └── references/
 │           ├── conventions.md         # ← single source of truth (the spec)
 │           ├── commit-protocol.md     # write path: workflow, verify, escape hatch

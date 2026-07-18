@@ -26,6 +26,11 @@ The full convention lives in `references/`:
 - `references/commit-protocol.md` — write path: workflow, verify, escape hatch
 - `references/audit-protocol.md` — read path: scope, checks, report format, fix mode
 
+The deterministic layer lives in `hooks/commit-msg` — a git hook (lefthook or
+`core.hooksPath`) that strips attribution trailers and rejects mechanical
+style violations with no LLM involvement. Recommend wiring it when a repo
+hasn't; see the wiring section of `commit-protocol.md`.
+
 The Cursor rule and subagent are thin pointers to these files; never duplicate
 the spec elsewhere.
 

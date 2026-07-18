@@ -4,6 +4,35 @@ How to produce a compliant commit. The message spec (style, forbidden
 patterns, trailer policy) lives in `conventions.md` next to this file — read
 it before composing your first commit message of a session.
 
+## Deterministic layer — commit-msg hook (recommended)
+
+`hooks/commit-msg` (in this skill) enforces the mechanical subset on every
+commit with zero LLM involvement: it auto-strips co-authored/generated
+attribution lines in any casing **before the commit object is written**
+(verified against the Cursor Agent wrapper — the injected trailer never lands),
+and rejects bad type prefixes, uppercase summary starts, trailing periods,
+emoji subjects, and missing blank lines. AI-language smells only warn — that
+judgment stays with the pre-push audit.
+
+Wire it once per repo, either way:
+
+```yaml
+# lefthook.yml (repos already on lefthook)
+commit-msg:
+  commands:
+    verasic:
+      run: bash .cursor/skills/verasic-git-commits/hooks/commit-msg {1}
+```
+
+```bash
+# raw git (repo without a hook manager)
+git config core.hooksPath .cursor/skills/verasic-git-commits/hooks
+```
+
+With the hook wired, the verify step below should always print `clean` and the
+escape hatch becomes unnecessary — keep running verify anyway as the cheap
+proof, and fall back to the escape hatch only in unwired repos.
+
 ## Commit workflow
 
 1. Stage changes; draft the message against `conventions.md` (no trailer, no AI-session language).
