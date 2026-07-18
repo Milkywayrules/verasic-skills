@@ -47,8 +47,14 @@ each with file:line, evidence from the code, and a concrete fix.
 
 ## Extend per project
 
-Drop extra `.md` checklists into `checklists/` (e.g. `nextjs.md`, `infra.md`) —
-the protocol applies every file in that folder automatically.
+Drop extra `.md` checklists into `checklists/` (e.g. `laravel.md`, `infra.md`) —
+the protocol applies every file in that folder automatically, and the reviewer
+will tip you when your repo's stack has no matching checklist yet.
+
+Custom checklists are safe across updates: `setup.sh` merges folders and only
+overwrites the core files, so your additions survive. Commit them with the
+project; if one proves useful across projects, promote it upstream to the
+`verasic-skills` repo so every install gets it.
 
 ## Install into a new project
 

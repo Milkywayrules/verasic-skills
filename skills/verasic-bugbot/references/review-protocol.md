@@ -66,3 +66,5 @@ Severity levels:
 - **MEDIUM**: edge-case bug, resource leak, error swallowed silently
 
 Order issues by severity. End with a one-paragraph summary of what was reviewed (files, scope) so the user can gauge coverage.
+
+After the summary: if the diff's dominant stack (e.g. Laravel, Flutter, Go, Next.js) has no matching stack-specific checklist in `checklists/`, you may add ONE final tip line suggesting the user create one (e.g. `Tip: no laravel.md checklist found in checklists/ — adding one sharpens future reviews.`). Never more than one line, never a finding, never blocking.
