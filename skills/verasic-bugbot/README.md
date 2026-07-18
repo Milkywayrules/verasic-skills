@@ -22,10 +22,12 @@ sharing one system:
 - **`/verasic-review`** (command) — the one you normally use. Kicks off a review
   of your branch changes. Add "uncommitted" to review staged + unstaged only.
 - **`/verasic-bugbot`** (skill) — attaches the orchestration instructions to your
-  message. Useful when phrasing a custom request, e.g. "/verasic-bugbot review
-  only the API layer".
-- **`/verasic-bugbot`** (agent) — talks to the review subagent directly. Rarely
-  needed; the command and skill both launch it for you.
+  message and runs in your current conversation. Useful when phrasing a custom
+  request, e.g. "/verasic-bugbot review only the API layer".
+- **`/verasic-bugbot`** (agent) — talks to the review subagent directly. It runs
+  in its own isolated context, so the (long) review work doesn't clutter your
+  chat — only the report comes back. Rarely needed; the command and skill both
+  launch it for you.
 
 Naming rationale: the agent and skill share the name `verasic-bugbot` because
 they are the same brain; the command is a verb (`verasic-review`) because it is

@@ -45,6 +45,8 @@ Zero issues found is a valid and common outcome. Say so plainly.
 
 ## Output format
 
+Your final reply must be the report itself in exactly this format — never a prose summary of the report.
+
 Start with a one-line verdict: `✅ No issues found` or `🐛 N issue(s) found`.
 
 For each issue:
