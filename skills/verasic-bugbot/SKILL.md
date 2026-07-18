@@ -8,10 +8,14 @@ description: Bugbot-like local code review. Use when the user asks to "review ch
 ## Workflow
 
 1. Determine scope from the user's message: branch changes (default) or uncommitted changes.
-2. Launch the `verasic-bugbot` subagent (in `.cursor/agents/verasic-bugbot.md`) with the repository path and scope. Run it in the foreground.
-3. Relay the subagent's report to the user unchanged.
+2. In Cursor: launch the `verasic-bugbot` subagent (`.cursor/agents/verasic-bugbot.md`) with the repository path and scope, in the foreground, then relay its report unchanged.
+3. In any agent without subagents: read `references/review-protocol.md` and execute the review yourself in this conversation, following it exactly.
 
-## Checklists (used by the subagent)
+## Source of truth
+
+The full review protocol (diff scope, process, filtering, output format) lives in `references/review-protocol.md`. The Cursor subagent is a thin pointer to it; never duplicate the protocol elsewhere.
+
+## Checklists (used by the protocol)
 
 Modular checklists live in `checklists/`:
 
@@ -19,7 +23,7 @@ Modular checklists live in `checklists/`:
 - `checklists/security.md` — injection, secrets, authz, unsafe deserialization
 - `checklists/performance.md` — N+1, unbounded growth, blocking calls
 
-Add project-specific checklists as new files here; the subagent applies every `.md` file in `checklists/`.
+Add project-specific checklists as new files here; the protocol applies every `.md` file in `checklists/`.
 
 ## Hard rules
 

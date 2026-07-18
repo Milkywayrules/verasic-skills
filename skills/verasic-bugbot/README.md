@@ -6,17 +6,37 @@ low-noise filter. Style nitpicks are never reported.
 
 ## Parts
 
-| File                                 | Role                                  |
-| ------------------------------------ | ------------------------------------- |
-| `.cursor/agents/verasic-bugbot.md`   | The review subagent — core logic      |
-| `.cursor/commands/verasic-review.md` | `/verasic-review` slash command       |
-| `.cursor/skills/verasic-bugbot/`     | This skill: auto-trigger + checklists |
+| File                                             | Role                                            |
+| ------------------------------------------------ | ----------------------------------------------- |
+| `.cursor/skills/verasic-bugbot/references/`      | `review-protocol.md` — the brain, single source |
+| `.cursor/skills/verasic-bugbot/checklists/`      | Modular bug-hunting checklists                  |
+| `.cursor/skills/verasic-bugbot/SKILL.md`         | Auto-trigger + orchestration                    |
+| `.cursor/agents/verasic-bugbot.md`               | Cursor subagent — thin pointer to the protocol  |
+| `.cursor/commands/verasic-review.md`             | `/verasic-review` slash command                 |
 
-## Usage
+## Human workflow (which slash entry do I use?)
 
-- `/verasic-review` — review branch changes vs default branch
-- `/verasic-review uncommitted` — review staged + unstaged only
-- Or just say "bugbot review my changes" in chat
+Typing `/verasic` in Cursor chat shows three entries — they are different types
+sharing one system:
+
+- **`/verasic-review`** (command) — the one you normally use. Kicks off a review
+  of your branch changes. Add "uncommitted" to review staged + unstaged only.
+- **`/verasic-bugbot`** (skill) — attaches the orchestration instructions to your
+  message. Useful when phrasing a custom request, e.g. "/verasic-bugbot review
+  only the API layer".
+- **`/verasic-bugbot`** (agent) — talks to the review subagent directly. Rarely
+  needed; the command and skill both launch it for you.
+
+Naming rationale: the agent and skill share the name `verasic-bugbot` because
+they are the same brain; the command is a verb (`verasic-review`) because it is
+the action a human runs — and it keeps the slash menu unambiguous.
+
+Day-to-day loop:
+
+1. Finish a feature/fix.
+2. Run `/verasic-review` (or just say "bugbot review my changes").
+3. Fix CRITICAL/HIGH findings, re-run until `✅ No issues found`.
+4. Commit / open PR.
 
 ## Output
 
@@ -26,7 +46,7 @@ each with file:line, evidence from the code, and a concrete fix.
 ## Extend per project
 
 Drop extra `.md` checklists into `checklists/` (e.g. `nextjs.md`, `infra.md`) —
-the subagent applies every file in that folder automatically.
+the protocol applies every file in that folder automatically.
 
 ## Install into a new project
 
