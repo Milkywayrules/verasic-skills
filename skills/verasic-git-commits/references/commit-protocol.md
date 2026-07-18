@@ -33,6 +33,11 @@ With the hook wired, the verify step below should always print `clean` and the
 escape hatch becomes unnecessary — keep running verify anyway as the cheap
 proof, and fall back to the escape hatch only in unwired repos.
 
+Two limits to know:
+
+- hooks are client-side and skippable — never pass `--no-verify` / `-n` to `git commit`; if the hook rejects the message, fix the message. The pre-push audit stays the backstop for commits made in unwired clones.
+- the emoji-subject check needs GNU grep (`-P`); on macOS/BSD grep it silently skips — every other check works everywhere.
+
 ## Commit workflow
 
 1. Stage changes; draft the message against `conventions.md` (no trailer, no AI-session language).

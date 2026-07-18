@@ -46,6 +46,10 @@ With the hook wired, injected trailers (Cursor, Claude Code, …) are stripped
 before the commit object exists — the `commit-tree` escape hatch is only
 needed in unwired repos.
 
+Caveats: hooks are client-side (`--no-verify` skips them — forbidden by the
+rule; the audit stays the backstop), and the emoji check needs GNU grep, so
+macOS/BSD grep silently skips that one check.
+
 ## How the pieces relate
 
 - The **rule** is always in context (Cursor `alwaysApply`), so every commit an
