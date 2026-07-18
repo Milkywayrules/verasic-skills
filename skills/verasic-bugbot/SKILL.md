@@ -22,6 +22,7 @@ Modular checklists live in `checklists/`:
 - `checklists/correctness.md` — logic, edge cases, contracts, concurrency
 - `checklists/security.md` — injection, secrets, authz, unsafe deserialization
 - `checklists/performance.md` — N+1, unbounded growth, blocking calls
+- `checklists/infra.md` — Docker/compose/CI/proxy: exposed ports, secrets, data loss
 
 Add project-specific checklists as new files here; the protocol applies every `.md` file in `checklists/`.
 

@@ -47,7 +47,7 @@ each with file:line, evidence from the code, and a concrete fix.
 
 ## Extend per project
 
-Drop extra `.md` checklists into `checklists/` (e.g. `laravel.md`, `infra.md`) —
+Drop extra `.md` checklists into `checklists/` (e.g. `laravel.md`, `flutter.md`) —
 the protocol applies every file in that folder automatically, and the reviewer
 will tip you when your repo's stack has no matching checklist yet.
 
