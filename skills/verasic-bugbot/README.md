@@ -51,8 +51,9 @@ Drop extra `.md` checklists into `checklists/` (e.g. `laravel.md`, `flutter.md`)
 the protocol applies every file in that folder automatically, and the reviewer
 will tip you when your repo's stack has no matching checklist yet.
 
-Custom checklists are safe across updates: `setup.sh` merges folders and only
-overwrites the core files, so your additions survive. Commit them with the
+Custom checklists are safe across updates: re-running `setup.sh` overwrites
+shipped skill files (including any local edits to them); extra files you added
+(e.g. custom checklists in `checklists/`) survive. Commit them with the
 project; if one proves useful across projects, promote it upstream to the
 `verasic-skills` repo so every install gets it.
 
