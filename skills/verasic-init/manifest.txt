@@ -1,0 +1,6 @@
+# verasic-init manifest — registry of verasic skills and their repo wiring
+# format: skill-name|wire-script-relative-to-skill-dir|short description
+# wire script "-" means the skill needs no repo wiring (skill-only)
+verasic-github-env|scripts/bootstrap.sh|GitHub CLI auth for local agent harnesses
+verasic-git-commits|scripts/wire-hook.sh|commit convention + deterministic commit-msg hook
+verasic-bugbot|-|local bugbot-style code review (no repo wiring)
