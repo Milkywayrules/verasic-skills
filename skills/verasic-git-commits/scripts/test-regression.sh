@@ -69,6 +69,26 @@ msgfile="$TMP/docker.msg"
 printf '%s\n' 'feat: Docker support' > "$msgfile"
 assert_fail "feat: Docker support rejected" "run_hook_expect_fail '$msgfile'"
 
+msgfile="$TMP/empty-summary.msg"
+printf '%s\n' 'feat:  ' > "$msgfile"
+assert_fail "empty summary rejected" "run_hook_expect_fail '$msgfile'"
+
+msgfile="$TMP/empty-scope.msg"
+printf '%s\n' 'feat(): add widget' > "$msgfile"
+assert_fail "empty scope rejected" "run_hook_expect_fail '$msgfile'"
+
+msgfile="$TMP/breaking.msg"
+printf '%s\n' 'feat!: drop legacy config format' > "$msgfile"
+assert "breaking-change marker passes" "run_hook '$msgfile'"
+
+msgfile="$TMP/breaking-scope.msg"
+printf '%s\n' 'feat(api)!: drop v1 endpoints' > "$msgfile"
+assert "scoped breaking-change marker passes" "run_hook '$msgfile'"
+
+msgfile="$TMP/only-attribution.msg"
+printf '%s\n' 'Co-authored-by: Cursor <cursoragent@cursor.com>' > "$msgfile"
+assert_fail "attribution-only message rejected after strip" "run_hook_expect_fail '$msgfile'"
+
 msgfile="$TMP/api.msg"
 printf '%s\n' 'feat: API rate limiter' > "$msgfile"
 assert "feat: API rate limiter passes" "run_hook '$msgfile'"

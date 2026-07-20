@@ -7,9 +7,9 @@ alwaysApply: true
 
 Hard convention for **every commit** (any branch, any agent, any IDE). The
 full spec and recipes live in `.cursor/skills/verasic-git-commits/references/`
-— read `commit-protocol.md` before your first commit of a session. If that
-folder is missing, the installation is broken: say so and fall back to the
-digest below.
+— read `conventions.md` (the spec) and `commit-protocol.md` (the workflow)
+before your first commit of a session. If that folder is missing, the
+installation is broken: say so and fall back to the digest below.
 
 ## Non-negotiables (digest)
 

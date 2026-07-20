@@ -66,6 +66,11 @@ git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || echo 'no upstream'
 - Else: range = `$(git merge-base HEAD "$BASE_REF")..HEAD`.
 - If user says branch was never pushed, treat whole branch range as unpushed — do not assume `@{upstream}`.
 
+Degraded environments — stop with a clear message instead of guessing:
+
+- `git config user.name` empty → ask the user whose commits to audit (or audit all authors on their say-so).
+- no `origin` remote / `git merge-base` fails → fall back to `--root` scope only if the user confirms auditing the whole branch history.
+
 3. **List commits** in scope:
 
 ```bash
@@ -143,7 +148,7 @@ packs, rules, commands wired into the repo) are allowed.
 | Agent config install | — | `.cursor/skills/**`, `.cursor/rules/**`, `.cursor/commands/**`, `.cursor/agents/**`, `.agents/skills/**` committed as repo tooling (e.g. installing/updating Verasic skill packs) |
 | Session / scratch artifacts | transcripts, `*.jsonl`, plan/scratch/note files (`.cursor/plans/**`, loose `.mdc`/`.md` scratch outside the install dirs above), `.tmp*`, `.local/`, chat exports | — |
 | Other agent paths | `.superpowers/`, `.claude/` (unless repo purpose), stray files under `.cursor/` or `.agents/` outside the install dirs | — |
-| Docs | `docs/**` unless user explicitly scoped docs work | — |
+| Docs | `docs/**` when the commits were not supposed to touch docs — **review tier, not blocker** (code commits legitimately update docs; flag for the user to confirm, don't fail the audit on it) | user scoped docs work, or the doc change matches the code change |
 
 Loose `*.md`, `*.mdc`, `*.txt`, `*.canvas` under non-exempt agent paths still
 fail — the install-dir exemption is narrow, not a blanket `.cursor/**` pass.
@@ -176,9 +181,25 @@ End with tallies: `clean: N`, `violations: N` per tier, and **PASS / FAIL** over
 6. **Fix mode (`--fix-trailers`)** — only if user explicitly approved after seeing audit:
 
 - confirm branch **not pushed** (or user approved force-push)
-- stash dirty working tree if needed
-- replay `<range>` with `git commit-tree` msg-filter stripping any line matching `^co-authored-by:` case-insensitively; preserve trees, authors, dates, merge parents (`mapping.get(p,p)` for out-of-range parents)
-- re-run this audit; report tree unchanged vs pre-fix tip if applicable
+- working tree must be clean (`git status --porcelain` empty) — stash first if not
+- replay every commit from the range oldest-first, rebuilding each with `git commit-tree` and a cleaned message (this preserves each commit's tree; authorship is preserved via the env vars):
+
+```bash
+BASE=$(git merge-base HEAD "$BASE_REF")
+NEW=$BASE
+for c in $(git rev-list --reverse --no-merges "$BASE..HEAD"); do
+  MSG=$(git log -1 --format=%B "$c" | grep -viE '^co-authored-by:' || true)
+  NEW=$(printf '%s' "$MSG" | \
+    GIT_AUTHOR_NAME="$(git log -1 --format=%an "$c")" \
+    GIT_AUTHOR_EMAIL="$(git log -1 --format=%ae "$c")" \
+    GIT_AUTHOR_DATE="$(git log -1 --format=%aD "$c")" \
+    git commit-tree "$c^{tree}" -p "$NEW")
+done
+git reset --hard "$NEW"
+```
+
+- ranges containing **merge commits** are out of scope for this recipe (`--no-merges` skips them, which would drop them from history) — use an interactive rebase in an external terminal instead
+- re-run this audit afterwards and confirm `git diff <pre-fix-tip> HEAD` is empty (trees unchanged, only messages rewritten)
 - **never** use `git commit` / `git commit --amend` for bulk trailer removal in an agent-managed terminal (the wrapper re-injects)
 
 For AI-language or Verasic casing fixes: report suggested rewordings; rewrite

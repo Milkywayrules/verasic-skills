@@ -130,7 +130,7 @@ git log -1 --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER STILL PRE
 ```
 
 - **First commit in the repository** (unborn parent — `git rev-parse HEAD~1` fails): omit `-p "$PARENT"`. A first commit on a normal feature branch still has a parent — use the recipe as written.
-- **Multiple consecutive bad commits:** repeat the recipe **oldest-first** (each pass replaces one bad HEAD), or use audit `--fix-trailers` replay for the whole range.
+- **Multiple bad commits in the range:** this recipe replaces **HEAD only** — it cannot reach older ancestors. Use the `--fix-trailers` replay loop in `audit-protocol.md` (fix mode) for the whole range.
 
 **Verify the full unpushed range** (not only `git log -1`):
 
