@@ -12,9 +12,9 @@ verasic_parse_gh_repo_from_remote() {
   if [[ "$raw" =~ ^github\.com:([^/]+)/([^/]+)$ ]]; then
     owner="${BASH_REMATCH[1]}"
     repo="${BASH_REMATCH[2]}"
-  elif [[ "$raw" =~ ^github\.com/([^/]+)/([^/]+)$ ]]; then
-    owner="${BASH_REMATCH[1]}"
-    repo="${BASH_REMATCH[2]}"
+  elif [[ "$raw" =~ ^(ssh\.)?github\.com(:[0-9]+)?/([^/]+)/([^/]+)$ ]]; then
+    owner="${BASH_REMATCH[3]}"
+    repo="${BASH_REMATCH[4]}"
   else
     return 1
   fi
