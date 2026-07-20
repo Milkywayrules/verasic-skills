@@ -1,6 +1,6 @@
 ---
 name: verasic-fusion
-description: Multi-model fusion for exploration and decision support. Use when the user asks to "fuse", "fusion", "multi-model", "ask several models", runs /verasic-fusion, or wants board-verdict, rfc-review, tradeoff-matrix, research-brief, risk-register, devils-advocate, premortem, stakeholder-lens, or compare-to-status-quo templates across named models.
+description: Multi-model fusion for exploration and decision support. Use when the user asks to "fuse", "fusion", "multi-model", "ask several models", runs /verasic-fusion, or wants board-verdict, rfc-review, tradeoff-matrix, research-brief, risk-register, devils-advocate, premortem, stakeholder-lens, or compare-to-status-quo templates across named models (e.g. composer-2.5-fast, glm-5.2-high, gemini-3-flash).
 ---
 
 # Verasic Fusion — Multi-Model Orchestration

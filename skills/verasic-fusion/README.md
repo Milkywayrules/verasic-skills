@@ -85,7 +85,17 @@ Then: `/verasic-init` or `bash .cursor/skills/verasic-init/scripts/init.sh`
 ## Verify
 
 ```bash
-bash .cursor/skills/verasic-fusion/scripts/test-regression.sh
+bash .cursor/skills/verasic-fusion/scripts/test-exhaustive.sh
 ```
 
-See `references/use-cases.md` for manual harness checks before publish.
+See `references/use-cases.md` for the full live harness checklist (UC-0 through UC-14).
+
+## Known limits
+
+- **Cursor-first** — parallel subagent spawn uses the Task tool; other agents read the
+  protocol and may run degraded sequential fusion after user confirmation.
+- **Models are user-supplied** — no default roster; validate slugs against
+  `references/models.md` (includes `composer-2.5-fast`, `glm-5.2-high`, and others).
+- **Readonly only** — decision support; no file edits, commits, or deploys.
+- **Harness availability** — model API limits or missing slugs fail before spawn; use
+  substitutes listed in `references/models.md`.

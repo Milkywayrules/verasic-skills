@@ -1,0 +1,23 @@
+name: verasic-fusion
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-fusion/**'
+      - 'cursor/commands/verasic-fusion.md'
+      - '.github/workflows/verasic-fusion.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-fusion/**'
+      - 'cursor/commands/verasic-fusion.md'
+      - '.github/workflows/verasic-fusion.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: structural regression
+        run: bash skills/verasic-fusion/scripts/test-regression.sh
+      - name: protocol exhaustive
+        run: bash skills/verasic-fusion/scripts/test-exhaustive-protocol.sh

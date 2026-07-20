@@ -65,6 +65,7 @@ assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'Degraded path' 'protoco
 
 assert_grep "$SKILL_ROOT/references/helper.md" 'mode: verbatim' 'helper lists modes'
 assert_grep "$SKILL_ROOT/references/models.md" 'composer-2.5-fast' 'models includes composer-2.5-fast'
+assert_grep "$SKILL_ROOT/references/models.md" 'glm-5.2-high' 'models includes glm-5.2-high'
 
 for slug in "${EXPECTED_TEMPLATES[@]}"; do
   assert_grep "$SKILL_ROOT/references/fusion-protocol.md" "\`${slug}\`" "protocol registry $slug"

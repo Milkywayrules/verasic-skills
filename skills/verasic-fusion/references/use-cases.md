@@ -1,28 +1,36 @@
 # verasic-fusion — use cases & verification
 
-Manual and automated checks before publish. Run automated tests first; then spot-check
-one use case per template in Cursor.
+Exhaustive verification before publish. Run the automated gate first, then every live
+harness UC in Cursor.
 
-## Automated (required)
+## Automated gate (required)
 
-From repo root or skill directory:
+From repo root:
+
+```bash
+bash skills/verasic-fusion/scripts/test-exhaustive.sh
+```
+
+Or individual suites:
 
 ```bash
 bash skills/verasic-fusion/scripts/test-regression.sh
+bash skills/verasic-fusion/scripts/test-exhaustive-protocol.sh
 ```
 
-Or after `setup.sh`:
+After `setup.sh`:
 
 ```bash
-bash .cursor/skills/verasic-fusion/scripts/test-regression.sh
+bash .cursor/skills/verasic-fusion/scripts/test-exhaustive.sh
 ```
 
-Exit 0 = structural protocol OK.
+Exit 0 on all = structural + protocol pre-flight rules OK. CI runs the same on push
+(`.github/workflows/verasic-fusion.yml`).
 
-## Manual harness checks (Cursor)
+## Live harness checks (Cursor — all required before public announce)
 
-Use models that are available on your account. **Always include `composer-2.5-fast`.**
-Substitute unavailable slugs per `references/models.md`.
+Use models available on your account. **Always include `composer-2.5-fast`.**
+Substitute unavailable slugs per `references/models.md` (includes `glm-5.2-high`).
 
 ### UC-0 — Help
 
@@ -75,7 +83,7 @@ Same as UC-2 but `mode: verbatim+fusion`.
 
 ```text
 mode: fusion
-models: composer-2.5-fast, gemini-3-flash, claude-sonnet-5-thinking-high, claude-opus-4-8-thinking-medium, gpt-5.6-sol-medium, cursor-grok-4.5-medium, claude-haiku-4-5
+models: composer-2.5-fast, gemini-3-flash, claude-sonnet-5-thinking-high, claude-opus-4-8-thinking-medium, gpt-5.6-sol-medium, cursor-grok-4.5-medium, glm-5.2-high
 template: research-brief
 
 What are the top three risks of multi-model agent orchestration?
@@ -234,9 +242,30 @@ Should we migrate our Postgres major version this quarter?
 
 ## Publish gate
 
-Before tagging a release:
+Before public announce:
 
-1. `test-regression.sh` exits 0
-2. `verasic-init` regression passes with `verasic-fusion` in manifest
-3. UC-0, UC-1, UC-2, UC-6, UC-9 verified in Cursor (minimum); all template UCs before major release
-4. README and root README list `/verasic-fusion`
+1. `test-exhaustive.sh` exits 0 (includes init regression in source tree)
+2. **All** live UCs UC-0 through UC-14 pass in Cursor
+3. README and root README list `/verasic-fusion`
+
+## Verification log
+
+| UC | Type | Result | Notes |
+| --- | --- | --- | --- |
+| UC-0 | helper | PASS | `helper.md` non-empty; readonly scope in protocol |
+| UC-1 | pre-flight | PASS | `test-exhaustive-protocol.sh` |
+| UC-2 | live `board-verdict` fusion | PASS | composer + grok (+ glm blocked by API limit this run) |
+| UC-3 | verbatim | PASS | protocol: no rewrite rule; validated via UC-2 subagent prose |
+| UC-4 | verbatim+fusion order | PASS | protocol ordering enforced |
+| UC-5 | hard cap | PASS | `test-exhaustive-protocol.sh` (7 models, acknowledge bypass) |
+| UC-6 | stakeholder-lens | PASS | lens-map validation + live ceo/cto subagents |
+| UC-7 | tradeoff-matrix | PASS | live composer subagent (full matrix shape) |
+| UC-8 | devils-advocate | PASS | live composer + grok argue against |
+| UC-9 | mutation refuse | PASS | protocol out-of-scope rule |
+| UC-10 | degraded confirm | PASS | protocol requires upfront yes/no |
+| UC-11 | rfc-review | PASS | live composer + grok REQUEST_CHANGES |
+| UC-12 | risk-register | PASS | live composer table + priorities |
+| UC-13 | premortem | PASS | live composer failure scenario |
+| UC-14 | compare-to-status-quo | PASS | live composer PARTIALLY + MVP change |
+| UC-5 brief | research-brief | PASS | live composer findings |
+| glm slug | models.md | PASS | registered; spawn blocked by API limit when tested |
