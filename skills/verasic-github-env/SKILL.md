@@ -7,12 +7,14 @@ description: GitHub CLI auth for local AI agent harnesses — fine-grained PAT i
 
 ## Workflows
 
+All paths below assume the Cursor install root; installed elsewhere (e.g. `.agents/skills/`), adjust the prefix — the scripts themselves are install-root-agnostic. `/verasic-init` runs the bootstrap for you.
+
 **Bootstrap path — wire a repo once:**
 
-1. Read `references/setup-protocol.md` for secrets tiers and PAT permissions.
-2. Run `scripts/bootstrap.sh` from the repository root (or invoke `/verasic-setup-github` in Cursor).
+1. Read `references/setup-protocol.md` (in this skill's directory) for secrets tiers and PAT permissions.
+2. From the repo root: `bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh` (or `/verasic-setup-github` in Cursor, or let `/verasic-init` do it).
 3. User creates `.github-agent.local` with `GH_TOKEN` (never commit).
-4. Run `scripts/check-gh.sh` to verify.
+4. Verify: `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh`
 
 **Runtime path — before any `gh` command:**
 

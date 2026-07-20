@@ -20,12 +20,14 @@ MSG_FILE="${1:?usage: commit-msg <message-file>}"
 # --- auto-strip attribution lines (near-zero false-positive forms only) ---
 # line-anchored trailer/link forms; prose like "generated with openapi codegen"
 # is untouched because it lacks the trailer colon / markdown-link bracket.
-strip_pattern='^co-authored-by:|^generated-with:|^generated with \[|^🤖|^(signed-off-by|reviewed-by):.*(\bai\b|claude|copilot|cursor|chatgpt|gemini|\bgpt\b)'
+strip_pattern='^co-authored-by:|^generated-with:|^generated with \[|^🤖|^(signed-off-by|reviewed-by):.*(\bai\b|copilot|chatgpt|gemini|\bgpt\b|noreply@anthropic\.com|cursoragent@cursor\.com|claude code)'
+stripped=0
 if grep -qiE "$strip_pattern" "$MSG_FILE"; then
   tmp="$(mktemp)"
   grep -viE "$strip_pattern" "$MSG_FILE" > "$tmp" || true
   cat "$tmp" > "$MSG_FILE"
   rm -f "$tmp"
+  stripped=1
   echo "verasic-git-commits: stripped attribution line(s) from the commit message" >&2
 fi
 
@@ -33,7 +35,14 @@ fi
 clean="$(grep -v '^#' "$MSG_FILE" || true)"
 subject="$(printf '%s\n' "$clean" | head -n1)"
 
+# a message that was ONLY attribution lines must not slip through as empty
+if [ "$stripped" -eq 1 ] && ! printf '%s' "$clean" | grep -q '[^[:space:]]'; then
+  echo "verasic-git-commits: commit message rejected — nothing left after stripping attribution lines; write a real message" >&2
+  exit 1
+fi
+
 # git-generated messages pass through untouched
+# (empty passes: git itself aborts commits with empty messages)
 case "$subject" in
   Merge\ *|Revert\ *|fixup!*|squash!*|amend!*|'') exit 0 ;;
 esac
@@ -45,14 +54,14 @@ fail() {
   failed=1
 }
 
-# conventional prefix
-if ! printf '%s' "$subject" | grep -qE '^(feat|fix|chore|refactor|docs|test|style|perf|build|ci|revert)(\([^)]*\))?!?: .'; then
-  fail "subject must be 'type: summary' or 'type(scope): summary' — types: feat fix chore refactor docs test style perf build ci revert"
+# conventional prefix — scope must be non-empty, summary must start with a visible char
+if ! printf '%s' "$subject" | grep -qE '^(feat|fix|chore|refactor|docs|test|style|perf|build|ci|revert)(\([^)]+\))?!?: [^ ]'; then
+  fail "subject must be 'type: summary' or 'type(scope): summary' (non-empty scope and summary) — types: feat fix chore refactor docs test style perf build ci revert"
 else
   # lowercase summary start; CamelCase / acronym first tokens (TabOverview, API) stay natural
   first_word="$(printf '%s' "$subject" | sed -E 's/^[a-z]+(\([^)]*\))?!?: *//' | cut -d' ' -f1)"
   if printf '%s' "$first_word" | grep -qE '^[A-Z][a-z]*$'; then
-    fail "summary starts uppercase ('$first_word') — lowercase it; proper nouns like TabOverview / API stay natural"
+    fail "summary must start with a lowercase word — rephrase '$first_word …' → 'add $first_word …' (e.g. 'Docker support' → 'add Docker support'); acronyms/CamelCase like API / TabOverview stay natural"
   fi
 fi
 

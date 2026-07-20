@@ -14,6 +14,7 @@ packaged here.
 | ------------------------------------------------ | -------------------------------------------------- |
 | `.cursor/skills/verasic-git-commits/references/` | The spec + both protocols — single source of truth |
 | `.cursor/skills/verasic-git-commits/hooks/`      | `commit-msg` git hook — deterministic layer        |
+| `.cursor/skills/verasic-git-commits/scripts/`    | `test-regression.sh` — hook regression suite       |
 | `.cursor/skills/verasic-git-commits/SKILL.md`    | Auto-trigger + orchestration                       |
 | `.cursor/rules/verasic-git-commits.mdc`          | Always-applied digest — enforcement at commit time |
 | `.cursor/commands/verasic-audit-commits.md`      | `/verasic-audit-commits` slash command             |
@@ -27,7 +28,8 @@ packaged here.
 | 1 — write time    | always-applied rule digest          | message _quality_: why-not-what body, backticks, AI voice avoidance                              | ~35 lines per context    |
 | 2 — judgment      | `/verasic-audit-commits` (subagent) | AI-session language in history, artifact files, anything regex can't judge                       | one run before push/PR   |
 
-Wire the hook per repo (once):
+Wire the hook per repo (once) — `/verasic-init` does this automatically via
+`scripts/wire-hook.sh`, or manually:
 
 ```yaml
 # lefthook.yml (repos already on lefthook)

@@ -14,7 +14,8 @@ and rejects bad type prefixes, uppercase summary starts, trailing periods,
 emoji subjects, and missing blank lines. AI-language smells only warn — that
 judgment stays with the pre-push audit.
 
-Wire it once per repo, either way:
+Wire it once per repo — `scripts/wire-hook.sh` (run by `/verasic-init`) picks
+the right path automatically, or manually:
 
 ```yaml
 # lefthook.yml (repos already on lefthook)
@@ -36,7 +37,7 @@ proof, and fall back to the escape hatch only in unwired repos.
 Two limits to know:
 
 - hooks are client-side and skippable — never pass `--no-verify` / `-n` to `git commit`; if the hook rejects the message, fix the message. The pre-push audit stays the backstop for commits made in unwired clones.
-- the emoji-subject check needs GNU grep (`-P`); on macOS/BSD grep it silently skips — every other check works everywhere.
+- the emoji-subject check needs GNU grep (`-P`); on macOS/BSD grep it silently skips. Word-boundary (`\b`) patterns work on GNU and macOS grep; minimal greps (busybox) may not match them.
 
 ## Commit workflow
 
@@ -97,14 +98,22 @@ message without the agent's commit wrapper.
 
 - verify matches a trailer after a normal commit (amend will not fix it)
 - the commit is **not** pushed
+- working tree is **clean** (stash or commit first — `git reset --hard` destroys uncommitted edits)
 
 **When not to use**
 
 - as the default commit path every time
 - after the commit is already on the remote (no force-push without supervisor approval)
 - when you must run `commit-msg` / GPG signing hooks that only fire on `git commit` (escape hatch skips the usual commit wrapper)
+- when the working tree has uncommitted changes (stash first)
 
-**Recipe** (stage first; `$MSG` = intended message, no trailer):
+**Preconditions**
+
+- bad commit is **HEAD** and **not** pushed
+- working tree **clean** — `git status --porcelain` empty (stash first if not)
+- `$MSG` = intended message, no trailer
+
+**Recipe** (replace bad **HEAD**; tree comes from the bad commit, parent from its parent):
 
 ```bash
 MSG="$(cat <<'EOF'
@@ -113,15 +122,27 @@ type(scope): lowercase summary
 lowercase body — why this change matters.
 EOF
 )"
-TREE=$(git write-tree)
-PARENT=$(git rev-parse HEAD)
+PARENT=$(git rev-parse HEAD~1)
+TREE=$(git rev-parse 'HEAD^{tree}')
 COMMIT=$(printf '%s' "$MSG" | git commit-tree "$TREE" -p "$PARENT")
 git reset --hard "$COMMIT"
 git log -1 --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER STILL PRESENT' || echo 'clean'
 ```
 
-- **First commit on a branch** (no parent): omit `-p "$PARENT"`.
-- **Empty index:** `git write-tree` fails — stage changes first (or use `--allow-empty` via a normal commit only if you accept fixing the trailer afterward).
+- **First commit in the repository** (unborn parent — `git rev-parse HEAD~1` fails): omit `-p "$PARENT"`. A first commit on a normal feature branch still has a parent — use the recipe as written.
+- **Multiple bad commits in the range:** this recipe replaces **HEAD only** — it cannot reach older ancestors. Use the `--fix-trailers` replay loop in `audit-protocol.md` (fix mode) for the whole range.
+
+**Verify the full unpushed range** (not only `git log -1`):
+
+```bash
+if git rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+  git log '@{upstream}..HEAD' --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER IN UNPUSHED RANGE' || echo 'clean'
+else
+  git log --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER IN HISTORY' || echo 'clean'
+fi
+```
+
+When no upstream is set, the fallback scans whole branch history — still run `git log -1` after each single-commit fix as the cheap spot-check.
 
 **Note:** injection is commonly seen in agent-managed shells; an external
 terminal may differ — still run the verify step after every commit.

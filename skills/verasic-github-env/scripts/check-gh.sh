@@ -8,8 +8,10 @@ cd "$ROOT"
 source "$(dirname "${BASH_SOURCE[0]}")/load-gh-env.sh"
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
+  SKILL_DISPLAY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  [[ "$SKILL_DISPLAY" == "$ROOT/"* ]] && SKILL_DISPLAY="${SKILL_DISPLAY#"$ROOT"/}"
   echo "check-gh: GH_TOKEN is unset — add a fine-grained PAT to .github-agent.local (preferred) or .env.local" >&2
-  echo "check-gh: see .cursor/skills/verasic-github-env/references/setup-protocol.md" >&2
+  echo "check-gh: see $SKILL_DISPLAY/references/setup-protocol.md" >&2
   exit 1
 fi
 
@@ -32,7 +34,25 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 1
 fi
 
-gh auth status >/dev/null 2>&1
-gh repo view "$GH_REPO" --json nameWithOwner -q .nameWithOwner >/dev/null
+# warn-only: the protocol asks for chmod 600 on the credential file
+for f in .github-agent.local .env.local; do
+  if [[ -f "$f" ]]; then
+    mode="$(stat -c '%a' "$f" 2>/dev/null || stat -f '%Lp' "$f" 2>/dev/null || true)"
+    if [[ -n "$mode" && "$mode" != 600 && "$mode" != 400 ]]; then
+      echo "check-gh: warning — $f is mode $mode; tighten with: chmod 600 $f" >&2
+    fi
+  fi
+done
+
+# gh auth status can leak a token prefix — keep stdout/stderr suppressed
+if ! gh auth status >/dev/null 2>&1; then
+  echo "check-gh: gh auth failed — GH_TOKEN invalid or expired; rotate the PAT in .github-agent.local" >&2
+  exit 1
+fi
+
+if ! gh repo view "$GH_REPO" --json nameWithOwner -q .nameWithOwner >/dev/null; then
+  echo "check-gh: cannot access $GH_REPO — token scope or repo name wrong" >&2
+  exit 1
+fi
 
 echo "check-gh: ok — authenticated for $GH_REPO"

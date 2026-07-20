@@ -23,7 +23,7 @@ Flags compose: `/verasic-audit-commits --unpushed-only --base master`
 
 - current branch checkout
 - base: detected default branch (see Resolve scope), or user `--base`
-- range: `merge-base(origin/<base>..HEAD)..HEAD`
+- range: `$(git merge-base HEAD "$BASE_REF")..HEAD`
 - **`--no-merges`** (exclude merged-in commits from other branches)
 - author: **`git config user.name`** only
 - full Verasic style + AI-language + committed-file checks
@@ -48,7 +48,14 @@ Flags compose: `/verasic-audit-commits --unpushed-only --base master`
 ```bash
 BRANCH=$(git branch --show-current)
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's|^origin/||')
-BASE_REF=origin/${DEFAULT_BRANCH:-master}   # user --base wins; if origin/master is missing, try origin/main
+if [ -z "$DEFAULT_BRANCH" ]; then
+  if git show-ref --verify --quiet refs/remotes/origin/main; then
+    DEFAULT_BRANCH=main
+  else
+    DEFAULT_BRANCH=master
+  fi
+fi
+BASE_REF=origin/${DEFAULT_BRANCH}   # user --base wins
 AUTHOR="$(git config user.name)"
 
 git merge-base HEAD "$BASE_REF"
@@ -58,6 +65,11 @@ git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || echo 'no upstream'
 - If `--unpushed-only`: range = `@{upstream}..HEAD`; stop with clear message if no upstream.
 - Else: range = `$(git merge-base HEAD "$BASE_REF")..HEAD`.
 - If user says branch was never pushed, treat whole branch range as unpushed — do not assume `@{upstream}`.
+
+Degraded environments — stop with a clear message instead of guessing:
+
+- `git config user.name` empty → ask the user whose commits to audit (or audit all authors on their say-so).
+- no `origin` remote / `git merge-base` fails → fall back to `--root` scope only if the user confirms auditing the whole branch history.
 
 3. **List commits** in scope:
 
@@ -80,7 +92,7 @@ trailers and AI-session language.
 | Check               | Fail when                                                                                        |
 | ------------------- | ------------------------------------------------------------------------------------------------ |
 | Conventional prefix | subject type is not on the canonical type list in `conventions.md`                               |
-| Subject casing      | uppercase first word after `type:` or `type(scope):`                                             |
+| Subject casing      | summary first word is Title Case only (`^[A-Z][a-z]*$` — e.g. `feat: Docker support`); rephrase to start with a lowercase word (`feat: add Docker support`); acronyms/CamelCase (`API`, `TabOverview`) pass |
 | Subject period      | subject ends with `.`                                                                            |
 | Blank line          | body present but no blank line after subject                                                     |
 | Body casing         | first prose sentence or list item starts uppercase without allowed proper noun/acronym/component |
@@ -107,18 +119,18 @@ case-sensitive (run ids, ticket ids).
 
 ```bash
 git log -1 --format=%B <hash> | grep -iE \
-  'cursor|copilot|chatgpt|claude|gemini|\bGPT\b|\bLLM\b|openai|anthropic|ai[- ]generated|ai[- ]assisted|as an ai|language model|\
-subagent|orchestrat|multi-agent|agent session|agent loop|auto-mode|autopilot|\
-implementer#|qa-verify#|doc-writer#|qa-tech#|\
-handoff|session output|chat session|from the chat|cross-session|\
-milestone brief|sprint task|action item|implementation plan|execution plan|per plan|per runbook|checkpoint l[12]|follow-up task|\
-task [0-9]+|step [0-9]+:|step [0-9]+ of|todo [0-9]+|\
-\bSS[0-9]|xd ss|per SS|verbatim XD|wireframe ref|\
-user asked|user requested|as requested|per user|as discussed|based on conversation|following instructions|per prompt|from the query|\
-\bI added\b|\bI will\b|\bI'"'"'ve updated\b|let me |here is |this commit|\
-additionally,|furthermore,|it'"'"'s worth noting|in order to|this ensures that|\
-files changed:|updated the following|changes include:|\
-generated[- ]with|🤖 generated|signed-off-by: ai|reviewed-by: copilot' \
+  -e 'cursor|copilot|chatgpt|claude|gemini|\bGPT\b|\bLLM\b|openai|anthropic|ai[- ]generated|ai[- ]assisted|as an ai|language model' \
+  -e 'subagent|orchestrat|multi-agent|agent session|agent loop|auto-mode|autopilot' \
+  -e 'implementer#|qa-verify#|doc-writer#|qa-tech#' \
+  -e 'handoff|session output|chat session|from the chat|cross-session' \
+  -e 'milestone brief|sprint task|action item|implementation plan|execution plan|per plan|per runbook|checkpoint l[12]|follow-up task' \
+  -e 'task [0-9]+|step [0-9]+:|step [0-9]+ of|todo [0-9]+' \
+  -e '\bSS[0-9]|xd ss|per SS|verbatim XD|wireframe ref' \
+  -e 'user asked|user requested|as requested|per user|as discussed|based on conversation|following instructions|per prompt|from the query' \
+  -e '\bI added\b|\bI will\b|\bi.ve updated\b|let me |here is |this commit' \
+  -e 'additionally,|furthermore,|it.s worth noting|in order to|this ensures that' \
+  -e 'files changed:|updated the following|changes include:' \
+  -e 'generated[- ]with|🤖 generated|signed-off-by: ai|reviewed-by: copilot' \
   && echo 'REVIEW: possible AI-session language'
 ```
 
@@ -127,11 +139,19 @@ teammate voice before push.
 
 ### D. Committed files (artifact leak)
 
-Files touched by commits in scope must not include:
+Files touched by commits in scope must not include **session artifacts** or
+accidental agent scratch — but **intentional agent-config installs** (skill
+packs, rules, commands wired into the repo) are allowed.
 
-- `*.md`, `*.mdc`, `*.txt`, `*.canvas`, `*.jsonl` under agent paths
-- `.cursor/`, `.agents/`, `.superpowers/`, `.claude/`, `.tmp*`, `.local/`
-- `docs/**` unless user explicitly scoped docs work
+| Category | Blocker | OK when intentional |
+| -------- | ------- | ------------------- |
+| Agent config install | — | `.cursor/skills/**`, `.cursor/rules/**`, `.cursor/commands/**`, `.cursor/agents/**`, `.agents/skills/**` committed as repo tooling (e.g. installing/updating Verasic skill packs) |
+| Session / scratch artifacts | transcripts, `*.jsonl`, plan/scratch/note files (`.cursor/plans/**`, loose `.mdc`/`.md` scratch outside the install dirs above), `.tmp*`, `.local/`, chat exports | — |
+| Other agent paths | `.superpowers/`, `.claude/` (unless repo purpose), stray files under `.cursor/` or `.agents/` outside the install dirs | — |
+| Docs | `docs/**` when the commits were not supposed to touch docs — **review tier, not blocker** (code commits legitimately update docs; flag for the user to confirm, don't fail the audit on it) | user scoped docs work, or the doc change matches the code change |
+
+Loose `*.md`, `*.mdc`, `*.txt`, `*.canvas` under non-exempt agent paths still
+fail — the install-dir exemption is narrow, not a blanket `.cursor/**` pass.
 
 Exception: repos whose **purpose** is those files (a skills/rules/docs repo)
 — note the exception in the report instead of flagging every commit.
@@ -161,9 +181,25 @@ End with tallies: `clean: N`, `violations: N` per tier, and **PASS / FAIL** over
 6. **Fix mode (`--fix-trailers`)** — only if user explicitly approved after seeing audit:
 
 - confirm branch **not pushed** (or user approved force-push)
-- stash dirty working tree if needed
-- replay `<range>` with `git commit-tree` msg-filter stripping any line matching `^co-authored-by:` case-insensitively; preserve trees, authors, dates, merge parents (`mapping.get(p,p)` for out-of-range parents)
-- re-run this audit; report tree unchanged vs pre-fix tip if applicable
+- working tree must be clean (`git status --porcelain` empty) — stash first if not
+- replay every commit from the range oldest-first, rebuilding each with `git commit-tree` and a cleaned message (this preserves each commit's tree; authorship is preserved via the env vars):
+
+```bash
+BASE=$(git merge-base HEAD "$BASE_REF")
+NEW=$BASE
+for c in $(git rev-list --reverse --no-merges "$BASE..HEAD"); do
+  MSG=$(git log -1 --format=%B "$c" | grep -viE '^co-authored-by:' || true)
+  NEW=$(printf '%s' "$MSG" | \
+    GIT_AUTHOR_NAME="$(git log -1 --format=%an "$c")" \
+    GIT_AUTHOR_EMAIL="$(git log -1 --format=%ae "$c")" \
+    GIT_AUTHOR_DATE="$(git log -1 --format=%aD "$c")" \
+    git commit-tree "$c^{tree}" -p "$NEW")
+done
+git reset --hard "$NEW"
+```
+
+- ranges containing **merge commits** are out of scope for this recipe (`--no-merges` skips them, which would drop them from history) — use an interactive rebase in an external terminal instead
+- re-run this audit afterwards and confirm `git diff <pre-fix-tip> HEAD` is empty (trees unchanged, only messages rewritten)
 - **never** use `git commit` / `git commit --amend` for bulk trailer removal in an agent-managed terminal (the wrapper re-injects)
 
 For AI-language or Verasic casing fixes: report suggested rewordings; rewrite

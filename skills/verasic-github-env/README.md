@@ -29,7 +29,7 @@ Skill-only (any agent):
 npx skills add Milkywayrules/verasic-skills
 ```
 
-If the skill is not under `.cursor/skills/`, copy or symlink it there before bootstrap (see setup-protocol.md).
+Installed under a different root (e.g. `.agents/skills/`)? No copying needed — the scripts derive their paths from their own location; just adjust the `.cursor/skills/` prefix in the commands below.
 
 ## Wire one repo
 

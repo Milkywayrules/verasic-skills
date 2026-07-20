@@ -12,6 +12,12 @@ cd "$ROOT"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# display path for messages — relative when installed inside the repo
+SKILL_DISPLAY="$SKILL_ROOT"
+if [[ "$SKILL_ROOT" == "$ROOT/"* ]]; then
+  SKILL_DISPLAY="${SKILL_ROOT#"$ROOT"/}"
+fi
+
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/parse-gh-repo.sh"
 
@@ -69,18 +75,28 @@ ensure_env_example() {
     return
   fi
 
+  if $has_token || $has_repo; then
+    # append only the missing line — re-appending the whole block would duplicate the other var
+    $has_token || printf 'GH_TOKEN=\n' >> .env.example
+    $has_repo  || printf 'GH_REPO=%s\n' "$GH_REPO" >> .env.example
+    echo "bootstrap: completed GH block in .env.example"
+    return
+  fi
+
   printf '\n%s\n' "$ENV_SNIPPET" >> .env.example
   echo "bootstrap: appended GitHub block to .env.example"
 }
 
-env_local_is_gitignored() {
-  if [[ -f .gitignore ]] && grep -qE '(^|/)\.env(\.local|/\*|\*)?(\$|$)|(^|/)\.env\*' .gitignore 2>/dev/null; then
-    return 0
-  fi
-  if git check-ignore -q .env.local 2>/dev/null; then
-    return 0
-  fi
-  return 1
+# true only when the file is actually ignored AND the deciding rule lives in a
+# repo-committed .gitignore — a machine-local global excludesfile or
+# .git/info/exclude does not protect other clones, and a negation rule
+# (`!.env.local`) makes check-ignore --verbose match while the file stays
+# committable, so the quiet ignored-status check must come first
+repo_gitignored() {
+  git check-ignore -q -- "$1" 2>/dev/null || return 1
+  local src
+  src="$(git check-ignore --verbose -- "$1" 2>/dev/null | head -n1 | cut -d: -f1)"
+  [[ -n "$src" && "$src" != /* && "$src" == *.gitignore ]]
 }
 
 ensure_gitignore() {
@@ -97,11 +113,11 @@ EOF
   fi
 
   local changed=false
-  if ! file_has_line .gitignore '(^|/)\.github-agent\.local$'; then
+  if ! repo_gitignored .github-agent.local; then
     printf '\n# agent harness secrets\n.github-agent.local\n' >> .gitignore
     changed=true
   fi
-  if ! env_local_is_gitignored; then
+  if ! repo_gitignored .env.local; then
     printf '.env.local\n' >> .gitignore
     changed=true
   fi
@@ -135,15 +151,20 @@ ensure_github_agent_example() {
   echo "bootstrap: wrote $dest"
 }
 
-warn_tracked_secrets() {
+# returns 1 when secrets are tracked so bootstrap can exit 3 (action needed)
+# instead of reporting a clean wire — a committed token is a rotation event
+check_tracked_secrets() {
   local tracked=()
   while IFS= read -r path; do
     tracked+=("$path")
   done < <(git ls-files .env.local .github-agent.local 2>/dev/null || true)
   if ((${#tracked[@]} > 0)); then
-    echo "bootstrap: WARNING — tracked secret file(s): ${tracked[*]}" >&2
-    echo "bootstrap: run: git rm --cached ${tracked[*]}" >&2
+    echo "bootstrap: ACTION NEEDED — secret file(s) tracked by git: ${tracked[*]}" >&2
+    echo "bootstrap: 1. git rm --cached ${tracked[*]}" >&2
+    echo "bootstrap: 2. commit the removal; if any commit with the file was pushed, ROTATE the token now" >&2
+    return 1
   fi
+  return 0
 }
 
 warn_committable_templates() {
@@ -163,7 +184,8 @@ ensure_envrc
 ensure_env_example
 ensure_gitignore
 ensure_github_agent_example
-warn_tracked_secrets
+secrets_clean=true
+check_tracked_secrets || secrets_clean=false
 warn_committable_templates
 
 cat <<EOF
@@ -172,7 +194,10 @@ Next steps:
   1. Create fine-grained PAT scoped to: ${GH_REPO}
   2. cp .github-agent.local.example .github-agent.local  # set GH_TOKEN (chmod 600)
   3. direnv allow  # optional, if using direnv
-  4. bash .cursor/skills/verasic-github-env/scripts/check-gh.sh
+  4. bash ${SKILL_DISPLAY}/scripts/check-gh.sh
 
-Full spec: .cursor/skills/verasic-github-env/references/setup-protocol.md
+Full spec: ${SKILL_DISPLAY}/references/setup-protocol.md
 EOF
+
+# exit 3 = manual step required (verasic-init reports it as "action needed")
+$secrets_clean || exit 3

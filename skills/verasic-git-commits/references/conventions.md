@@ -8,8 +8,9 @@ Applies to **every commit** (any branch, any agent, any IDE).
 
 ## Message style (same casing as comments / JSDoc)
 
-Commit messages are prose, not JSDoc. Where the repo carries
-`verasic-jsdoc-and-comments.mdc`, casing aligns with it.
+Commit messages are prose, not JSDoc. (Some Verasic repos carry a separate
+`verasic-jsdoc-and-comments.mdc` rule with the same casing style; it is not
+part of this skill — do not go looking for it.)
 
 - lowercase first sentence (and after `.`, `?`, `!`, `;`, `:`, `—`)
 - natural casing elsewhere: types, acronyms, API routes, component names, field labels (`User ID`, `BRANCH`), ticket ids (`PROJ-1234`)
@@ -32,13 +33,17 @@ notation: `--set` not `-set` or `set flag`.
 ### Subject (first line)
 
 - conventional prefix — canonical type list: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `style`, `perf`, `build`, `ci`, `revert`
-- optional scope: `(PROJ-1234)` — ticket id natural casing
-- after `type:` or `type(scope):` — **lowercase** start for the summary
+- optional scope: `(PROJ-1234)` — ticket id natural casing; scope must be non-empty (`feat():` is invalid)
+- optional breaking-change marker `!` after type/scope (`feat!:`, `feat(api)!:`) — conventional commits standard
+- after `type:` or `type(scope):` — summary **must start with a lowercase word** (the first token after the prefix)
+- when the summary would start with a proper noun, **rephrase** — e.g. `feat: Docker support` → `feat: add Docker support`; shape-based exemptions still pass: acronyms and CamelCase/mixed-case tokens (`API`, `TabOverview`, `iOS`) stay natural
 - imperative mood, concise, no trailing period on the subject
 
 | Good                                         | Bad                                    |
 | -------------------------------------------- | -------------------------------------- |
 | `chore: add release bump script`             | `Chore: Add release bump script`       |
+| `feat: add Docker support`                   | `feat: Docker support`                 |
+| `feat: API rate limiter`                     | `refactor: Streamline Select Styling` (Title Case first word) |
 | `fix(PROJ-1234): undefined variables`        | `fix(PROJ-1234): Undefined variables.` |
 | `refactor: streamline shared select styling` | `refactor: Streamline Select Styling`  |
 
