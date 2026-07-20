@@ -12,6 +12,12 @@ cd "$ROOT"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# display path for messages — relative when installed inside the repo
+SKILL_DISPLAY="$SKILL_ROOT"
+if [[ "$SKILL_ROOT" == "$ROOT/"* ]]; then
+  SKILL_DISPLAY="${SKILL_ROOT#"$ROOT"/}"
+fi
+
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/parse-gh-repo.sh"
 
@@ -73,14 +79,12 @@ ensure_env_example() {
   echo "bootstrap: appended GitHub block to .env.example"
 }
 
-env_local_is_gitignored() {
-  if [[ -f .gitignore ]] && grep -qE '(^|/)\.env(\.local|/\*|\*)?(\$|$)|(^|/)\.env\*' .gitignore 2>/dev/null; then
-    return 0
-  fi
-  if git check-ignore -q .env.local 2>/dev/null; then
-    return 0
-  fi
-  return 1
+# true only when a repo-committed .gitignore covers the file — a machine-local
+# global excludesfile or .git/info/exclude does not protect other clones
+repo_gitignored() {
+  local src
+  src="$(git check-ignore --verbose -- "$1" 2>/dev/null | head -n1 | cut -d: -f1)"
+  [[ -n "$src" && "$src" != /* && "$src" == *.gitignore ]]
 }
 
 ensure_gitignore() {
@@ -97,11 +101,11 @@ EOF
   fi
 
   local changed=false
-  if ! file_has_line .gitignore '(^|/)\.github-agent\.local$'; then
+  if ! repo_gitignored .github-agent.local; then
     printf '\n# agent harness secrets\n.github-agent.local\n' >> .gitignore
     changed=true
   fi
-  if ! env_local_is_gitignored; then
+  if ! repo_gitignored .env.local; then
     printf '.env.local\n' >> .gitignore
     changed=true
   fi
@@ -172,7 +176,7 @@ Next steps:
   1. Create fine-grained PAT scoped to: ${GH_REPO}
   2. cp .github-agent.local.example .github-agent.local  # set GH_TOKEN (chmod 600)
   3. direnv allow  # optional, if using direnv
-  4. bash .cursor/skills/verasic-github-env/scripts/check-gh.sh
+  4. bash ${SKILL_DISPLAY}/scripts/check-gh.sh
 
-Full spec: .cursor/skills/verasic-github-env/references/setup-protocol.md
+Full spec: ${SKILL_DISPLAY}/references/setup-protocol.md
 EOF
