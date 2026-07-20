@@ -187,4 +187,8 @@ fi
 echo "$RULE"
 
 ((failed == 0)) || exit 1
+# a --skills selection that matched nothing real is an input error, not success
+if ((unknown > 0 && wired + ready + action_needed + installed == 0)); then
+  exit 2
+fi
 exit 0

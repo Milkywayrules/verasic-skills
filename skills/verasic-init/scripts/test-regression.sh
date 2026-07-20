@@ -73,10 +73,22 @@ rc=0
 (cd "$R" && bash "$INIT_REL" --skills= >/dev/null 2>&1) || rc=$?
 [[ "$rc" -eq 2 ]] && ok "empty --skills rejected" || bad "empty --skills rejected (rc=$rc)"
 
-# --- unknown skill name ---
-out4="$(cd "$R" && bash "$INIT_REL" --skills nope)"
+# --- all-unknown selection: reported and exits 2 ---
+rc=0
+out4="$(cd "$R" && bash "$INIT_REL" --skills nope)" || rc=$?
 row 'nope' 'unknown' "$out4" && ok "unknown skill reported" || bad "unknown skill reported"
 grep -q '1 unknown' <<<"$out4" && ok "unknown counted in tally" || bad "unknown counted in tally"
+[[ "$rc" -eq 2 ]] && ok "all-unknown selection exits 2" || bad "all-unknown selection exits 2 (rc=$rc)"
+
+# --- mixed selection (one real, one typo) still succeeds ---
+rc=0
+out4b="$(cd "$R" && bash "$INIT_REL" --skills verasic-bugbot,nope)" || rc=$?
+[[ "$rc" -eq 0 ]] && ok "mixed selection exits 0" || bad "mixed selection exits 0 (rc=$rc)"
+row 'verasic-bugbot' 'ready' "$out4b" && ok "mixed selection wires real skill" || bad "mixed selection wires real skill"
+
+# --- init itself is in the manifest ---
+out4c="$(cd "$R" && bash "$INIT_REL" --skills verasic-init)"
+row 'verasic-init' 'ready' "$out4c" && ok "verasic-init selectable in manifest" || bad "verasic-init selectable in manifest"
 
 # --- tokened origin URL never printed ---
 R1b="$TMP/tokened"

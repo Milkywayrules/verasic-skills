@@ -22,9 +22,10 @@ Scripts must be idempotent, must run correctly from the repo root (init `cd`s th
 
 | Skill | Script | What it does |
 | --- | --- | --- |
-| `verasic-github-env` | `scripts/bootstrap.sh` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template |
+| `verasic-github-env` | `scripts/bootstrap.sh` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; exit 3 when a secret file is already git-tracked |
 | `verasic-git-commits` | `scripts/wire-hook.sh` | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
 | `verasic-bugbot` | — | skill-only; nothing to wire |
+| `verasic-init` | — | this orchestrator; running it is the wiring |
 
 ## Statuses in the report
 
@@ -53,6 +54,7 @@ The full stdout of `init.sh` is the user-facing report. Agents relay it verbatim
 
 - Not a git repo → exit 1 before any changes.
 - Unknown CLI argument or empty `--skills` → usage + exit 2.
+- `--skills` selection where every name is unknown → report + exit 2 (nothing was wired).
 - Any wire script exit code other than 0/3, or a manifest-declared wire script missing from an installed skill → report row `FAILED`, init exit 1.
 - `--list` and `--help` never modify the repository.
 

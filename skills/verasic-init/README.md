@@ -63,5 +63,5 @@ npx skills add Milkywayrules/verasic-skills
 ## Regression tests
 
 ```bash
-bash skills/verasic-init/scripts/test-regression.sh
+bash .cursor/skills/verasic-init/scripts/test-regression.sh
 ```

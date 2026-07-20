@@ -4,3 +4,4 @@
 verasic-github-env|scripts/bootstrap.sh|GitHub CLI auth for local agent harnesses
 verasic-git-commits|scripts/wire-hook.sh|commit convention + deterministic commit-msg hook
 verasic-bugbot|-|local bugbot-style code review (no repo wiring)
+verasic-init|-|this orchestrator (running it is the wiring)
