@@ -34,6 +34,16 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 1
 fi
 
+# warn-only: the protocol asks for chmod 600 on the credential file
+for f in .github-agent.local .env.local; do
+  if [[ -f "$f" ]]; then
+    mode="$(stat -c '%a' "$f" 2>/dev/null || stat -f '%Lp' "$f" 2>/dev/null || true)"
+    if [[ -n "$mode" && "$mode" != 600 && "$mode" != 400 ]]; then
+      echo "check-gh: warning — $f is mode $mode; tighten with: chmod 600 $f" >&2
+    fi
+  fi
+done
+
 # gh auth status can leak a token prefix — keep stdout/stderr suppressed
 if ! gh auth status >/dev/null 2>&1; then
   echo "check-gh: gh auth failed — GH_TOKEN invalid or expired; rotate the PAT in .github-agent.local" >&2

@@ -13,6 +13,9 @@ _verasic_extract_var() {
   local line value
   while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    # tolerate leading whitespace and an `export ` prefix (direnv accepts both)
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ "$line" == export[[:space:]]* ]] && line="${line#export}" && line="${line#"${line%%[![:space:]]*}"}"
     [[ "$line" == "${key}="* ]] || continue
     value="${line#*=}"
     value="${value#"${value%%[![:space:]]*}"}"

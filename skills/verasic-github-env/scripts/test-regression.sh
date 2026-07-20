@@ -194,6 +194,79 @@ else
   fail=$((fail + 1))
 fi
 
+# fresh repo: a negation rule (`!.env.local`) matches check-ignore --verbose while the
+# file stays committable — bootstrap must still end with the file actually ignored
+mkdir -p "$TMP/negation"
+setup_repo "$TMP/negation"
+printf '%s\n' '!.env.local' '!.github-agent.local' > .gitignore
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null
+if git check-ignore -q .env.local && git check-ignore -q .github-agent.local; then
+  echo "PASS: secrets ignored despite pre-existing negation rules"
+  pass=$((pass + 1))
+else
+  echo "FAIL: negation rule left a secret file committable"
+  fail=$((fail + 1))
+fi
+
+# fresh repo: a git-tracked secret file must turn bootstrap into exit 3 (action needed)
+mkdir -p "$TMP/tracked-secret"
+setup_repo "$TMP/tracked-secret"
+printf 'GH_TOKEN=oops\n' > .github-agent.local
+git add .github-agent.local
+git -c user.email=t@t -c user.name=t commit -qm 'chore: seed'
+rc=0
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null 2>&1 || rc=$?
+if [[ "$rc" -eq 3 ]]; then
+  echo "PASS: tracked secret file makes bootstrap exit 3"
+  pass=$((pass + 1))
+else
+  echo "FAIL: tracked secret file should exit 3 (got $rc)"
+  fail=$((fail + 1))
+fi
+
+# fresh repo: .env.example with only GH_REPO must gain GH_TOKEN without duplicating GH_REPO
+mkdir -p "$TMP/partial-example"
+setup_repo "$TMP/partial-example"
+printf 'GH_REPO=acme/other\n' > .env.example
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null
+tok_count="$(grep -c '^GH_TOKEN=' .env.example || true)"
+repo_count="$(grep -c '^GH_REPO=' .env.example || true)"
+if [[ "$tok_count" -eq 1 && "$repo_count" -eq 1 ]]; then
+  echo "PASS: partial .env.example completed without duplicates"
+  pass=$((pass + 1))
+else
+  echo "FAIL: partial .env.example (GH_TOKEN=$tok_count GH_REPO=$repo_count)"
+  fail=$((fail + 1))
+fi
+
+# export-prefixed lines must load (direnv accepts them)
+mkdir -p "$TMP/export-prefix"
+setup_repo "$TMP/export-prefix"
+printf '%s\n' 'export GH_TOKEN=exported_token' 'export GH_REPO=acme/exported' > .github-agent.local
+if ( set +eu; unset GH_TOKEN GH_REPO
+     source .cursor/skills/verasic-github-env/scripts/load-gh-env.sh
+     [[ "$GH_TOKEN" == exported_token && "$GH_REPO" == acme/exported ]] ); then
+  echo "PASS: load-gh-env reads export-prefixed lines"
+  pass=$((pass + 1))
+else
+  echo "FAIL: load-gh-env reads export-prefixed lines"
+  fail=$((fail + 1))
+fi
+
+# loose credential-file permissions must warn (check still fails on fake token)
+mkdir -p "$TMP/loose-perms"
+setup_repo "$TMP/loose-perms"
+printf '%s\n' 'GH_TOKEN=fake' 'GH_REPO=acme/x' > .github-agent.local
+chmod 644 .github-agent.local
+warn_out="$(bash .cursor/skills/verasic-github-env/scripts/check-gh.sh 2>&1 >/dev/null || true)"
+if [[ "$warn_out" == *"chmod 600"* ]]; then
+  echo "PASS: check-gh warns on loose credential permissions"
+  pass=$((pass + 1))
+else
+  echo "FAIL: check-gh missing chmod warning for mode 644"
+  fail=$((fail + 1))
+fi
+
 echo "---"
 echo "regression: $pass passed, $fail failed"
 [[ "$fail" -eq 0 ]]
