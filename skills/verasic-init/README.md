@@ -8,12 +8,12 @@ a Cursor `setup.sh` install.
 
 ## Parts
 
-| File | Role |
-| --- | --- |
-| `scripts/init.sh` | Orchestrator — detect, wire, report |
-| `manifest.txt` | Registry: skill → wiring script → description |
+| File                          | Role                                            |
+| ----------------------------- | ----------------------------------------------- |
+| `scripts/init.sh`             | Orchestrator — detect, wire, report             |
+| `manifest.txt`                | Registry: skill → wiring script → description   |
 | `references/init-protocol.md` | Spec — wire contract, statuses, extension guide |
-| `scripts/test-regression.sh` | Disposable regression tests |
+| `scripts/test-regression.sh`  | Disposable regression tests                     |
 
 ## Usage
 
@@ -33,11 +33,11 @@ landed; no configuration needed.
 
 ## What gets wired
 
-| Skill | Wiring |
-| --- | --- |
-| `verasic-github-env` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template |
+| Skill                 | Wiring                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `verasic-github-env`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template                                            |
 | `verasic-git-commits` | `core.hooksPath` → deterministic commit-msg hook (or prints a lefthook/chaining snippet if hooks already exist) |
-| `verasic-bugbot` | nothing — skill-only |
+| `verasic-bugbot`      | nothing — skill-only                                                                                            |
 
 Skills that are not installed are reported as `not installed` and skipped —
 cherry-picked installs just work.
@@ -63,5 +63,7 @@ npx skills add Milkywayrules/verasic-skills
 ## Regression tests
 
 ```bash
+bash skills/verasic-init/scripts/test-regression.sh   # from verasic-skills repo root
+# after setup.sh in a consumer project:
 bash .cursor/skills/verasic-init/scripts/test-regression.sh
 ```

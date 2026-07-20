@@ -10,15 +10,18 @@ packaged here.
 
 ## Parts
 
-| File                                             | Role                                               |
-| ------------------------------------------------ | -------------------------------------------------- |
-| `.cursor/skills/verasic-git-commits/references/` | The spec + both protocols — single source of truth |
-| `.cursor/skills/verasic-git-commits/hooks/`      | `commit-msg` git hook — deterministic layer        |
-| `.cursor/skills/verasic-git-commits/scripts/`    | `test-regression.sh` — hook regression suite       |
-| `.cursor/skills/verasic-git-commits/SKILL.md`    | Auto-trigger + orchestration                       |
-| `.cursor/rules/verasic-git-commits.mdc`          | Always-applied digest — enforcement at commit time |
-| `.cursor/commands/verasic-audit-commits.md`      | `/verasic-audit-commits` slash command             |
-| `.cursor/agents/verasic-commit-auditor.md`       | Audit subagent — isolated context, read-only       |
+Paths relative to this skill folder unless noted. After `setup.sh`, skill files
+live under `.cursor/skills/verasic-git-commits/`.
+
+| File                                             | Role                                                  |
+| ------------------------------------------------ | ----------------------------------------------------- |
+| `references/`                                    | The spec + both protocols — single source of truth    |
+| `hooks/commit-msg`                               | Deterministic git hook layer                          |
+| `scripts/test-regression.sh`                     | Hook regression suite                                 |
+| `SKILL.md`                                       | Auto-trigger + orchestration                          |
+| `../../cursor/rules/verasic-git-commits.mdc`     | Always-applied digest (installed to `.cursor/rules/`) |
+| `../../cursor/commands/verasic-audit-commits.md` | `/verasic-audit-commits` slash command                |
+| `../../cursor/agents/verasic-commit-auditor.md`  | Audit subagent — isolated context, read-only          |
 
 ## Three enforcement layers
 

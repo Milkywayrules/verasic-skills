@@ -6,13 +6,16 @@ low-noise filter. Style nitpicks are never reported.
 
 ## Parts
 
-| File                                             | Role                                            |
-| ------------------------------------------------ | ----------------------------------------------- |
-| `.cursor/skills/verasic-bugbot/references/`      | `review-protocol.md` — the brain, single source |
-| `.cursor/skills/verasic-bugbot/checklists/`      | Modular bug-hunting checklists                  |
-| `.cursor/skills/verasic-bugbot/SKILL.md`         | Auto-trigger + orchestration                    |
-| `.cursor/agents/verasic-bugbot.md`               | Cursor subagent — thin pointer to the protocol  |
-| `.cursor/commands/verasic-review.md`             | `/verasic-review` slash command                 |
+Paths relative to this skill folder unless noted. After `setup.sh`, skill files
+live under `.cursor/skills/verasic-bugbot/`.
+
+| File                                      | Role                                             |
+| ----------------------------------------- | ------------------------------------------------ |
+| `references/review-protocol.md`           | The brain — single source of truth               |
+| `checklists/`                             | Modular bug-hunting checklists                   |
+| `SKILL.md`                                | Auto-trigger + orchestration                     |
+| `../../cursor/agents/verasic-bugbot.md`   | Cursor subagent (installed to `.cursor/agents/`) |
+| `../../cursor/commands/verasic-review.md` | `/verasic-review` slash command                  |
 
 ## Human workflow (which slash entry do I use?)
 

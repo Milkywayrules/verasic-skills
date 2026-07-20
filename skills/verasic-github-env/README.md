@@ -7,15 +7,18 @@ production secrets.
 
 ## Parts
 
-| File | Role |
-| --- | --- |
-| `.cursor/skills/verasic-github-env/references/setup-protocol.md` | Spec — tiers, PAT permissions, bootstrap, agent usage |
-| `.cursor/skills/verasic-github-env/scripts/bootstrap.sh` | Wire repo once — `.envrc`, templates, `.gitignore` |
-| `.cursor/skills/verasic-github-env/scripts/load-gh-env.sh` | Safe GH var loader (no shell execution of env files) |
-| `.cursor/skills/verasic-github-env/scripts/check-gh.sh` | Verify `GH_TOKEN` + `gh auth status` |
-| `.cursor/skills/verasic-github-env/scripts/test-regression.sh` | Disposable regression tests |
-| `.cursor/skills/verasic-github-env/SKILL.md` | Auto-trigger + orchestration |
-| `.cursor/rules/verasic-github-env.mdc` | Always-applied digest for `gh` commands |
+Paths relative to this skill folder unless noted. After `setup.sh`, skill files
+live under `.cursor/skills/verasic-github-env/`.
+
+| File                                        | Role                                                  |
+| ------------------------------------------- | ----------------------------------------------------- |
+| `references/setup-protocol.md`              | Spec — tiers, PAT permissions, bootstrap, agent usage |
+| `scripts/bootstrap.sh`                      | Wire repo once — `.envrc`, templates, `.gitignore`    |
+| `scripts/load-gh-env.sh`                    | Safe GH var loader (no shell execution of env files)  |
+| `scripts/check-gh.sh`                       | Verify `GH_TOKEN` + `gh auth status`                  |
+| `scripts/test-regression.sh`                | Regression tests (local; no CI)                       |
+| `SKILL.md`                                  | Auto-trigger + orchestration                          |
+| `../../cursor/rules/verasic-github-env.mdc` | Always-applied digest for `gh` commands               |
 
 ## Install into a project
 
@@ -50,11 +53,11 @@ Legacy: `load-gh-env.sh` still reads `GH_*` lines from `.env.local` if present.
 
 ## Secrets tiers
 
-| Tier | Where |
-| --- | --- |
+| Tier         | Where                            |
+| ------------ | -------------------------------- |
 | Local agents | `.github-agent.local` + `.envrc` |
-| CI | GitHub Actions secrets |
-| Production | Doppler / Coolify / vault |
+| CI           | GitHub Actions secrets           |
+| Production   | Doppler / Coolify / vault        |
 
 ## Usage
 

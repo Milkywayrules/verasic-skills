@@ -62,6 +62,13 @@ Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
 [skills/verasic-init/README.md](skills/verasic-init/README.md)
 
+## Testing
+
+Most skills ship a local `test-regression.sh` — run before publish, no CI required.
+**verasic-fusion** is the exception: it also has `test-exhaustive-protocol.sh`,
+`test-exhaustive.sh` (local full gate), and `.github/workflows/verasic-fusion.yml`
+(structural + protocol checks on push).
+
 ## This Repo Hierarchy
 
 ```markdown
@@ -69,6 +76,8 @@ verasic-skills/
 ├── README.md # root: short pitch + install commands
 ├── .gitignore
 ├── setup.sh
+├── .github/workflows/
+│ └── verasic-fusion.yml # CI: fusion structural + protocol checks only
 ├── skills/ # ← the units npx installs
 │ ├── verasic-bugbot/
 │ │ ├── SKILL.md
@@ -99,7 +108,9 @@ verasic-skills/
 │ │ │ ├── stakeholder-lens.md
 │ │ │ └── compare-to-status-quo.md
 │ │ └── scripts/
-│ │ └── test-regression.sh
+│ │ ├── test-regression.sh
+│ │ ├── test-exhaustive-protocol.sh
+│ │ └── test-exhaustive.sh # local full gate (includes init regression in source tree)
 │ ├── verasic-git-commits/
 │ │ ├── SKILL.md
 │ │ ├── README.md

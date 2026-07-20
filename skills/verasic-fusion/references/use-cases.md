@@ -24,8 +24,11 @@ After `setup.sh`:
 bash .cursor/skills/verasic-fusion/scripts/test-exhaustive.sh
 ```
 
-Exit 0 on all = structural + protocol pre-flight rules OK. CI runs the same on push
-(`.github/workflows/verasic-fusion.yml`).
+Exit 0 = structural + protocol pre-flight rules OK. `test-exhaustive.sh` also runs
+init regression when invoked from the verasic-skills source tree.
+
+CI (`.github/workflows/verasic-fusion.yml`) runs `test-regression.sh` and
+`test-exhaustive-protocol.sh` on push — not the init suite.
 
 ## Live harness checks (Cursor — all required before public announce)
 
@@ -250,23 +253,25 @@ Before public announce:
 
 ## Verification log
 
-| UC | Type | Result | Notes |
-| --- | --- | --- | --- |
-| UC-0 | helper | PASS | `helper.md` non-empty; readonly scope in protocol |
-| UC-1 | pre-flight | PASS | `test-exhaustive-protocol.sh` |
-| UC-2 | live `board-verdict` fusion | PASS | slash E2E ([24c21dca](agent transcript)); composer + grok; glm API limit |
-| UC-0 slash | `/verasic-fusion` bare | PASS | helper relay ([dcad2afa](agent transcript)) |
-| UC-3 | verbatim | PASS | protocol: no rewrite rule; validated via UC-2 subagent prose |
-| UC-4 | verbatim+fusion order | PASS | protocol ordering enforced |
-| UC-5 | hard cap | PASS | `test-exhaustive-protocol.sh` (7 models, acknowledge bypass) |
-| UC-6 | stakeholder-lens | PASS | lens-map validation + live ceo/cto subagents |
-| UC-7 | tradeoff-matrix | PASS | live composer subagent (full matrix shape) |
-| UC-8 | devils-advocate | PASS | live composer + grok argue against |
-| UC-9 | mutation refuse | PASS | protocol out-of-scope rule |
-| UC-10 | degraded confirm | PASS | protocol requires upfront yes/no |
-| UC-11 | rfc-review | PASS | live composer + grok REQUEST_CHANGES |
-| UC-12 | risk-register | PASS | live composer table + priorities |
-| UC-13 | premortem | PASS | live composer failure scenario |
-| UC-14 | compare-to-status-quo | PASS | live composer PARTIALLY + MVP change |
-| UC-5 brief | research-brief | PASS | live composer findings |
-| glm slug | models.md | PASS | registered; spawn blocked by API limit when tested |
+Last full pass: automated gate + live UCs UC-0 through UC-14 in Cursor.
+
+| UC         | Type                   | Result | Verified by                             |
+| ---------- | ---------------------- | ------ | --------------------------------------- |
+| UC-0       | helper                 | PASS   | `helper.md`; readonly scope in protocol |
+| UC-0 slash | `/verasic-fusion` bare | PASS   | live harness                            |
+| UC-1       | pre-flight             | PASS   | `test-exhaustive-protocol.sh`           |
+| UC-2       | `board-verdict` fusion | PASS   | live harness                            |
+| UC-3       | verbatim               | PASS   | protocol + live harness                 |
+| UC-4       | verbatim+fusion order  | PASS   | protocol                                |
+| UC-5       | hard cap               | PASS   | `test-exhaustive-protocol.sh`           |
+| UC-5 brief | research-brief         | PASS   | live harness                            |
+| UC-6       | stakeholder-lens       | PASS   | protocol + live harness                 |
+| UC-7       | tradeoff-matrix        | PASS   | live harness                            |
+| UC-8       | devils-advocate        | PASS   | live harness                            |
+| UC-9       | mutation refuse        | PASS   | protocol                                |
+| UC-10      | degraded confirm       | PASS   | protocol                                |
+| UC-11      | rfc-review             | PASS   | live harness                            |
+| UC-12      | risk-register          | PASS   | live harness                            |
+| UC-13      | premortem              | PASS   | live harness                            |
+| UC-14      | compare-to-status-quo  | PASS   | live harness                            |
+| glm slug   | models.md              | PASS   | registered; may hit API limits at spawn |

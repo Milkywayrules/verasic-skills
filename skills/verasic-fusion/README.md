@@ -6,14 +6,17 @@ orchestrates; frontier models stay disposable and focused.
 
 ## Parts
 
-| File                                                          | Role                                 |
-| ------------------------------------------------------------- | ------------------------------------ |
-| `.cursor/skills/verasic-fusion/references/fusion-protocol.md` | Single source of truth               |
-| `.cursor/skills/verasic-fusion/references/helper.md`          | Help text for bare `/verasic-fusion` |
-| `.cursor/skills/verasic-fusion/references/models.md`          | Known model slugs                    |
-| `.cursor/skills/verasic-fusion/templates/`                    | Output templates (9 presets)         |
-| `.cursor/skills/verasic-fusion/SKILL.md`                      | Auto-trigger + orchestration         |
-| `.cursor/commands/verasic-fusion.md`                          | `/verasic-fusion` slash command      |
+Paths relative to this skill folder. After `setup.sh`, the same files live under
+`.cursor/skills/verasic-fusion/`.
+
+| File                                      | Role                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------ |
+| `references/fusion-protocol.md`           | Single source of truth                                             |
+| `references/helper.md`                    | Help text for bare `/verasic-fusion`                               |
+| `references/models.md`                    | Known model slugs                                                  |
+| `templates/`                              | Output templates (9 presets)                                       |
+| `SKILL.md`                                | Auto-trigger + orchestration                                       |
+| `../../cursor/commands/verasic-fusion.md` | `/verasic-fusion` slash command (installed to `.cursor/commands/`) |
 
 ## Human workflow
 
@@ -85,6 +88,8 @@ Then: `/verasic-init` or `bash .cursor/skills/verasic-init/scripts/init.sh`
 ## Verify
 
 ```bash
+bash skills/verasic-fusion/scripts/test-exhaustive.sh   # from verasic-skills repo root
+# after setup.sh in a consumer project:
 bash .cursor/skills/verasic-fusion/scripts/test-exhaustive.sh
 ```
 
