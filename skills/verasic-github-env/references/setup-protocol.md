@@ -53,7 +53,7 @@ Or in Cursor: `/verasic-setup-github`
 
 This writes `.envrc`, `.github-agent.local.example`, documents GH vars in `.env.example`, and updates `.gitignore`. If the repo uses a broad `.env*` ignore rule, bootstrap adds `!.env.example` and `!.envrc` negation rules.
 
-**npx skills add:** skills land outside `.cursor/skills/` depending on the host agent. Copy or symlink this skill into `.cursor/skills/verasic-github-env` before running bootstrap, or run bootstrap from the path your agent exposes.
+**npx skills add:** skills may land outside `.cursor/skills/` depending on the host agent (e.g. `.agents/skills/`). No copying needed — the scripts derive their paths from wherever they live. Run bootstrap (or `verasic-init`) from the path your agent exposes, adjusting the `.cursor/skills/` prefix in the commands here.
 
 ## direnv (optional)
 

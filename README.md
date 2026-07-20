@@ -25,13 +25,21 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 curl -fsSL https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/setup.sh | bash
 ```
 
-Re-run the same command anytime to update.
+Re-run the same command anytime to update (it overwrites shipped files; extra files you added survive).
 
 **Any agent (skills only — Claude Code, Codex, etc.):**
 
 ```bash
 npx skills add Milkywayrules/verasic-skills
 ```
+
+**Then wire the repo (both install paths, once):** run `/verasic-init` in Cursor, or directly:
+
+```bash
+bash .cursor/skills/verasic-init/scripts/init.sh   # adjust the prefix if your agent installs skills elsewhere (e.g. .agents/skills/)
+```
+
+It detects the installed skills, wires each one idempotently, and prints a report — after that, everything enforces itself.
 
 ## Usage
 
@@ -72,6 +80,7 @@ verasic-skills/
 │   │   ├── hooks/
 │   │   │   └── commit-msg             # deterministic layer: strip trailers, reject style breaks
 │   │   ├── scripts/
+│   │   │   ├── wire-hook.sh           # hook wiring used by verasic-init
 │   │   │   └── test-regression.sh     # disposable regression tests
 │   │   └── references/
 │   │       ├── conventions.md         # ← single source of truth (the spec)
