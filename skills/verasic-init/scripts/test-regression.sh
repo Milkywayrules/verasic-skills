@@ -35,11 +35,12 @@ row() { grep -qE "$1 +$2" <<<"$3"; }
 
 # --- full wire on a fresh repo ---
 R="$TMP/full"
-make_repo "$R" verasic-init verasic-github-env verasic-git-commits verasic-bugbot
+make_repo "$R" verasic-init verasic-github-env verasic-git-commits verasic-bugbot verasic-fusion
 out="$(cd "$R" && bash "$INIT_REL")"
 row 'verasic-github-env' 'wired' "$out" && ok "github-env wired" || bad "github-env wired"
 row 'verasic-git-commits' 'wired' "$out" && ok "git-commits wired" || bad "git-commits wired"
 row 'verasic-bugbot' 'ready' "$out" && ok "bugbot ready" || bad "bugbot ready"
+row 'verasic-fusion' 'ready' "$out" && ok "fusion ready" || bad "fusion ready"
 [[ -f "$R/.envrc" ]] && ok ".envrc created" || bad ".envrc created"
 hooks_path="$(git -C "$R" config core.hooksPath || true)"
 [[ "$hooks_path" == ".cursor/skills/verasic-git-commits/hooks" ]] && ok "hooksPath set" || bad "hooksPath set ($hooks_path)"

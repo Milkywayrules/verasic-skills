@@ -10,35 +10,36 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 
 ## Wire script contract
 
-| Exit code | Meaning | Init status |
-| --- | --- | --- |
-| 0 | wired (or already wired — idempotent) | `wired` |
-| 3 | manual step required; instructions printed to stdout | `action needed` |
-| other | error | `FAILED` (init exits 1) |
+| Exit code | Meaning                                              | Init status             |
+| --------- | ---------------------------------------------------- | ----------------------- |
+| 0         | wired (or already wired — idempotent)                | `wired`                 |
+| 3         | manual step required; instructions printed to stdout | `action needed`         |
+| other     | error                                                | `FAILED` (init exits 1) |
 
 Scripts must be idempotent, must run correctly from the repo root (init `cd`s there), and must never print secret values.
 
 ## Per-skill wiring
 
-| Skill | Script | What it does |
-| --- | --- | --- |
-| `verasic-github-env` | `scripts/bootstrap.sh` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; exit 3 when a secret file is already git-tracked |
+| Skill                 | Script                 | What it does                                                                                                                                           |
+| --------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `verasic-github-env`  | `scripts/bootstrap.sh` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; exit 3 when a secret file is already git-tracked                                 |
 | `verasic-git-commits` | `scripts/wire-hook.sh` | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
-| `verasic-bugbot` | — | skill-only; nothing to wire |
-| `verasic-init` | — | this orchestrator; running it is the wiring |
+| `verasic-bugbot`      | —                      | skill-only; nothing to wire                                                                                                                            |
+| `verasic-fusion`      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
+| `verasic-init`        | —                      | this orchestrator; running it is the wiring                                                                                                            |
 
 ## Statuses in the report
 
-| Status | Meaning |
-| --- | --- |
-| `wired` | wiring script succeeded |
-| `ready` | installed, no wiring needed |
-| `action needed` | manual step required — instructions in details |
-| `not installed` | in manifest but not present in the skills root |
-| `not selected` | excluded by `--skills` |
-| `unknown` | requested via `--skills` but not in the manifest |
-| `installed` | `--list` mode only — present, would be wired on a real run |
-| `FAILED` | wiring script errored or missing — init exits 1 |
+| Status          | Meaning                                                    |
+| --------------- | ---------------------------------------------------------- |
+| `wired`         | wiring script succeeded                                    |
+| `ready`         | installed, no wiring needed                                |
+| `action needed` | manual step required — instructions in details             |
+| `not installed` | in manifest but not present in the skills root             |
+| `not selected`  | excluded by `--skills`                                     |
+| `unknown`       | requested via `--skills` but not in the manifest           |
+| `installed`     | `--list` mode only — present, would be wired on a real run |
+| `FAILED`        | wiring script errored or missing — init exits 1            |
 
 ## Report contract
 
