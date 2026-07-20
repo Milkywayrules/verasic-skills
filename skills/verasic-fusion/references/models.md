@@ -23,6 +23,7 @@ Adjust if any slug is unavailable on the harness or account.
 | Gemini Flash      | `gemini-3-flash`                  |
 | Gemini Pro        | `gemini-3.1-pro`                  |
 | Sonnet            | `claude-sonnet-5-thinking-high`   |
+| Haiku             | `claude-haiku-4-5`                |
 | Opus              | `claude-opus-4-8-thinking-medium` |
 | GLM               | `glm-5.2-high`                    |
 | Auto              | `auto`                            |
@@ -40,6 +41,7 @@ Adjust if any slug is unavailable on the harness or account.
 | `gemini-flash`, `flash`                     | `gemini-3-flash`                  |
 | `gemini-pro`, `pro`                         | `gemini-3.1-pro`                  |
 | `sonnet-5`, `claude-sonnet`                 | `claude-sonnet-5-thinking-high`   |
+| `haiku`, `claude-haiku`                     | `claude-haiku-4-5`                |
 | `opus-4.8`, `claude-opus`, `opus`           | `claude-opus-4-8-thinking-medium` |
 | `glm`, `glm-5`, `glm-5.2`                   | `glm-5.2-high`                    |
 | `fable`, `fable-5`                          | `claude-fable-5-thinking-xhigh`   |
@@ -49,7 +51,15 @@ Adjust if any slug is unavailable on the harness or account.
 | `kimi`                                      | `kimi-k2`                         |
 
 If the harness exposes a different canonical slug at runtime, prefer the harness list
-and update this file upstream.
+and update this file upstream. Slugs not on the harness list may still be valid elsewhere —
+fail before spawn with substitutes; do not silently swap models.
+
+## Harness availability (Cursor Task)
+
+These slugs are known to the catalog but **may fail** Task spawn on some accounts or quota
+states: `kimi-k2`, `claude-haiku-4-5` (validate before spawn — often unavailable in Cursor
+Task). Prefer validating at pre-flight; use substitutes from the table below. GLM (`glm-5.2-high`) and frontier models may hit API usage limits —
+report unavailable slugs; fuse from surviving models unless all inputs are unusable.
 
 ## Substitutes when unavailable
 
@@ -62,5 +72,6 @@ and update this file upstream.
 | `gpt-5.6-terra-medium`            | `gpt-5.6-sol-medium`              |
 | `glm-5.2-high`                    | `cursor-grok-4.5-medium`          |
 | `kimi-k2`                         | `cursor-grok-4.5-medium`          |
+| `claude-haiku-4-5`                | `gemini-3-flash`                  |
 
 Always keep `composer-2.5-fast` when substituting.

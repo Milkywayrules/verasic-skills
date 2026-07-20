@@ -61,6 +61,9 @@ assert_grep "$SKILL_ROOT/references/fusion-protocol.md" '`fusion`' 'protocol fus
 assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'verbatim\+fusion' 'protocol verbatim+fusion mode'
 assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'No default models' 'protocol no default models'
 assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'never be silently flattened' 'protocol conflict rule'
+assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'Subagent prompt contract' 'protocol subagent prompt contract'
+assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'MUST read this file' 'protocol must read template file'
+assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'Do not.*paste the full template' 'protocol no inline template paste'
 assert_grep "$SKILL_ROOT/references/fusion-protocol.md" 'Degraded path' 'protocol degraded path'
 
 assert_grep "$SKILL_ROOT/references/helper.md" 'mode: verbatim' 'helper lists modes'
@@ -85,6 +88,8 @@ if [[ -n "$COMMAND_FILE" ]]; then
   assert_file "$COMMAND_FILE" 'cursor command verasic-fusion.md'
   assert_grep "$COMMAND_FILE" 'fusion-protocol\.md' 'command points to protocol'
   assert_grep "$COMMAND_FILE" 'No default models' 'command no default models'
+  assert_grep "$COMMAND_FILE" 'must read' 'command subagent must read template'
+  assert_grep "$COMMAND_FILE" 'paste the full template inline' 'command no inline template'
 else
   bad 'cursor command verasic-fusion.md (not found in source or install layout)'
 fi

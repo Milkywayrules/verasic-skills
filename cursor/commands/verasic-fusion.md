@@ -24,25 +24,35 @@ Optional: `template:`, `acknowledge:`, template extras (`options:`, `lens-map:`,
 ## Orchestration (Cursor)
 
 1. Pre-flight per protocol (roster caps: warn at 4, hard cap 6 unless acknowledged).
-2. Package prompt: my question + attachments + your framing — append to each subagent task.
-3. Spawn Task subagents **in parallel**, one per model, foreground, with each model slug.
-   Pass the active template path under `.cursor/skills/verasic-fusion/templates/<slug>.md`.
-4. Subagents: readonly tools only; no mutations.
-5. Curate and deliver per `mode`. Never rewrite subagent prose in `verbatim`.
-6. Surface conflicts; attribute in `## by model`.
-7. If all subagent outputs unusable — refuse fusion; say why.
-8. If Task/subagents unavailable — ask me before degraded sequential fusion.
+2. Resolve skill root and **read** the active template file when `template:` is set.
+3. Package prompt: my question + attachments + your framing — no other subagent answers.
+4. Spawn Task subagents **in parallel**, one per model, foreground, with each model slug.
+5. Subagent tasks: **absolute paths** to protocol + template; subagent **must read** the
+   template file. Do **not** paste the full template inline. Optional: append extracted
+   `## Subagent instruction` + `## Subagent answer shape` as fallback only (see protocol).
+6. Subagents: readonly tools only; no mutations.
+7. Curate and deliver per `mode`. Never rewrite subagent prose in `verbatim`.
+8. Surface conflicts; attribute in `## by model`.
+9. If all subagent outputs unusable — refuse fusion; say why.
+10. If Task/subagents unavailable — ask me before degraded sequential fusion.
 
 ## Subagent task prompt (one per model)
 
+Replace `<skill-root>` with the absolute skill directory (contains `references/fusion-protocol.md`).
+
 ```text
-Read and follow .cursor/skills/verasic-fusion/references/fusion-protocol.md readonly rules.
+Readonly fusion subagent. Follow <skill-root>/references/fusion-protocol.md readonly rules.
 
-Template (if set): .cursor/skills/verasic-fusion/templates/<slug>.md
+Template: <skill-root>/templates/<slug>.md
+You MUST read this file before answering. Use ## Subagent instruction and
+## Subagent answer shape only. Ignore Fusion mapping / Fusion notes.
 
+<optional fallback: Subagent instruction + answer shape — only if needed>
+
+## Packaged prompt
 <packaged prompt from main agent>
 
-Answer in the template shape. Readonly exploration allowed. Do not mutate the repo.
+Answer in the template shape. Do not mutate the repo.
 ```
 
 ## Deliver

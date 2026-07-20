@@ -24,15 +24,18 @@ Never duplicate the protocol in chat — follow it.
    slugs via `references/models.md`. Apply soft cap 4 (warn) and hard cap 6 (block unless
    `acknowledge: proceed with N models`). Validate template extras (e.g. `lens-map` for
    `stakeholder-lens`).
-3. **Package prompt** — user question + attachments + your framing/analysis. Subagents must
+3. **Read template** — when `template:` is set, read `templates/<slug>.md` before dispatch.
+   Resolve absolute skill-root paths for subagent tasks (see protocol).
+4. **Package prompt** — user question + attachments + your framing/analysis. Subagents must
    not see each other's answers.
-4. **Dispatch** — in Cursor: spawn Task subagents **in parallel**, one per model, with
-   the model slug from the roster. Each subagent gets the packaged prompt + active template
-   path. Readonly tools only.
-5. **Curate & deliver** — per `mode` (`verbatim`, `fusion`, `verbatim+fusion`). Never
+5. **Dispatch** — in Cursor: spawn Task subagents **in parallel**, one per model, with
+   the model slug from the roster. Each subagent gets absolute protocol + template paths;
+   subagent **must read** the template file. Do **not** paste the full template inline.
+   Optional fallback: extracted `## Subagent instruction` + `## Subagent answer shape` only.
+6. **Curate & deliver** — per `mode` (`verbatim`, `fusion`, `verbatim+fusion`). Never
    rewrite subagent prose in `verbatim`. Surface conflicts. Attribute in `## by model`.
-6. **Refuse** — if all subagent outputs are unusable, say so; do not invent fusion.
-7. **Degraded** — if Task/subagents unavailable, ask upfront before sequential
+7. **Refuse** — if all subagent outputs are unusable, say so; do not invent fusion.
+8. **Degraded** — if Task/subagents unavailable, ask upfront before sequential
    single-context simulation.
 
 ## Without subagents

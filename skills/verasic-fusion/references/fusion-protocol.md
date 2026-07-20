@@ -114,28 +114,77 @@ not invent a synthesized answer.
 2. **Package prompt** — combine: user question, user attachments, main-agent framing/analysis
    (scope, constraints, readonly facts already gathered). Subagents do **not** see each
    other's answers.
-3. **Parallel dispatch** — same verbatim core prompt to every model; spawn all subagents in
+3. **Read active template** — when `template:` is set, read `templates/<slug>.md` yourself
+   before dispatch. Extract `## Subagent instruction` (if present) and
+   `## Subagent answer shape` for optional fallback only (see Subagent prompt contract).
+4. **Parallel dispatch** — same packaged prompt to every model; spawn all subagents in
    parallel unless the user explicitly requests sequential.
-4. **Collect** — wait for all subagents (or record failures).
-5. **Curate** — apply curation rules; never rewrite in `verbatim`.
-6. **Deliver** — format per mode and active template.
-7. **Provenance** — `## by model`: one attribution block per model (short summary of stance).
-8. **Degraded** — only if subagents unavailable (see below).
+5. **Collect** — wait for all subagents (or record failures).
+6. **Curate** — apply curation rules; never rewrite in `verbatim`.
+7. **Deliver** — format per mode and active template.
+8. **Provenance** — `## by model`: one attribution block per model (short summary of stance).
+9. **Degraded** — only if subagents unavailable (see below).
 
-### Subagent prompt shape
+### Skill path resolution
 
-Each subagent receives:
+Resolve the skill root as the directory that contains `references/fusion-protocol.md`
+(for example `.cursor/skills/verasic-fusion/` or `.agents/skills/verasic-fusion/`).
+Pass **absolute paths** to subagents:
+
+- Protocol: `<skill-root>/references/fusion-protocol.md`
+- Template: `<skill-root>/templates/<slug>.md` (when set)
+
+Do not use relative paths like `templates/<slug>.md` alone — subagents may start from
+another working directory.
+
+### Subagent prompt contract
+
+**Main agent**
+
+- Read the active template file before dispatch.
+- Pass the template **file path** to each subagent.
+- **Do not** paste the full template file or duplicate `## Subagent answer shape` inline
+  when the path is included — that defeats single-source-of-truth in `templates/`.
+- **May** append an extracted fallback block (see below) after the path line.
+
+**Subagent**
+
+- **Must** read the template file at the given absolute path (readonly) before answering.
+- Use only:
+  - `## Subagent instruction` (if present — e.g. devils-advocate argues against)
+  - `## Subagent answer shape`
+- **Ignore** `## Fusion mapping` and `## Fusion notes` — those are for the main agent only.
+- Readonly exploration allowed per Readonly tool boundary. Do not mutate the repository.
+
+**Fallback (optional)** — if the harness often skips file reads, the main agent may append
+immediately after the template path:
 
 ```text
-Follow references/fusion-protocol.md readonly rules and the active template at templates/<slug>.md.
-
-<packaged prompt from main agent>
-
-Answer using the template shape. Readonly tools allowed when facts are needed.
-Do not mutate the repository.
+Fallback — use only if you cannot read the template file:
+<verbatim contents of ## Subagent instruction if present>
+<verbatim contents of ## Subagent answer shape code block>
 ```
 
-When a template is active, include its file path. When none, use the core skeleton only.
+Do not include Fusion mapping/notes in the fallback.
+
+**No template** — point subagents at `references/fusion-protocol.md` core skeleton only.
+
+Each subagent task:
+
+```text
+Readonly fusion subagent. Follow <absolute protocol path> readonly rules.
+
+Template (required when set): <absolute template path>
+You MUST read this file before answering. Use ## Subagent instruction and
+## Subagent answer shape only. Ignore Fusion mapping / Fusion notes.
+
+<optional fallback block>
+
+## Packaged prompt
+<user question + attachments + main-agent framing — no other subagent answers>
+
+Answer in the template shape. Do not mutate the repository.
+```
 
 ### Readonly tool boundary (subagents)
 

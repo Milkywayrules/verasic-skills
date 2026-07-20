@@ -254,7 +254,8 @@ Before public announce:
 | --- | --- | --- | --- |
 | UC-0 | helper | PASS | `helper.md` non-empty; readonly scope in protocol |
 | UC-1 | pre-flight | PASS | `test-exhaustive-protocol.sh` |
-| UC-2 | live `board-verdict` fusion | PASS | composer + grok (+ glm blocked by API limit this run) |
+| UC-2 | live `board-verdict` fusion | PASS | slash E2E ([24c21dca](agent transcript)); composer + grok; glm API limit |
+| UC-0 slash | `/verasic-fusion` bare | PASS | helper relay ([dcad2afa](agent transcript)) |
 | UC-3 | verbatim | PASS | protocol: no rewrite rule; validated via UC-2 subagent prose |
 | UC-4 | verbatim+fusion order | PASS | protocol ordering enforced |
 | UC-5 | hard cap | PASS | `test-exhaustive-protocol.sh` (7 models, acknowledge bypass) |
