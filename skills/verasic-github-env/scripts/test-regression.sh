@@ -68,12 +68,43 @@ else
   pass=$((pass + 1))
 fi
 
-source .cursor/skills/verasic-github-env/scripts/parse-gh-repo.sh
-assert "parser scp form" "test \"\$(verasic_parse_gh_repo_from_remote 'git@github.com:owner/repo.git')\" = 'owner/repo'"
-assert "parser ssh form" "test \"\$(verasic_parse_gh_repo_from_remote 'ssh://git@github.com/owner/repo.git')\" = 'owner/repo'"
-assert "parser https form" "test \"\$(verasic_parse_gh_repo_from_remote 'https://github.com/owner/repo')\" = 'owner/repo'"
-assert "parser https+.git" "test \"\$(verasic_parse_gh_repo_from_remote 'https://github.com/owner/repo.git')\" = 'owner/repo'"
-assert_fail "parser non-github" "verasic_parse_gh_repo_from_remote 'https://gitlab.com/owner/repo'"
+source "$SKILL_ROOT/scripts/parse-gh-repo.sh"
+
+assert_parse() {
+  local name="$1" url="$2" expected="$3"
+  local actual
+  if actual="$(verasic_parse_gh_repo_from_remote "$url")" && [[ "$actual" == "$expected" ]]; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name (got '${actual:-}', expected '$expected')"
+    fail=$((fail + 1))
+  fi
+}
+
+assert_parse_fail() {
+  local name="$1" url="$2"
+  if verasic_parse_gh_repo_from_remote "$url" >/dev/null 2>&1; then
+    echo "FAIL (expected error): $name"
+    fail=$((fail + 1))
+  else
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  fi
+}
+
+assert_parse "parse scp form" 'git@github.com:owner/repo.git' 'owner/repo'
+assert_parse "parse https+.git" 'https://github.com/owner/repo.git' 'owner/repo'
+assert_parse "parse https" 'https://github.com/owner/repo' 'owner/repo'
+assert_parse "parse http" 'http://github.com/owner/repo' 'owner/repo'
+assert_parse "parse ssh+.git" 'ssh://git@github.com/owner/repo.git' 'owner/repo'
+assert_parse "parse ssh" 'ssh://git@github.com/owner/repo' 'owner/repo'
+assert_parse "parse ssh over https port" 'ssh://git@ssh.github.com:443/owner/repo.git' 'owner/repo'
+
+assert_parse_fail "parse reject gitlab scp" 'git@gitlab.com:owner/repo.git'
+assert_parse_fail "parse reject evil host" 'https://github.com.evil.com/owner/repo'
+assert_parse_fail "parse reject missing repo" 'https://github.com/owner'
+assert_parse_fail "parse reject extra path" 'https://github.com/owner/repo/extra'
 
 echo "---"
 echo "regression: $pass passed, $fail failed"
