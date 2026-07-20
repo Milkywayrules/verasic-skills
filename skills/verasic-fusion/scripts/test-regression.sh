@@ -6,7 +6,9 @@ set -euo pipefail
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_ROOT="$(cd "$SKILL_ROOT/../.." && pwd)"
 IS_SOURCE_TREE=false
-[[ -d "$INSTALL_ROOT/skills/verasic-init" ]] && IS_SOURCE_TREE=true
+if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/commands" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
+  IS_SOURCE_TREE=true
+fi
 
 pass=0
 fail=0
