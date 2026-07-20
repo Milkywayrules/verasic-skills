@@ -26,7 +26,7 @@ if grep -qiE "$strip_pattern" "$MSG_FILE"; then
   grep -viE "$strip_pattern" "$MSG_FILE" > "$tmp" || true
   cat "$tmp" > "$MSG_FILE"
   rm -f "$tmp"
-  echo "verasic-git-commits: stripped attribution line(s) (co-authored / generated-with)" >&2
+  echo "verasic-git-commits: stripped attribution line(s) from the commit message" >&2
 fi
 
 # --- checks run on the comment-free message ---

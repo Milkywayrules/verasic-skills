@@ -68,6 +68,13 @@ else
   pass=$((pass + 1))
 fi
 
+source .cursor/skills/verasic-github-env/scripts/parse-gh-repo.sh
+assert "parser scp form" "test \"\$(verasic_parse_gh_repo_from_remote 'git@github.com:owner/repo.git')\" = 'owner/repo'"
+assert "parser ssh form" "test \"\$(verasic_parse_gh_repo_from_remote 'ssh://git@github.com/owner/repo.git')\" = 'owner/repo'"
+assert "parser https form" "test \"\$(verasic_parse_gh_repo_from_remote 'https://github.com/owner/repo')\" = 'owner/repo'"
+assert "parser https+.git" "test \"\$(verasic_parse_gh_repo_from_remote 'https://github.com/owner/repo.git')\" = 'owner/repo'"
+assert_fail "parser non-github" "verasic_parse_gh_repo_from_remote 'https://gitlab.com/owner/repo'"
+
 echo "---"
 echo "regression: $pass passed, $fail failed"
 [[ "$fail" -eq 0 ]]

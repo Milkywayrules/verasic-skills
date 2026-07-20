@@ -3,10 +3,10 @@
 
 verasic_parse_gh_repo_from_remote() {
   local raw="${1%.git}"
-  raw="${raw#git@}"
   raw="${raw#ssh://}"
   raw="${raw#https://}"
   raw="${raw#http://}"
+  raw="${raw#git@}"
 
   local owner repo
   if [[ "$raw" =~ ^github\.com:([^/]+)/([^/]+)$ ]]; then
