@@ -1,0 +1,54 @@
+---
+name: verasic-fusion
+description: Multi-model fusion for exploration and decision support. Use when the user asks to "fuse", "fusion", "multi-model", "ask several models", runs /verasic-fusion, or wants board-verdict, rfc-review, tradeoff-matrix, research-brief, risk-register, devils-advocate, premortem, stakeholder-lens, or compare-to-status-quo templates across named models.
+---
+
+# Verasic Fusion — Multi-Model Orchestration
+
+## Source of truth
+
+| File                            | Role                                           |
+| ------------------------------- | ---------------------------------------------- |
+| `references/fusion-protocol.md` | Full protocol — read first                     |
+| `references/helper.md`          | Help text for bare `/verasic-fusion` or `help` |
+| `references/models.md`          | Known model slugs and substitutes              |
+| `templates/<slug>.md`           | Output shape per template                      |
+
+Never duplicate the protocol in chat — follow it.
+
+## Workflow
+
+1. **Help path** — if the user invokes fusion with no question or asks for help, relay
+   `references/helper.md` (adjust path prefix for install root).
+2. **Pre-flight** — require question, `mode`, and `models` (≥ 2). No defaults. Validate
+   slugs via `references/models.md`. Apply soft cap 4 (warn) and hard cap 6 (block unless
+   `acknowledge: proceed with N models`). Validate template extras (e.g. `lens-map` for
+   `stakeholder-lens`).
+3. **Package prompt** — user question + attachments + your framing/analysis. Subagents must
+   not see each other's answers.
+4. **Dispatch** — in Cursor: spawn Task subagents **in parallel**, one per model, with
+   the model slug from the roster. Each subagent gets the packaged prompt + active template
+   path. Readonly tools only.
+5. **Curate & deliver** — per `mode` (`verbatim`, `fusion`, `verbatim+fusion`). Never
+   rewrite subagent prose in `verbatim`. Surface conflicts. Attribute in `## by model`.
+6. **Refuse** — if all subagent outputs are unusable, say so; do not invent fusion.
+7. **Degraded** — if Task/subagents unavailable, ask upfront before sequential
+   single-context simulation.
+
+## Without subagents
+
+Read `references/fusion-protocol.md` and execute the full workflow yourself, including
+degraded confirmation when parallel spawn is impossible.
+
+## Hard rules
+
+- Decision support only — no mutations.
+- No default models or mode.
+- No silent model substitution.
+- Conflicts never silently flattened.
+- `composer-2.5-fast` should appear in suggested rosters (user's primary model).
+
+## Templates
+
+Read `templates/<slug>.md` before dispatch when `template:` is set. All nine ship with this
+skill — see `references/fusion-protocol.md` registry.
