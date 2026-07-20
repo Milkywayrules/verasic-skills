@@ -20,7 +20,7 @@ MSG_FILE="${1:?usage: commit-msg <message-file>}"
 # --- auto-strip attribution lines (near-zero false-positive forms only) ---
 # line-anchored trailer/link forms; prose like "generated with openapi codegen"
 # is untouched because it lacks the trailer colon / markdown-link bracket.
-strip_pattern='^co-authored-by:|^generated-with:|^generated with \[|^🤖|^(signed-off-by|reviewed-by):.*(\bai\b|claude|copilot|cursor|chatgpt|gemini|\bgpt\b)'
+strip_pattern='^co-authored-by:|^generated-with:|^generated with \[|^🤖|^(signed-off-by|reviewed-by):.*(\bai\b|copilot|chatgpt|gemini|\bgpt\b|noreply@anthropic\.com|cursoragent@cursor\.com|claude code)'
 if grep -qiE "$strip_pattern" "$MSG_FILE"; then
   tmp="$(mktemp)"
   grep -viE "$strip_pattern" "$MSG_FILE" > "$tmp" || true
@@ -52,7 +52,7 @@ else
   # lowercase summary start; CamelCase / acronym first tokens (TabOverview, API) stay natural
   first_word="$(printf '%s' "$subject" | sed -E 's/^[a-z]+(\([^)]*\))?!?: *//' | cut -d' ' -f1)"
   if printf '%s' "$first_word" | grep -qE '^[A-Z][a-z]*$'; then
-    fail "summary starts uppercase ('$first_word') — lowercase it; proper nouns like TabOverview / API stay natural"
+    fail "summary must start with a lowercase word — rephrase '$first_word …' → 'add $first_word …' (e.g. 'Docker support' → 'add Docker support'); acronyms/CamelCase like API / TabOverview stay natural"
   fi
 fi
 

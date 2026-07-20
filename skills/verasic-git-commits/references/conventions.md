@@ -33,12 +33,15 @@ notation: `--set` not `-set` or `set flag`.
 
 - conventional prefix — canonical type list: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `style`, `perf`, `build`, `ci`, `revert`
 - optional scope: `(PROJ-1234)` — ticket id natural casing
-- after `type:` or `type(scope):` — **lowercase** start for the summary
+- after `type:` or `type(scope):` — summary **must start with a lowercase word** (the first token after the prefix)
+- when the summary would start with a proper noun, **rephrase** — e.g. `feat: Docker support` → `feat: add Docker support`; shape-based exemptions still pass: acronyms and CamelCase/mixed-case tokens (`API`, `TabOverview`, `iOS`) stay natural
 - imperative mood, concise, no trailing period on the subject
 
 | Good                                         | Bad                                    |
 | -------------------------------------------- | -------------------------------------- |
 | `chore: add release bump script`             | `Chore: Add release bump script`       |
+| `feat: add Docker support`                   | `feat: Docker support`                 |
+| `feat: API rate limiter`                     | `refactor: Streamline Select Styling` (Title Case first word) |
 | `fix(PROJ-1234): undefined variables`        | `fix(PROJ-1234): Undefined variables.` |
 | `refactor: streamline shared select styling` | `refactor: Streamline Select Styling`  |
 
