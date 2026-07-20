@@ -13,5 +13,5 @@ cp -r "$TMP/cursor/commands/." .cursor/commands/
 cp -r "$TMP/cursor/rules/."    .cursor/rules/
 cp -r "$TMP/skills/."          .cursor/skills/
 
-echo "✅ verasic skills installed into .cursor/ — try /verasic-review or /verasic-audit-commits"
+echo "✅ verasic skills installed into .cursor/ — try /verasic-review, /verasic-audit-commits, or /verasic-setup-github"
 echo "ℹ️  optional: wire the deterministic commit-msg hook (lefthook or core.hooksPath) — see .cursor/skills/verasic-git-commits/README.md"

@@ -9,6 +9,9 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 - **verasic-git-commits** — hard commit convention plus pre-push history
   audit. One message style for humans and agents, no co-authored/AI trailers,
   no AI-session language in messages.
+- **verasic-github-env** — GitHub CLI auth for local agent harnesses.
+  Fine-grained PAT per repo in gitignored `.github-agent.local`, optional direnv,
+  bootstrap + verify scripts. Separate tiers for CI and production secrets.
 
 ## Install
 
@@ -31,10 +34,13 @@ npx skills add Milkywayrules/verasic-skills
 - `/verasic-review` — review branch changes vs the default branch
 - `/verasic-review uncommitted` — review staged + unstaged only
 - `/verasic-audit-commits` — audit branch commit history before push/PR
+- `/verasic-setup-github` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
 - Commit convention needs no invocation — the always-applied rule enforces it on every commit
+- GitHub env rule applies automatically before `gh` commands when installed
 
 Full docs: [skills/verasic-bugbot/README.md](skills/verasic-bugbot/README.md) ·
-[skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md)
+[skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
+[skills/verasic-github-env/README.md](skills/verasic-github-env/README.md)
 
 ## This Repo Hierarchy
 
@@ -53,22 +59,37 @@ verasic-skills/
 │   │       ├── security.md
 │   │       ├── performance.md
 │   │       └── infra.md
-│   └── verasic-git-commits/
+│   ├── verasic-git-commits/
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   ├── hooks/
+│   │   │   └── commit-msg             # deterministic layer: strip trailers, reject style breaks
+│   │   └── references/
+│   │       ├── conventions.md         # ← single source of truth (the spec)
+│   │       ├── commit-protocol.md     # write path: workflow, verify, escape hatch
+│   │       └── audit-protocol.md      # read path: scope, checks, report
+│   └── verasic-github-env/
 │       ├── SKILL.md
 │       ├── README.md
-│       ├── hooks/
-│       │   └── commit-msg             # deterministic layer: strip trailers, reject style breaks
+│       ├── scripts/
+│       │   ├── bootstrap.sh           # wire repo: .envrc, templates, .gitignore
+│       │   ├── check-gh.sh            # verify GH_TOKEN + gh auth
+│       │   ├── load-gh-env.sh         # safe GH var loader
+│       │   └── test-regression.sh     # disposable regression tests
+│       ├── templates/
+│       │   ├── .envrc
+│       │   └── github-agent.local.example
 │       └── references/
-│           ├── conventions.md         # ← single source of truth (the spec)
-│           ├── commit-protocol.md     # write path: workflow, verify, escape hatch
-│           └── audit-protocol.md      # read path: scope, checks, report
+│           └── setup-protocol.md      # ← single source of truth
 └── cursor/
     ├── agents/
     │   ├── verasic-bugbot.md          # thin pointer to the review protocol
     │   └── verasic-commit-auditor.md  # thin pointer to the audit protocol
     ├── commands/
     │   ├── verasic-review.md
-    │   └── verasic-audit-commits.md
+    │   ├── verasic-audit-commits.md
+    │   └── verasic-setup-github.md
     └── rules/
-        └── verasic-git-commits.mdc    # always-applied digest + pointer
+        ├── verasic-git-commits.mdc    # always-applied digest + pointer
+        └── verasic-github-env.mdc
 ```
