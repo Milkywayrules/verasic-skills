@@ -1,0 +1,26 @@
+# Domain pack: design systems, landing pages, SSR/static tradeoffs — creative + engineering
+id: creative-technical
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.1
+  CO: 1.1
+  VR: 1.0
+floor: 0
+ceiling: 85
+recency_months: 24
+source_hints:
+  - design-system documentation (Material, Polaris, Radix, etc.)
+  - CRO and UX research on landing-page patterns
+  - framework docs (Next.js, Astro, Remix) for rendering tradeoffs
+  - web performance guidelines (Core Web Vitals)
+  - case studies with measurable conversion data
+example_prompts:
+  - design system vs component library — when to use which?
+  - how should we structure landing page sections for conversion?
+  - tradeoffs: SSR vs static for a marketing site
+warnings:
+  - conversion advice is context-dependent — note industry and audience
+  - distinguish pattern libraries from brand-specific design decisions

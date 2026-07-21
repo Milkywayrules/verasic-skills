@@ -1,0 +1,28 @@
+# Domain pack: creator economy, monetization, platform tooling
+id: creator-monetization
+parent: null
+persona: references/personas/hunter.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.2
+  VR: 1.0
+floor: 0
+ceiling: 80
+recency_months: 12
+source_hints:
+  - platform partner program documentation (YouTube, TikTok, Patreon)
+  - AdSense and sponsorship rate benchmarks from transparent creator reports
+  - marketplace ToS for plugins, extensions, and digital products
+  - tax and disclosure guidance for creators (informational)
+  - case studies with verifiable revenue screenshots or filings
+example_prompts:
+  - I want to start a faceless YouTube channel
+  - can I sell Cursor plugins/extensions to make money?
+  - AdSense vs sponsorship vs digital products for a new creator
+  - how long until a new channel can monetize realistically?
+warnings:
+  - monetization timelines vary widely — avoid guaranteed income claims
+  - platform eligibility rules change; verify current thresholds
+  - plugin/extension sales depend on marketplace policies

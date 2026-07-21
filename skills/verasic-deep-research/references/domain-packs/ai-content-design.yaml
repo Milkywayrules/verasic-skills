@@ -1,0 +1,28 @@
+# Domain pack: AI-generated UX, copy, media, trust, and platform policy
+id: ai-content-design
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.1
+  CG: 1.2
+  CO: 1.1
+  VR: 1.0
+floor: 0
+ceiling: 85
+recency_months: 18
+source_hints:
+  - platform terms of service and monetization policies (YouTube, Meta, TikTok, X)
+  - FTC and consumer-protection guidance on disclosure
+  - UX research on trust, authenticity, and AI labeling
+  - accessibility and readability standards (WCAG)
+  - case law summaries from reputable legal news (informational only)
+example_prompts:
+  - how do I prevent AI slop on a marketing site?
+  - AI-generated content on YT/TikTok/IG/Threads/X/FB — legal? tools? agents? monetization?
+  - how to make AI-written copy feel human without lying to users?
+  - is using AI voices for YouTube narration misleading?
+warnings:
+  - platform policies change frequently — verify ToS dates
+  - legal answers are informational, not professional legal advice
+  - distinguish ethical UX from deceptive dark patterns

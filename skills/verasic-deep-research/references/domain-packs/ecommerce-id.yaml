@@ -1,0 +1,27 @@
+# Domain pack: Indonesian e-commerce — marketplaces, pricing, COD
+id: ecommerce-id
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.2
+  VR: 1.0
+floor: 0
+ceiling: 80
+recency_months: 12
+source_hints:
+  - Tokopedia, Shopee, TikTok Shop seller education and policy pages
+  - BPS and industry reports on Indonesian e-commerce trends
+  - logistics and COD fee structures from official carrier pages
+  - UMKM pricing guides from reputable Indonesian business media
+  - competitor listing analysis on public marketplaces
+example_prompts:
+  - best products to sell on TikTok, Tokopedia, Shopee for side income
+  - how to price handmade goods for Indonesian marketplaces
+  - COD vs prepaid — conversion impact in Indonesia
+warnings:
+  - marketplace fees and policies change — verify effective dates
+  - product-trend advice is volatile; label time-sensitive findings
+  - distinguish side-income feasibility from guaranteed revenue

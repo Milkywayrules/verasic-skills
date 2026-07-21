@@ -1,0 +1,27 @@
+# Domain pack: Indonesian UMKM and small food/service businesses
+id: small-business-id
+parent: small-business-generic
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.2
+  VR: 0.9
+floor: 0
+ceiling: 80
+recency_months: 24
+source_hints:
+  - OSS and Indonesian government UMKM portals
+  - regional licensing requirements (Jabodetabek, Bandung, etc.)
+  - Bank Indonesia and OJK small-business financing guides
+  - reputable Indonesian SME associations and incubators
+  - local cost surveys from business journalism
+example_prompts:
+  - I want to open a warkop in Jabodetabek; I know little about business
+  - modal and break-even for a small coffee shop in Bandung
+  - what permits does a UMKM food business need in Indonesia?
+warnings:
+  - permit requirements vary by kabupaten/kota — confirm locality
+  - financial projections are estimates; not accounting or legal advice
+  - inherit generic small-business disclaimers from parent pack

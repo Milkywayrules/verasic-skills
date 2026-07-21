@@ -1,0 +1,28 @@
+# Domain pack: explicit claim verification — requires ## claim ledger section
+id: claims-investigation
+parent: null
+persona: references/personas/skeptic.md
+axis_weights:
+  SQ: 1.2
+  EC: 1.3
+  CG: 1.3
+  CO: 1.1
+  VR: 1.3
+floor: 0
+ceiling: 85
+recency_months: 24
+source_hints:
+  - primary sources cited by the original claim
+  - fact-checking organizations with transparent methodology
+  - official statements from governing bodies
+  - peer-reviewed research for medical/scientific claims
+  - court records and regulatory filings when legal claims arise
+example_prompts:
+  - is World Cup 2026 rigged like people say?
+  - do vaccines cause autism — what does evidence show?
+  - is cryptocurrency a Ponzi scheme?
+  - is publishing AI content to social platforms legal?
+warnings:
+  - always deliver ## claim ledger mapping each user claim to verdict
+  - contested topics may never reach high confidence — say so honestly
+  - separate legal information from legal advice

@@ -1,0 +1,88 @@
+# Source ledger — schema example
+# Canonical field definitions: references/citation-protocol.md
+# Every [Sn] in deep-research-brief.md must map to one row below with verify_status != failed
+
+schema_version: "1.0"
+research_slug: example-topic-slug
+generated_at: "2026-07-22T00:00:00Z"
+source_boundary: public-standard
+domain_primary: technical
+domain_secondary: []
+
+sources:
+  - id: S1
+    url: https://example.com/docs/feature
+    title: "Official Feature Documentation"
+    tier: T0
+    fetch_status: verified          # verified | snippet-only | failed | blocked | paywall
+    verified_at: "2026-07-22T00:05:00Z"
+    excerpt: "Verbatim excerpt ≤40 words when snippet-only; longer when full page verified."
+    excerpt_word_count: 12
+    author: "Example Corp"
+    published_date: "2026-01-15"
+    accessed_date: "2026-07-22"
+    domain_tags: [technical]
+    contradicts: []                 # list of other source ids
+    notes: "Primary vendor documentation"
+    claim_ids: [C1]
+
+  - id: S2
+    url: https://example.org/paper/123
+    title: "Independent Benchmark Study"
+    tier: T1
+    fetch_status: verified
+    verified_at: "2026-07-22T00:08:00Z"
+    excerpt: "Results show measurable improvement under controlled conditions."
+    excerpt_word_count: 8
+    author: "Research Lab"
+    published_date: "2025-11-01"
+    accessed_date: "2026-07-22"
+    domain_tags: [technical]
+    contradicts: [S3]
+    notes: "Peer-reviewed; methodology section linked"
+    claim_ids: [C1, C2]
+
+  - id: S3
+    url: https://example.net/blog/contrary-view
+    title: "Contrary Industry Commentary"
+    tier: T2
+    fetch_status: snippet-only
+    verified_at: "2026-07-22T00:10:00Z"
+    excerpt: "Short snippet when live page differs from cache."
+    excerpt_word_count: 7
+    author: "Industry Analyst"
+    published_date: "2026-06-01"
+    accessed_date: "2026-07-22"
+    domain_tags: [technical]
+    contradicts: [S2]
+    notes: "snippet-only — max claim confidence 40 per citation-protocol"
+    claim_ids: [C2]
+
+claims:
+  - id: C1
+    text: "Material claim supported by primary documentation."
+    source_ids: [S1, S2]
+    confidence:
+      headline: 78
+      SQ: 85
+      EC: 80
+      CG: 75
+      CO: 70
+      VR: 82
+    verify_status: verified
+
+  - id: C2
+    text: "Contested secondary claim with conflicting sources."
+    source_ids: [S2, S3]
+    confidence:
+      headline: 42
+      SQ: 55
+      EC: 35
+      CG: 50
+      CO: 45
+      VR: 40
+    verify_status: contested
+
+# SourceRecord fields (required on each sources[] row):
+#   id, url, title, tier, fetch_status, verified_at, excerpt, accessed_date, claim_ids
+# Optional: author, published_date, excerpt_word_count, domain_tags, contradicts, notes

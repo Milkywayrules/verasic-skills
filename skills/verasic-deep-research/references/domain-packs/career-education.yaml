@@ -1,0 +1,28 @@
+# Domain pack: career paths, education choices, role transitions
+id: career-education
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.1
+  EC: 1.1
+  CG: 1.1
+  CO: 1.2
+  VR: 1.0
+floor: 0
+ceiling: 85
+recency_months: 18
+source_hints:
+  - official certification body requirements (ISC2, CNCF, etc.)
+  - labor-market data from government statistics offices
+  - reputable hiring surveys (Stack Overflow, LinkedIn, Indeed reports)
+  - university and bootcamp outcome reports (with methodology scrutiny)
+  - practitioner career-path writeups from verified industry sources
+example_prompts:
+  - best way to learn DevSecOps and land a job
+  - is doctor still a future-proof profession?
+  - bootcamp vs self-taught vs degree for frontend in 2026
+  - how to transition from frontend to platform engineering
+warnings:
+  - job-market data is regional and time-sensitive
+  - future-proofing claims are speculative — label uncertainty
+  - distinguish credential requirements by country and employer

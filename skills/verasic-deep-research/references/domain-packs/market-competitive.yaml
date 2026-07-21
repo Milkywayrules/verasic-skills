@@ -1,0 +1,28 @@
+# Domain pack: competitive intelligence, market saturation, strategic positioning
+id: market-competitive
+parent: null
+persona: references/personas/hunter.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.2
+  VR: 1.0
+floor: 0
+ceiling: 80
+recency_months: 12
+source_hints:
+  - company websites, pricing pages, and public filings
+  - industry analyst reports (summaries with primary links)
+  - product documentation and changelogs
+  - reputable tech and business journalism
+  - user reviews as secondary signal only
+example_prompts:
+  - is Jamdev our competitor? strengths/weaknesses vs us
+  - is the current tech market saturated?
+  - deep study competitors and evolve our projects to stay ahead
+  - who are the main players in AI agent tooling in 2026?
+warnings:
+  - competitor claims from marketing pages need independent corroboration
+  - market saturation is subjective — define segment and geography
+  - avoid non-public or insider competitive data

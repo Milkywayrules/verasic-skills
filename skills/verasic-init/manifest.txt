@@ -6,4 +6,5 @@ verasic-github-env|scripts/bootstrap.sh|scripts/check-gh.sh|GitHub CLI auth for 
 verasic-git-commits|scripts/wire-hook.sh|-|commit convention + deterministic commit-msg hook
 verasic-bugbot|-|-|local bugbot-style code review (no repo wiring)
 verasic-fusion|-|-|multi-model fusion for exploration and decision support (no repo wiring)
+verasic-deep-research|-|-|verified deep research with source ledger and confidence scoring
 verasic-init|-|-|this orchestrator (running it is the wiring)

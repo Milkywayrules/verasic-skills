@@ -1,0 +1,28 @@
+# Domain pack: training, nutrition, recovery — evidence-weighted health topics
+id: health-fitness
+parent: null
+persona: references/personas/skeptic.md
+axis_weights:
+  SQ: 1.3
+  EC: 1.2
+  CG: 1.2
+  CO: 1.0
+  VR: 1.1
+floor: 60
+ceiling: 85
+recency_months: 36
+source_hints:
+  - systematic reviews and meta-analyses (PubMed, Cochrane)
+  - sports-medicine society position statements
+  - registered dietitian and ACSM guidance
+  - peer-reviewed exercise physiology
+  - avoid influencer anecdotes as primary evidence
+example_prompts:
+  - gluten vs non-gluten for swimmers — which is better?
+  - sub-40 on 10km in 9 months; PB sub-50 from 12 months ago
+  - is cold plunge after workout evidence-based?
+  - minimum sleep for muscle recovery when training 5 days/week
+warnings:
+  - sensitive domain — floor 60 applies; not medical advice
+  - individual physiology varies; flag when evidence is population-level only
+  - training plans at high confidence require professional coaching caveat

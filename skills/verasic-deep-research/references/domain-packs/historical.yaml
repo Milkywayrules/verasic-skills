@@ -1,0 +1,27 @@
+# Domain pack: historical events, timelines, historiography
+id: historical
+parent: null
+persona: references/personas/hunter.md
+axis_weights:
+  SQ: 1.2
+  EC: 1.1
+  CG: 1.2
+  CO: 1.0
+  VR: 1.2
+floor: 0
+ceiling: 90
+recency_months: 120
+source_hints:
+  - primary documents and archives
+  - peer-reviewed historical journals
+  - museum and national archive publications
+  - established reference works with cited bibliographies
+  - historiography comparing competing interpretations
+example_prompts:
+  - history of football and the World Cup
+  - why did the Roman Empire fall — main theories
+  - how did Indonesia gain independence — timeline and sources
+warnings:
+  - historiography includes contested interpretations — surface multiple schools
+  - recency matters less; source tier and primary evidence matter more
+  - avoid presentist bias when evaluating past events

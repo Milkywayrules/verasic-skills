@@ -1,0 +1,30 @@
+# Domain pack: systems engineering, infrastructure, frameworks, how-things-work
+id: technical
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.2
+  EC: 1.0
+  CG: 1.1
+  CO: 0.9
+  VR: 1.2
+floor: 0
+ceiling: 90
+recency_months: 24
+source_hints:
+  - vendor official documentation and release notes
+  - standards bodies (IEEE, ISO, IETF, W3C)
+  - peer-reviewed engineering and physics explainers
+  - reputable technical journalism with primary-source links
+  - benchmark reports from independent labs when comparing products
+example_prompts:
+  - how does the elevator work?
+  - how are electricity towers built and kept safe?
+  - how does LED work?
+  - how can F1 cars be so fast yet safe and driveable?
+  - which VPS is better for users in Japan?
+  - best Next.js pattern for a production app in 2026
+  - how does GPS know my location?
+warnings:
+  - product comparisons age quickly — prefer recency for hosting and framework advice
+  - distinguish mechanism (how it works) from vendor marketing claims

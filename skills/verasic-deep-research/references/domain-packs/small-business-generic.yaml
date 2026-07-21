@@ -1,0 +1,26 @@
+# Domain pack: generic small-business fallback (non-regional)
+id: small-business-generic
+parent: null
+persona: references/personas/practitioner-generic.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.1
+  VR: 0.9
+floor: 0
+ceiling: 80
+recency_months: 36
+source_hints:
+  - government small-business administration guides
+  - reputable entrepreneurship education (SBA-style resources)
+  - industry association startup cost benchmarks
+  - franchise disclosure documents when comparing franchise vs independent
+  - academic research on business validation methods
+example_prompts:
+  - should I franchise or start independent?
+  - how to validate a business idea before quitting my job
+warnings:
+  - fallback pack for small-business topics without regional subpack
+  - financial and legal guidance is informational only
+  - prefer regional subpack (e.g. small-business-id) when geography is specified

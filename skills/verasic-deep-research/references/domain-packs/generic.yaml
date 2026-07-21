@@ -1,0 +1,26 @@
+# Domain pack: ultimate fallback when no specialized pack matches
+id: generic
+parent: null
+persona: references/personas/hunter.md
+axis_weights:
+  SQ: 1.0
+  EC: 1.0
+  CG: 1.0
+  CO: 1.0
+  VR: 1.0
+floor: 0
+ceiling: 85
+recency_months: 24
+source_hints:
+  - start with authoritative primaries for the topic domain
+  - cross-check at least two independent reputable sources
+  - prefer sources with clear authorship and methodology
+  - downgrade social posts and anonymous forums by default
+  - escalate to specialized pack when domain becomes clear mid-research
+example_prompts:
+  - explain quantum computing like I'm 15
+  - what should I know before buying an EV in Indonesia?
+warnings:
+  - fallback pack — infer traits and confirm if safety-sensitive or ambiguous
+  - one confirm step when boundary or domain is unclear
+  - suggest specialized pack on follow-up when topic narrows

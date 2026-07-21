@@ -10,6 +10,9 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
   Run the same question across models you name, with optional templates
   (board-verdict, rfc-review, tradeoff-matrix, and more). Main agent orchestrates;
   conflicts and provenance stay visible.
+- **verasic-deep-research** — verified deep research with source ledger,
+  verify-before-cite, 5-axis confidence scoring, and optional drill rounds.
+  T2 workers (Hunter, Practitioner, Skeptic, Arbiter) plus optional T3 fetch.
 - **verasic-git-commits** — hard commit convention plus pre-push history
   audit. One message style for humans and agents, no co-authored/AI trailers,
   no AI-session language in messages.
@@ -48,6 +51,7 @@ It detects the installed skills, wires each one idempotently, and prints a repor
 ## Usage
 
 - `/verasic-fusion` — multi-model fusion (requires `mode`, `models`, question)
+- `/verasic-deep-research` — ledger-backed research (requires `depth`, `output`, `source-boundary`, question)
 - `/verasic-review` — review branch changes vs the default branch
 - `/verasic-review uncommitted` — review staged + unstaged only
 - `/verasic-audit-commits` — audit branch commit history before push/PR
@@ -57,6 +61,7 @@ It detects the installed skills, wires each one idempotently, and prints a repor
 - GitHub env rule applies automatically before `gh` commands when installed
 
 Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
+[skills/verasic-deep-research/README.md](skills/verasic-deep-research/README.md) ·
 [skills/verasic-bugbot/README.md](skills/verasic-bugbot/README.md) ·
 [skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
@@ -72,6 +77,7 @@ Per-skill scanner notes:
 [verasic-github-env](skills/verasic-github-env/references/scanner-notes.md) ·
 [verasic-git-commits](skills/verasic-git-commits/references/scanner-notes.md) ·
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
+[verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
 [verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md)
 
 ## Testing
@@ -125,6 +131,20 @@ verasic-skills/
 │ │ ├── test-regression.sh
 │ │ ├── test-exhaustive-protocol.sh
 │ │ └── test-exhaustive.sh # local full gate (includes init regression in source tree)
+│ ├── verasic-deep-research/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ ├── references/
+│ │ │ ├── research-protocol.md # ← single source of truth
+│ │ │ ├── helper.md
+│ │ │ ├── citation-protocol.md
+│ │ │ ├── confidence-rubric.md
+│ │ │ ├── drill-protocol.md
+│ │ │ ├── source-tiers.md
+│ │ │ ├── fusion-handoff.md
+│ │ │ └── scanner-notes.md
+│ │ └── workflows/
+│ │     └── deep-research-brief.md
 │ ├── verasic-git-commits/
 │ │ ├── SKILL.md
 │ │ ├── README.md
@@ -169,6 +189,7 @@ verasic-skills/
 ├── commands/
 │ ├── verasic-review.md
 │ ├── verasic-fusion.md
+│ ├── verasic-deep-research.md
 │ ├── verasic-audit-commits.md
 │ ├── verasic-setup-github.md
 │ └── verasic-init.md
