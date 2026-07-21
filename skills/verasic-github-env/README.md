@@ -65,6 +65,8 @@ Legacy: `load-gh-env.sh` still reads `GH_*` lines from `.env.local` if present.
 - `/verasic-setup-github` — bootstrap current repo
 - Regression: `bash .cursor/skills/verasic-github-env/scripts/test-regression.sh`
 
+Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+
 ## Extend per repo
 
 After bootstrap, add a one-liner to the project README deploy section pointing

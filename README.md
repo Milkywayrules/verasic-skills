@@ -62,6 +62,13 @@ Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
 [skills/verasic-init/README.md](skills/verasic-init/README.md)
 
+## Security
+
+Static scanners (Gen, Socket, Snyk on [skills.sh](https://skills.sh/milkywayrules/verasic-skills))
+often flag harness skills for expected reasons — git hooks, credential docs, `curl` update checks.
+See [SECURITY.md](SECURITY.md) for the trust model, credential handling, and per-skill
+[scanner notes](skills/verasic-init/references/scanner-notes.md).
+
 ## Testing
 
 Most skills ship a local `test-regression.sh` — run before publish, no CI required.

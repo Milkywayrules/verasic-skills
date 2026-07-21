@@ -63,6 +63,8 @@ Skill-only (any agent):
 npx skills add Milkywayrules/verasic-skills
 ```
 
+Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+
 ## Regression tests
 
 ```bash

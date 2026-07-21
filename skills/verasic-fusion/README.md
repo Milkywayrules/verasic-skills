@@ -68,6 +68,8 @@ No default models. No default mode.
 
 Readonly decision support — no edits, commits, or deploys.
 
+Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+
 ## Extend
 
 Add templates as new files in `templates/` and one row in the protocol registry. Custom

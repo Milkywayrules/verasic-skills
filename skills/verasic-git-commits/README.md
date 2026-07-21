@@ -96,6 +96,8 @@ overall **PASS / FAIL**.
 3. Fix Blockers (trailer strip via the `commit-tree` escape hatch — only with your approval), reword flagged messages, re-run until **PASS**.
 4. Push / open PR.
 
+Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+
 ## Extend per repo
 
 Initiative docs may add constraints on top (e.g. a RUNBOOK requiring ticket

@@ -48,6 +48,8 @@ Day-to-day loop:
 One-line verdict (`✅` / `🐛`), then issues ranked CRITICAL / HIGH / MEDIUM,
 each with file:line, evidence from the code, and a concrete fix.
 
+Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+
 ## Extend per project
 
 Drop extra `.md` checklists into `checklists/` (e.g. `laravel.md`, `flutter.md`) —
