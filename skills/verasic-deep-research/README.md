@@ -14,7 +14,7 @@ Paths relative to this skill folder. After `setup.sh`, the same files live under
 | `references/research-protocol.md`         | Single source of truth                    |
 | `references/helper.md`                    | Help text for bare `/verasic-deep-research` |
 | `references/citation-protocol.md`         | Verify pipeline, SourceRecord, two-key rule |
-| `references/confidence-rubric.md`         | SQ / EC / CG / CO / VR scoring            |
+| `references/confidence-rubric.md`         | SQ / EC / CG / CO / VR scoring (Claim Grounding, Evidence Convergence, Verification Rigor) |
 | `references/drill-protocol.md`            | Drill triggers, futile conditions         |
 | `references/source-tiers.md`              | T0–T3 classification                      |
 | `references/fusion-handoff.md`            | Manual chain to verasic-fusion            |
@@ -28,7 +28,7 @@ Paths relative to this skill folder. After `setup.sh`, the same files live under
 1. Choose `depth`, `output`, and `source-boundary` (no defaults on output or boundary).
 2. Run `/verasic-deep-research` with your question — or attach the skill in chat.
 3. Answer pre-flight prompts; read honesty notices in `references/helper.md`.
-4. Main agent runs discover → verify ledger → synthesize → score → drill offer → deliver.
+4. Main agent runs discover → verify ledger → synthesize → score → drill → deliver.
 5. Files land in `./docs/research/<slug>/` when output includes files (Agent mode only).
 
 Typing `/verasic` shows deep-research alongside fusion, review, audit, init, and github setup.
@@ -67,12 +67,12 @@ Typical files: `deep-research-brief.md` and `source-ledger.yaml` under `./docs/r
 
 ## Depth tiers
 
-| Depth               | T2 workers                                      |
-| ------------------- | ----------------------------------------------- |
-| `quick-scan`        | Hunter                                          |
-| `standard-research` | Hunter + Practitioner                           |
-| `adversarial-deep`  | Hunter + Practitioner + Skeptic + Arbiter       |
-| `custom`            | User-specified roles                            |
+| Depth               | T2 dispatch                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `quick-scan`        | Hunter — no Skeptic                                                         |
+| `standard-research` | Hunter + Practitioner (parallel) → Skeptic (sequential)                     |
+| `adversarial-deep`  | Hunter + Practitioner + Skeptic + Arbiter (4 parallel)                      |
+| `custom`            | User-specified roles                                                        |
 
 ## Honesty
 
@@ -102,5 +102,5 @@ Then: `/verasic-init` or `bash .cursor/skills/verasic-init/scripts/init.sh`
 
 - **Cursor-first** — parallel T2 spawn uses the Task tool; other agents run degraded sequential after confirmation.
 - **Public sources** — paywalls and blocks produce gaps, not invented citations.
-- **T3 optional** — leaf fetch failure falls back to T2/T1 direct fetch.
+- **T3 optional** — leaf jobs spawned by T2; failure falls back to T2/T1 direct fetch.
 - **Fusion optional** — handoff is manual; never auto-spawned.

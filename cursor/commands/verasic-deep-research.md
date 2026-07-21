@@ -18,7 +18,7 @@ Parse or ask for:
 - `languages:` cite / search / report languages
 - The question body
 
-Optional: `models:`, `domain:`, `drill:`, `claims:` list, output path, `custom-roles:` when `depth: custom`
+Optional: `models:`, `domain:`, `drill:` (`auto-at-threshold` | `off` | `always-offer`), `claims:` list, output path, `custom-roles:` when `depth: custom`
 
 **No default output format. No default source boundary.** Recommend `public-standard`.
 If required fields missing, ask before any fetch or spawn. Include honesty notices from helper ## honesty at each pre-flight step.
@@ -32,11 +32,14 @@ If I am in Ask (read-only) mode — **no file writes**. Deliver chat only even i
 
 1. Pre-flight per protocol — all required fields; path `./docs/research/<slug>/` when files requested.
 2. Read supporting refs: citation-protocol, confidence-rubric, source-tiers, drill-protocol, `workflows/<depth>.md`, deliver template.
-3. Dispatch T2 workers via Task **in parallel** per depth tier (Hunter, Practitioner, Skeptic, Arbiter).
-4. Optional T3 leaf fetches in parallel (no Task) — T2 direct fallback on failure.
-5. Verify ledger — verify-before-cite; no `[Sn]` without ledger row; IEEE citations.
-6. Score — 5-axis per claim; sensitive domain floor 60; chat shows headline + full axes.
-7. Drill offer when thresholds hit (`drill-protocol.md`); max 2 rounds.
+3. Dispatch T2 workers via Task per depth tier:
+   - `quick-scan`: Hunter only (no Skeptic)
+   - `standard-research`: Hunter + Practitioner parallel → Skeptic sequential (mandatory 7a)
+   - `adversarial-deep`: Hunter + Practitioner + Skeptic + Arbiter (4 parallel)
+4. T3 leaf jobs spawned by T2 (grandchild, no Task): `fetch-url`, `extract-excerpt`, `single-query-search`, `verify-one-claim`. T1 batches WebFetch when T2 unavailable. T2 direct fallback on failure.
+5. Verify ledger — verify-before-cite; no `[Sn]` without ledger row; IEEE citations; snippet-only headline hard cap 40.
+6. Score — 5-axis per claim (SQ, EC, CG, CO, VR); sensitive domain floor 60; chat shows headline + full axes.
+7. Drill when thresholds hit — `auto-at-threshold` auto-executes round 1; offer round 2; max 2 rounds (`drill-protocol.md`).
 8. Deliver per `output` — use `templates/deep-research-brief.md` sections.
 9. `## unverified` → suggest manual fusion only if `verasic-fusion` installed (`fusion-handoff.md`).
 10. If Task unavailable — ask before degraded sequential single-context research.
@@ -62,6 +65,17 @@ Domain pack: <inferred or user domain>
 
 Return candidate sources for main-agent verify. Do not mutate the repo.
 ```
+
+## T3 leaf jobs (spawned by T2, no Task)
+
+| Job | Returns |
+| --- | ------- |
+| `fetch-url` | HTTP status + raw body/metadata |
+| `extract-excerpt` | ≤40-word supporting excerpt |
+| `single-query-search` | Candidate URLs/snippets (no synthesis) |
+| `verify-one-claim` | Two-key pass/fail + excerpt |
+
+T3 must not synthesize, merge ledger, spawn subagents, or score confidence.
 
 ## Deliver
 

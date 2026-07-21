@@ -14,7 +14,7 @@ is a step checklist only, not a second source of truth.
 5. **Verify ledger** — verify-before-cite per `references/citation-protocol.md`; drop failed rows.
 6. **Synthesize** — populate `templates/deep-research-brief.md` sections from verified rows only.
 7. **Score** — 5-axis per `references/confidence-rubric.md`; apply pack weights and sensitive floor.
-8. **Drill offer** — if `drill: auto-at-threshold` and score ≤50 (≤60 sensitive), offer one drill round max.
+8. **Drill** — if `drill: auto-at-threshold` and score ≤50 (≤60 sensitive), auto-execute drill round 1; offer round 2 per `references/drill-protocol.md`.
 9. **Deliver** — chat per `output` format; files to `./docs/research/<slug>/` when allowed; Ask mode = no writes.
 
 ## When to recommend

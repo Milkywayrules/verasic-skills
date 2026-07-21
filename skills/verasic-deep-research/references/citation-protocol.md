@@ -47,6 +47,10 @@ When live page content differs from search preview or memory:
 3. Note mismatch in `notes`.
 4. Score with tier penalty per `confidence-rubric.md`.
 
+**Two separate 40 limits:** snippet **text** is capped at ≤40 **words** in the ledger;
+`snippet-only` verified claims get a **headline score hard cap of 40** (independent of
+word count).
+
 Never expand snippet post-hoc beyond 40 words.
 
 ## Two-key rule

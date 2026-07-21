@@ -1,11 +1,11 @@
 # Drill protocol — verasic-deep-research
 
 Structured re-search when confidence is low. Max **2 rounds** per research session.
-Default policy: `auto-at-threshold` (offer drill when triggers hit).
+Default policy: `auto-at-threshold` (auto-execute round 1 when triggers hit).
 
 ## Triggers
 
-Offer drill when **any** of:
+Run drill when **any** of:
 
 | Trigger | Condition                                              |
 | ------- | ------------------------------------------------------ |
@@ -13,11 +13,21 @@ Offer drill when **any** of:
 | Sensitive | Headline **≤ 60** on health / legal / financial topics |
 | User    | `drill: always-offer` — offer even above thresholds    |
 
-Do **not** auto-drill when `drill: off` — report scores and stop.
+Do **not** drill when `drill: off` — report scores and stop.
 
-When `drill: auto-at-threshold` (default), main agent **offers** drill in chat:
-_Want a drill round? (yes/no)_ — do not start round 2 without confirmation unless
-user pre-authorized in the question.
+### Policy behavior
+
+| Policy               | Round 1                                      | Round 2                                      |
+| -------------------- | -------------------------------------------- | -------------------------------------------- |
+| `auto-at-threshold`  | **Auto-execute** when trigger hit (no ask)   | **Offer** yes/no before executing            |
+| `always-offer`       | Offer yes/no before executing                | Offer yes/no before executing                |
+| `off`                | Skip                                         | Skip                                         |
+
+When `drill: auto-at-threshold` (default), main agent **auto-executes drill round 1**
+without asking when a trigger fires. Before round 2, **offer** in chat:
+_Want drill round 2? (yes/no)_ — do not start round 2 without confirmation.
+
+When `drill: always-offer`, offer yes/no before **both** rounds (even above thresholds).
 
 ## Max rounds
 
@@ -26,7 +36,7 @@ user pre-authorized in the question.
 | 1     | Target lowest-axis claims; seek T0/T1 upgrades       |
 | 2     | Narrow remaining gaps; adversarial check if not run  |
 
-After round 2, stop — report plateau honestly.
+After round 2: **stop**, downgrade honestly, report plateau — no round 3.
 
 ## Drill execution
 
@@ -48,20 +58,37 @@ Do **not** offer another drill round when:
 | No T0/T1 exists publicly | State evidentiary ceiling; list `## unverified` |
 | Official contested position | Keep `## conflicts`; no drill inflation |
 | Paywall blocks primary | Mark gap; no pretend verify |
-| User `drill: off` | Skip offer |
-| Round 2 complete | Stop |
+| User `drill: off` | Skip drill entirely |
+| Round 2 complete | Stop; downgrade; honest plateau |
 
 **Downgrade rules:** lower headline honestly; move stuck claims to `## unverified` or
 `partially-supported`; suggest fusion handoff only for opinion gaps (see `fusion-handoff.md`).
 
 ## Sensitive domain drill
 
-Health / legal / financial: prefer drill offer at ≤60 even when overall > 60 if any
+Health / legal / financial: prefer drill at ≤60 even when overall > 60 if any
 **material** claim is ≤55.
 
 Include disclaimer that drill does not constitute professional advice.
 
-## Chat copy (offer template)
+## Chat copy (templates)
+
+**Round 1 auto (auto-at-threshold):**
+
+```markdown
+**Drill round 1 (auto):** overall confidence is 48/100 (threshold ≤50).
+Re-searching: <claim list>.
+```
+
+**Round 2 offer:**
+
+```markdown
+**Drill round 2 offered:** after round 1, overall is 52/100.
+A second drill round would target: <remaining gaps>.
+Continue? (yes/no)
+```
+
+**Always-offer (round 1):**
 
 ```markdown
 **Drill offered:** overall confidence is 48/100 (threshold ≤50).
@@ -71,8 +98,8 @@ Max 2 rounds per session. Continue? (yes/no)
 
 ## Integration with T3
 
-Drill may batch new URLs through T3 leaf fetchers. T3 failure → T2 direct fetch;
-not a blocker.
+Drill may batch new URLs through T3 leaf jobs (`fetch-url`, `verify-one-claim`, etc.).
+T3 failure → T2 direct fallback; not a blocker.
 
 ## Degraded mode
 

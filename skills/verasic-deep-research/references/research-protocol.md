@@ -26,10 +26,11 @@ of sources or confidence.
 | T2   | Practitioner    | yes        | Deep read — extract claims, snippets, methodology, primary sources             |
 | T2   | Skeptic         | yes        | Challenge claims — conflicts, weak evidence, missing primary sources      |
 | T2   | Arbiter         | yes        | Resolve conflicts — rank sources, flag contested claims (adversarial tier)     |
-| T3   | Leaf fetcher    | no         | Parallel HTTP fetch only — return raw text/metadata; no synthesis              |
+| T3   | Leaf worker     | no         | Grandchild jobs spawned **by T2** — bounded fetch/extract/search/verify only |
 
-T3 workers are optional parallel fetch helpers. When T3 fails or is unavailable,
-T2 (or T1 in degraded mode) fetches directly — **not a blocker**.
+T3 workers are leaf jobs spawned by T2 (grandchild tier — **no Task tool**). When T3
+fails or is unavailable, T2 (or T1 in degraded mode) performs the same work directly —
+**not a blocker**.
 
 No dedicated subagent definition files. Spawn generic Task subagents with
 role instructions from this protocol and absolute paths to reference files.
@@ -113,7 +114,7 @@ another path. `<slug>` is a kebab-case short name derived from the question.
 ## Pipeline
 
 ```text
-pre-flight → discover → verify ledger → synthesize → score → drill offer → deliver
+pre-flight → discover → verify ledger → synthesize → score → drill → deliver
 ```
 
 1. **Pre-flight** — collect required fields; honesty notices; infer domain pack if needed.
@@ -125,23 +126,23 @@ pre-flight → discover → verify ledger → synthesize → score → drill off
    deliver sections per `templates/deep-research-brief.md`.
 5. **Score** — 5-axis confidence per claim and overall headline per
    `references/confidence-rubric.md`; apply sensitive-domain floor 60.
-6. **Drill offer** — when thresholds hit and drill policy allows, offer up to 2 drill rounds
-   per `references/drill-protocol.md`.
+6. **Drill** — when thresholds hit and drill policy allows, run up to 2 drill rounds per
+   `references/drill-protocol.md` (`auto-at-threshold` auto-executes round 1).
 7. **Deliver** — chat summary + files per output format; IEEE `[Sn]` citations throughout.
 
 ## Depth tiers and T2 dispatch
 
 Read the matching tier checklist: `workflows/<depth>.md` (e.g. `workflows/quick-scan.md`).
 
-| Depth                 | T2 workers (parallel)                                      |
-| --------------------- | ---------------------------------------------------------- |
-| `quick-scan`          | Hunter (1)                                                 |
-| `standard-research`   | Hunter + Practitioner (2)                                  |
-| `adversarial-deep`    | Hunter + Practitioner + Skeptic + Arbiter (4)              |
-| `custom`              | User-specified subset of Hunter, Practitioner, Skeptic, Arbiter |
+| Depth                 | T2 dispatch                                                                 |
+| --------------------- | --------------------------------------------------------------------------- |
+| `quick-scan`          | Hunter (1) — no Skeptic                                                     |
+| `standard-research`   | Hunter + Practitioner (parallel) → Skeptic (sequential, packaged prompt)  |
+| `adversarial-deep`    | Hunter + Practitioner + Skeptic + Arbiter (4, parallel)                     |
+| `custom`              | User-specified subset of Hunter, Practitioner, Skeptic, Arbiter             |
 
-Optional: spawn T3 leaf fetchers in parallel for URL batches returned by Hunter.
-T3 returns fetch status + raw body only — no Task tool, no synthesis.
+T2 spawns T3 leaf jobs via Task (T2 has Task). When T2 is unavailable, T1 batches
+WebFetch (or equivalent readonly fetch) for the same job types.
 
 ### T2 subagent contract
 
@@ -167,19 +168,29 @@ Do not cite URLs not returned by readonly fetch. Flag paywalls and blocks.
 ```
 
 **Arbiter** runs only in `adversarial-deep` (or custom when explicitly included).
-**Skeptic** challenges Practitioner/Hunter outputs — main agent passes those summaries
-in the packaged prompt (sequential dependency within the same research round).
+**Skeptic** challenges Practitioner/Hunter outputs — main agent passes merged summaries
+in the packaged prompt. At `standard-research`, Skeptic is **mandatory** and runs
+**sequentially after** Hunter + Practitioner parallel merge (step 7a). At
+`adversarial-deep`, Skeptic runs in parallel with the other three T2 workers.
 
-### T3 leaf fetch contract
+### T3 leaf worker contract
 
-T3 is **not** a Task subagent. Main agent (or T2) issues parallel readonly fetches:
+T3 = leaf workers spawned **by T2** (grandchild tier). T3 has **no Task tool** — one
+leaf per job; parallel jobs OK.
 
-```text
-Input: list of URLs from Hunter
-Output: { url, status, title?, raw_excerpt?, error?, tier_hint? }
-```
+| Job                  | Input                                      | Output                                              |
+| -------------------- | ------------------------------------------ | --------------------------------------------------- |
+| `fetch-url`          | URL                                        | HTTP status + raw body/metadata                     |
+| `extract-excerpt`    | URL or raw body + claim text               | ≤40-word supporting excerpt                         |
+| `single-query-search`| One bounded web search query               | Candidate URLs/snippets (no synthesis)              |
+| `verify-one-claim`   | Claim + URL                                | Two-key pass/fail + excerpt                         |
 
-On T3 failure → T2 Hunter or Practitioner fetches directly; note degraded fetch in ledger.
+T3 **must not**: synthesize, merge ledger, spawn subagents, or score confidence.
+
+T2 spawns T3 leaves via Task. When T2 is unavailable, T1 batches WebFetch (or
+equivalent readonly fetch) for the same job types.
+
+On T3 failure → T2 direct fallback (same job); note degraded fetch in ledger — not a blocker.
 
 ## Citation and ledger
 
@@ -187,7 +198,8 @@ Hard rules (details in `references/citation-protocol.md`):
 
 - **Verify-before-cite** — fetch or re-fetch; confirm snippet/support exists at URL.
 - **No cite without ledger row** — every `[Sn]` maps to exactly one ledger row.
-- **Snippet fallback** — max 40 words per claim when live page differs; mark `snippet-only`.
+- **Snippet fallback** — max 40 words per claim when live page differs; mark `snippet-only`;
+  claim headline hard cap 40 (see `confidence-rubric.md` — separate from the 40-word text limit).
 - **IEEE style** — inline `[Sn]`; numbered source list at end.
 - **Two-key rule** — claim appears in ledger only when URL key + support key both pass.
 
@@ -230,6 +242,7 @@ For **health**, **legal**, and **financial** topics (auto-detected or user-decla
   with explicit _sensitive-domain floor applied_ note.
 - Prominent disclaimer in deliverable (see helper ## honesty).
 - Prefer T0/T1 sources; Skeptic strongly recommended even at `standard-research`.
+- **Health-fitness (6a–6b):** When pack `health-fitness` applies and a claim headline is **≥75** with **T0/T1** backing, structured training plans in `## recommendation` are permitted — include explicit **not medical advice — consult a professional** disclaimer.
 
 ## Claims investigation mode
 

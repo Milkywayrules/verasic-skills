@@ -105,6 +105,17 @@ assert_grep "$SKILL_ROOT/references/confidence-rubric.md" '\*\*EC\*\*' 'rubric E
 assert_grep "$SKILL_ROOT/references/confidence-rubric.md" '\*\*CG\*\*' 'rubric CG axis'
 assert_grep "$SKILL_ROOT/references/confidence-rubric.md" '\*\*CO\*\*' 'rubric CO axis'
 assert_grep "$SKILL_ROOT/references/confidence-rubric.md" '\*\*VR\*\*' 'rubric VR axis'
+assert_grep "$SKILL_ROOT/references/confidence-rubric.md" 'Claim Grounding' 'rubric CG Claim Grounding'
+assert_grep "$SKILL_ROOT/references/confidence-rubric.md" 'Evidence Convergence' 'rubric EC Evidence Convergence'
+assert_grep "$SKILL_ROOT/references/confidence-rubric.md" 'Verification Rigor' 'rubric VR Verification Rigor'
+assert_grep "$SKILL_ROOT/references/confidence-rubric.md" 'snippet-only.*hard cap 40' 'rubric snippet-only hard cap 40'
+
+assert_grep "$SKILL_ROOT/references/research-protocol.md" 'fetch-url' 'protocol T3 fetch-url job'
+assert_grep "$SKILL_ROOT/references/research-protocol.md" 'Skeptic.*sequential' 'protocol standard Skeptic sequential'
+
+assert_grep "$SKILL_ROOT/references/drill-protocol.md" 'Auto-execute' 'drill auto-execute round 1'
+
+assert_grep "$SKILL_ROOT/workflows/standard-research.md" 'Skeptic pass \(7a' 'standard-research mandatory Skeptic'
 
 # --- Domain packs ---
 for slug in "${EXPECTED_DOMAIN_PACKS[@]}"; do

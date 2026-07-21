@@ -24,6 +24,9 @@ When `output` includes files, provide or accept path `./docs/research/<slug>/`.
 models: composer-2.5-fast, gemini-3-flash, ...
 domain: health | legal | financial | tech | general | ...
 drill: auto-at-threshold | off | always-offer
+  # auto-at-threshold: auto round 1 when triggered; offer round 2
+  # off: no drill
+  # always-offer: offer yes/no before both rounds
 custom-roles: hunter, practitioner, skeptic   # when depth: custom
 claims:
   - <claim one>
@@ -36,12 +39,13 @@ Recommend including `composer-2.5-fast` when suggesting a model roster.
 
 | Depth               | Workers                         | Use                                      |
 | ------------------- | ------------------------------- | ---------------------------------------- |
-| `quick-scan`        | Hunter (1 T2)                   | Fast landscape, fewer sources            |
-| `standard-research` | Hunter + Practitioner (2 T2)    | Balanced depth                           |
-| `adversarial-deep`  | Hunter + Practitioner + Skeptic + Arbiter | Contested topics, conflict resolution |
+| `quick-scan`        | Hunter (1 T2) — no Skeptic      | Fast landscape, fewer sources            |
+| `standard-research` | Hunter + Practitioner (parallel) → Skeptic (sequential) | Balanced depth with challenge pass |
+| `adversarial-deep`  | Hunter + Practitioner + Skeptic + Arbiter (4 parallel) | Contested topics, conflict resolution |
 | `custom`            | You specify T2 roles            | Non-standard scope                       |
 
-Optional T3 leaf fetchers run in parallel for URL batches — failure is not a blocker.
+Optional T3 leaf jobs (`fetch-url`, `extract-excerpt`, `single-query-search`,
+`verify-one-claim`) spawned by T2 — failure is not a blocker.
 
 ## Output formats
 
@@ -123,18 +127,21 @@ Treat headline numbers as guidance, not proof.
 → no `[Sn]` cite. Expect gaps.
 
 **Drill plateau.** Drill rounds (max 2) may not improve score — same sources, no new T0/T1,
-contested official positions, and paywalls are futile triggers. Downgrade honestly.
+contested official positions, and paywalls are futile triggers. `auto-at-threshold` runs
+round 1 automatically; round 2 requires confirmation. Downgrade honestly after round 2.
 
 **Sensitive disclaimers.** Health, legal, and financial topics get a confidence display floor of
 60 and explicit not-professional-advice language. Deep research is not a lawyer, doctor, or
 financial advisor.
+
+**Health training plans.** Under `health-fitness`, headline ≥75 with T0/T1 backing allows structured plans in `## recommendation` with **not medical advice — consult a professional** disclaimer.
 
 **Ask mode.** Read-only chat cannot write files. Choose Agent mode or `chat-only` for file output.
 
 **Fusion optional.** Unverified items may suggest a manual `verasic-fusion` follow-up only when
 that skill is installed — never automatic.
 
-**T3 fallback.** Parallel leaf fetch is best-effort. T2 or main agent direct fetch replaces T3
+**T3 fallback.** T3 leaf jobs are best-effort. T2 or main agent direct fetch replaces T3
 without blocking delivery.
 
 **Source boundary is your contract.** Widen only when you accept tier downgrade and ToS/rate-limit
@@ -154,9 +161,10 @@ roster when provided.
 **Contested claims.** Adversarial tier surfaces disagreement in `## conflicts` — not hidden
 in a single narrative line.
 
-**Snippet-only rows.** Live page may differ; max 40 words stored; lower effective tier for scoring.
+**Snippet-only rows.** Live page may differ; max 40 words stored; claim headline hard cap 40
+for scoring (separate from word limit).
 
-**Time decay.** Verification recency (VR axis) drops as sources age — old docs may be formally
+**Verification rigor (VR axis).** Fetch quality and recency — old docs may be formally
 correct but operationally stale.
 
 **composer-2.5-fast.** Recommended in optional rosters as the user's primary Cursor model — not

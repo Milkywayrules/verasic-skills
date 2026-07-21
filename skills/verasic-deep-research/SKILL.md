@@ -32,14 +32,17 @@ Never duplicate the protocol in chat — follow it.
    (see `references/helper.md` ## honesty).
 3. **Read protocol** — read `references/research-protocol.md`, active `workflows/<depth>.md`, and supporting references before
    any fetch or spawn.
-4. **Dispatch T2/T3 per tier** — T1 main orchestrates; spawn T2 workers (Hunter, Practitioner,
-   Skeptic, Arbiter per tier preset) via Task in parallel; optional T3 leaf fetchers (no Task).
+4. **Dispatch T2/T3 per tier** — T1 main orchestrates; spawn T2 workers per depth preset via
+   Task. T3 leaf jobs (`fetch-url`, `extract-excerpt`, `single-query-search`, `verify-one-claim`)
+   are spawned by T2 (grandchild, no Task). T1 batches WebFetch when T2 unavailable.
+   `standard-research`: Hunter + Practitioner parallel → Skeptic sequential (mandatory).
    T2 direct fallback when T3 fails — not a blocker.
 5. **Verify ledger** — every citation must pass verify-before-cite; no cite without a ledger row
    (see `references/citation-protocol.md`).
 6. **Score** — apply 5-axis confidence per `references/confidence-rubric.md`; sensitive domains
    enforce floor 60.
-7. **Drill** — offer drill per `references/drill-protocol.md` when thresholds hit; max 2 rounds.
+7. **Drill** — per `references/drill-protocol.md` when thresholds hit; max 2 rounds
+   (`auto-at-threshold` auto-executes round 1; offers round 2).
 8. **Deliver** — chat per output format; write files to `./docs/research/<slug>/` when chosen.
    Use `templates/deep-research-brief.md` sections. **Ask mode = no file writes.**
 

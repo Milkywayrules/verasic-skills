@@ -9,10 +9,10 @@ estimates — see helper ## honesty.
 | Code | Axis                   | Question answered                                      | Range |
 | ---- | ---------------------- | ------------------------------------------------------ | ----- |
 | **SQ** | Source Quality       | How authoritative are the best sources for this claim? | 0–100 |
-| **EC** | Evidence Corroboration | How many independent sources agree?                    | 0–100 |
-| **CG** | Claim Granularity      | How specific vs vague is the claim?                    | 0–100 |
+| **EC** | Evidence Convergence | How many independent sources agree?                    | 0–100 |
+| **CG** | Claim Grounding      | How well does quoted text support the claim wording?   | 0–100 |
 | **CO** | Coverage             | How well do sources cover scope, geography, time?        | 0–100 |
-| **VR** | Verification Recency | How fresh is the evidence vs claim time-sensitivity?   | 0–100 |
+| **VR** | Verification Rigor   | Fetch success, ledger quality, and evidence freshness? | 0–100 |
 
 ### Axis guidance
 
@@ -21,12 +21,14 @@ snippet-only with explicit penalty already applied.
 
 **EC** — independent origins count; same press release syndicated does not multiply EC.
 
-**CG** — "AI Act exists" scores high granularity for a boolean; "soon" scores low unless dated.
+**CG** — quote-to-claim fit: verbatim excerpt directly supports the specific claim wording;
+vague or tangential quotes score low even when the topic is related.
 
 **CO** — penalize US-only sources for EU-only questions; penalize 2019 docs for 2026 ops claims.
 
-**VR** — use `accessed` date and document publication date; fast-moving tech/regulatory topics
-decay VR faster (domain pack multiplier).
+**VR** — fetch success and ledger quality (two-key pass, tier honesty, excerpt fidelity);
+recency is a sub-factor — use `accessed` and publication dates; fast-moving topics decay
+VR faster (domain pack `recency_months` multiplier).
 
 ## Domain packs (default weights)
 
@@ -61,9 +63,9 @@ Show all five axes in chat for every material claim in `## confidence`:
 | ---- | ----- | -------------------- |
 | SQ   | 85    | T0 regulator text [1] |
 | EC   | 70    | Two independent T1 outlets [1][3] |
-| CG   | 90    | Dated enforcement milestone |
+| CG   | 90    | Verbatim quote matches claim wording |
 | CO   | 65    | EU-wide; no member-state detail |
-| VR   | 80    | 2025 doc, accessed 2026 |
+| VR   | 80    | Full fetch; 2025 doc, accessed 2026 |
 | **Headline** | **78** | weighted |
 ```
 
@@ -71,10 +73,13 @@ Show all five axes in chat for every material claim in `## confidence`:
 
 | Condition              | Adjustment                                    |
 | ---------------------- | --------------------------------------------- |
-| `snippet-only` only    | SQ −15; headline note                         |
+| `snippet-only` verified | SQ −15; **claim headline hard cap 40** (score cap — separate from ≤40-word snippet text limit in ledger) |
 | Single T3 source       | EC cap 40; headline cap 50                     |
 | `contested`            | headline cap 55 unless T0 majority            |
 | Sensitive domain floor | display headline = max(computed, 60) with note  |
+
+Snippet text in the ledger is capped at **≤40 words** (citation protocol). The **score cap
+40** for `snippet-only` claims is a confidence ceiling — independent limits.
 
 Sensitive floor applies to **display headline** for health/legal/financial — always show
 true computed score in axis table.
@@ -114,7 +119,7 @@ Chat deliverable **always** includes:
 
 ```text
 headline = weighted_sum(axes, domain_pack_weights)
-apply caps (contested, T3-only, snippet-only)
+apply caps (contested, T3-only, snippet-only hard cap 40)
 apply sensitive display floor if health|legal|financial
 round to integer
 ```
