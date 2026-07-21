@@ -66,8 +66,13 @@ Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 
 Static scanners (Gen, Socket, Snyk on [skills.sh](https://skills.sh/milkywayrules/verasic-skills))
 often flag harness skills for expected reasons — git hooks, credential docs, `curl` update checks.
-See [SECURITY.md](SECURITY.md) for the trust model, credential handling, and per-skill
-[scanner notes](skills/verasic-init/references/scanner-notes.md).
+See [SECURITY.md](SECURITY.md) for the trust model, expected scan signals, and credential handling.
+Per-skill scanner notes:
+[verasic-init](skills/verasic-init/references/scanner-notes.md) ·
+[verasic-github-env](skills/verasic-github-env/references/scanner-notes.md) ·
+[verasic-git-commits](skills/verasic-git-commits/references/scanner-notes.md) ·
+[verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
+[verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md)
 
 ## Testing
 

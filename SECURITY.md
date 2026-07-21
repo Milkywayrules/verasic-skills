@@ -1,5 +1,7 @@
 # Security
 
+**This file is the project security policy** for [Milkywayrules/verasic-skills](https://github.com/Milkywayrules/verasic-skills). Enable it as the GitHub Security Policy in repo settings if the Security tab is not yet wired.
+
 verasic-skills is an **agent harness** — markdown protocols, Cursor rules/commands, and
 small bash wiring scripts that help AI-assisted development workflows. It is **not** a
 runtime application, server, or npm package that executes in production.
@@ -23,6 +25,34 @@ Published on [skills.sh](https://skills.sh/milkywayrules/verasic-skills).
 These are **expected false positives** for a local-dev harness — not indicators of
 malware. Review the skill source (`SKILL.md`, `references/`, `scripts/`) before trusting
 any install path.
+
+## Expected scan signals (typical at install time)
+
+Counts and severities may drift as vendors retune heuristics. This table reflects what
+installers commonly see on [skills.sh](https://skills.sh/milkywayrules/verasic-skills)
+as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
+
+| Skill | Gen (typical) | Socket (typical) | Snyk (typical) | Expected? |
+| ----- | ------------- | ---------------- | -------------- | --------- |
+| **verasic-github-env** | High | — | Critical (bundle) | Yes — credential docs + env loader |
+| **verasic-git-commits** | High | — | Critical (bundle) | Yes — hook + `core.hooksPath` |
+| **verasic-init** | — | 1 alert | Critical (bundle) | Yes — orchestrates hook/bootstrap + `curl` |
+| **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
+| **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
+
+Per-skill detail: `skills/<name>/references/scanner-notes.md` (linked in [Related](#related)).
+
+## FAQ
+
+### Why is Snyk still Critical?
+
+Snyk scores the **whole skill bundle** at install time. Harness skills intentionally
+document credentials, install git hooks, run bash wiring scripts, and (for init) may
+`curl` upstream version files. Static analysis treats those patterns as high risk even
+when the behavior is read-only, repo-local, and documented. **Critical here means
+"matches sensitive-dev-tool heuristics" — not "malware" or "CVE in production."** More
+prose will not turn marketplace badges green; verify trust via source review and
+`integrity.sha256` instead.
 
 ## Trust model
 
@@ -64,11 +94,12 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
 | **verasic-bugbot** | None (review only) | None | Reads git diffs and full files; reports bugs |
 
-Per-skill scanner context: `skills/<name>/references/scanner-notes.md`.
-
 ## Install paths
 
-- **Cursor full setup:** `curl …/setup.sh | bash` — copies rules, commands, agents, and skills.
+- **Cursor full setup:** `curl …/setup.sh | bash` — clones this repo shallowly and copies
+  rules, commands, agents, and skills into `.cursor/`. Same trust model as
+  `npx skills add`: read `SKILL.md` and scripts first; prefer a pinned tag URL over
+  `main` when piping remote shell; verify `integrity.sha256` after install.
 - **Skills only:** `npx skills add Milkywayrules/verasic-skills`.
 - **Post-install wiring:** `/verasic-init` or `bash …/verasic-init/scripts/init.sh`.
 
@@ -90,3 +121,9 @@ Include skill name, install path, command run, and redacted logs (never paste to
 
 - [skills.sh listing](https://skills.sh/milkywayrules/verasic-skills) — install audits and community signals
 - Root [README.md](README.md) — install and usage overview
+- Per-skill scanner notes:
+  - [skills/verasic-init/references/scanner-notes.md](skills/verasic-init/references/scanner-notes.md)
+  - [skills/verasic-github-env/references/scanner-notes.md](skills/verasic-github-env/references/scanner-notes.md)
+  - [skills/verasic-git-commits/references/scanner-notes.md](skills/verasic-git-commits/references/scanner-notes.md)
+  - [skills/verasic-fusion/references/scanner-notes.md](skills/verasic-fusion/references/scanner-notes.md)
+  - [skills/verasic-bugbot/references/scanner-notes.md](skills/verasic-bugbot/references/scanner-notes.md)
