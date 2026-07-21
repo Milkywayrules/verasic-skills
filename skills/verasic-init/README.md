@@ -11,7 +11,7 @@ a Cursor `setup.sh` install.
 | File                          | Role                                            |
 | ----------------------------- | ----------------------------------------------- |
 | `scripts/init.sh`             | Orchestrator — detect, wire, report             |
-| `manifest.txt`                | Registry: skill → wiring script → description   |
+| `manifest.txt`                | Registry: skill → wiring → verify → description |
 | `references/init-protocol.md` | Spec — wire contract, statuses, extension guide |
 | `scripts/test-regression.sh`  | Disposable regression tests                     |
 
@@ -23,6 +23,9 @@ From the target repository's root:
 bash .cursor/skills/verasic-init/scripts/init.sh              # wire everything installed
 bash .cursor/skills/verasic-init/scripts/init.sh --skills verasic-bugbot,verasic-git-commits
 bash .cursor/skills/verasic-init/scripts/init.sh --list       # inspect only, change nothing
+bash .cursor/skills/verasic-init/scripts/init.sh --verify   # run manifest verify scripts after wire
+bash .cursor/skills/verasic-init/scripts/init.sh --strict-integrity
+bash .cursor/skills/verasic-init/scripts/init.sh --check-updates
 ```
 
 Or in Cursor: `/verasic-init`
@@ -44,7 +47,7 @@ cherry-picked installs just work.
 
 ## Report
 
-The full output of `init.sh` is the report: status table, per-skill details,
+The full output of `init.sh` is the report: **versions** section, status table, per-skill details,
 result tally, and a `next:` line. Agents are instructed to relay it verbatim.
 Re-running is always safe — every wiring script is idempotent.
 

@@ -1,7 +1,9 @@
 # required paths relative to skill dir
 SKILL.md
+VERSION
 scripts/bootstrap.sh
 scripts/check-gh.sh
 scripts/load-gh-env.sh
 references/setup-protocol.md
 templates/.envrc
+integrity.sha256

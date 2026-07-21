@@ -4,9 +4,13 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 
 ## Design
 
-- `manifest.txt` is the registry: `skill-name|wire-script|description` per line, `#` comments allowed. Wire script paths are relative to the skill's own directory; `-` means skill-only (no repo wiring).
+- `manifest.txt` is the registry: `skill-name|wire-script|verify-script|description` per line, `#` comments allowed. Wire script paths are relative to the skill's own directory; `-` means skill-only (no repo wiring). Verify script `-` means no manifest verify step; init runs it only with `--verify`.
+- Legacy three-field lines (`skill-name|wire-script|description`) remain valid — the third field is treated as description with no verify script.
 - Init discovers **repo-local** skills roots under the git root (`.agents/skills`, `.cursor/skills`, and `skills/` under other hidden agent folders). It **never** wires skills from outside the repository — even when init is invoked from an external install path.
-- Each skill ships `integrity.txt` listing required relative paths. Init runs `check_integrity` before wiring and again after wire scripts when applicable.
+- Each skill ships `integrity.txt` listing required relative paths and `integrity.sha256` with expected hashes for those files (excluding `integrity.sha256` itself).
+- Init runs `check_integrity` before wiring and again after wire scripts when applicable. With `--strict-integrity`, `check_hash_integrity` compares live hashes and reports `modified:` paths (detect only — no auto-restore).
+- Each skill ships a semver `VERSION` file (one line, like `.nvmrc`). The report always includes a **versions** section with local versions; `--check-updates` fetches upstream `VERSION` files read-only.
+- Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases.
 - Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, runs, and reports.
 
 ## Skills root selection
@@ -25,7 +29,11 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 - `missing:<path>` — required file absent
 - `empty:<path>` — required file present but zero bytes
 
-Used in `--list` mode and before/after wiring.
+`check_hash_integrity(skill_dir)` reads `integrity.sha256` (sha256sum format: `hash  path`). Reports:
+
+- `modified:<path>` — file missing or hash mismatch
+
+Used in `--list` mode and before/after wiring. `--strict-integrity` enables hash checks; hash mismatch before wire → `broken install`; after successful wire → `degraded`.
 
 ## Wire script contract
 
@@ -46,15 +54,24 @@ Scripts must be idempotent, must run correctly from the repo root (init `cd`s th
 
 Bootstrap step lines (`bootstrap: step: ran|skipped|cannot …`) feed the report **actions** section.
 
+## Manifest verify (`--verify`)
+
+After a successful wire (exit 0), init may run the manifest verify script for that skill when `--verify` is passed. Verify scripts are listed in the fourth manifest column; `-` skips.
+
+- `verasic-github-env`: `scripts/check-gh.sh` — init orchestrates this on `--verify` even when bootstrap already verified on token presence.
+- Other skills: `-` today.
+
+If any manifest verify script fails, init reports `verify: failed` in actions, tallies verify failures, and exits 3 (after the full report). Broken installs and wire failures still exit 1 first.
+
 ## Per-skill wiring
 
-| Skill                 | Script                 | What it does                                                                                                                                           |
-| --------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `verasic-github-env`  | `scripts/bootstrap.sh` | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; optional `check-gh` verify; exit 3 when secrets tracked or verify fails          |
-| `verasic-git-commits` | `scripts/wire-hook.sh` | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
-| `verasic-bugbot`      | —                      | skill-only; nothing to wire                                                                                                                            |
-| `verasic-fusion`      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
-| `verasic-init`        | —                      | this orchestrator; running it is the wiring                                                                                                            |
+| Skill                 | Wire                   | Verify                 | What it does                                                                                                                                           |
+| --------------------- | ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `verasic-github-env`  | `scripts/bootstrap.sh` | `scripts/check-gh.sh`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; optional bootstrap verify on token; manifest verify with `--verify`            |
+| `verasic-git-commits` | `scripts/wire-hook.sh` | —                      | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
+| `verasic-bugbot`      | —                      | —                      | skill-only; nothing to wire                                                                                                                            |
+| `verasic-fusion`      | —                      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
+| `verasic-init`        | —                      | —                      | this orchestrator; running it is the wiring                                                                                                            |
 
 ## Statuses in the report
 
@@ -62,11 +79,11 @@ Bootstrap step lines (`bootstrap: step: ran|skipped|cannot …`) feed the report
 | --------------- | ----------------------------------------------------------------------- |
 | `verified`      | wired + `check-gh.sh` passed (`verasic-github-env` only in slice A)     |
 | `wired`         | wiring script succeeded; integrity ok; verify skipped (no token)        |
-| `degraded`      | wire ran but integrity incomplete, or verify skipped (check-gh missing) |
+| `degraded`      | wire ran but integrity incomplete, hash mismatch (`--strict-integrity`), or verify skipped (check-gh missing) |
 | `ready`         | installed skill-only skill; integrity ok                                |
 | `ok`            | `--list` only — would wire; integrity ok                                |
-| `broken install`| required integrity files missing before wire                            |
-| `action needed` | manual step required — instructions in details                          |
+| `broken install`| required integrity files missing or hash mismatch before wire           |
+| `action needed` | manual step required — instructions in details, or manifest verify failed |
 | `not installed` | in manifest but not present in any repo-local root                      |
 | `not selected`  | excluded by `--skills`                                                  |
 | `unknown`       | requested via `--skills` but not in the manifest                        |
@@ -79,17 +96,20 @@ The full stdout of `init.sh` is the user-facing report. Agents relay it verbatim
 - repo root, origin (credentials stripped), selected skills root
 - external-invoker warning when applicable
 - **skill roots** — each discovered root with per-skill integrity summary
-- status table, per-skill **details** (wire script output), **actions** (integrity + steps)
+- **versions** — local `VERSION` per manifest skill; with `--check-updates`, upstream comparison
+- status table, per-skill **details** (wire script output), **actions** (integrity + steps + verify)
 - result tally and a `next:` line
 
 Errors before the report (not a git repo, no repo-local verasic-init, broken manifest) go to stderr with exit 1.
 
 ## Adding a new verasic skill
 
-1. Add `integrity.txt` listing required paths.
-2. Give the skill an idempotent wiring script following the contract above (or use `-`).
-3. Add one line to `manifest.txt`.
-4. Extend `scripts/test-regression.sh` with at least one assertion for it.
+1. Add `integrity.txt` listing required paths and generate `integrity.sha256`.
+2. Add a one-line semver `VERSION` file.
+3. Give the skill an idempotent wiring script following the contract above (or use `-` for wire and verify columns).
+4. Add one line to `manifest.txt` (four-field preferred).
+5. Bump `versions.lock` when releasing.
+6. Extend `scripts/test-regression.sh` with at least one assertion for it.
 
 ## Failure behavior
 
@@ -98,11 +118,18 @@ Errors before the report (not a git repo, no repo-local verasic-init, broken man
 - Unknown CLI argument or empty `--skills` → usage + exit 2.
 - `--skills` selection where every name is unknown → report + exit 2.
 - Any `FAILED` or `broken install` row → init exit 1.
+- Manifest verify failure with `--verify` → exit 3.
 - `action needed`, `degraded`, `wired`, `verified`, and `--list` with only non-fatal rows → exit 0.
-- `--list` and `--help` never modify the repository.
+- `--list`, `--check-updates`, and `--help` never modify the repository.
 
 ## Manifest parsing rules
 
-- One entry per line: `skill-name|wire-script|description`; `#` comments and blank lines skipped.
-- Whitespace around `name` and `wire-script` is stripped; a trailing newline on the last line is optional; CRLF tolerated.
+- Preferred: `skill-name|wire-script|verify-script|description`
+- Legacy: `skill-name|wire-script|description` (no verify script)
+- `#` comments and blank lines skipped.
+- Whitespace around `name`, `wire-script`, and `verify-script` is stripped; a trailing newline on the last line is optional; CRLF tolerated.
 - `--skills` values are whitespace-normalized, so `--skills " a, b "` equals `--skills a,b`.
+
+## Version check (`--check-updates`)
+
+Read-only. Fetches `https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/skills/<skill>/VERSION` (override with `VERASIC_INIT_REMOTE_VERSION_BASE` for tests). Compares to local `VERSION`. Never auto-overwrites installed skills.

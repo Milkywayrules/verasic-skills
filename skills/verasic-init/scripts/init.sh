@@ -5,15 +5,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INVOKED_SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INVOKED_SKILLS_ROOT="$(cd "$INVOKED_SKILL_ROOT/.." && pwd)"
 
+REMOTE_VERSION_BASE="${VERASIC_INIT_REMOTE_VERSION_BASE:-https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/skills}"
+
 usage() {
   cat <<'EOF'
 verasic-init — wire installed Verasic skills into this repository
 
 Usage:
-  init.sh                  wire every installed verasic skill
-  init.sh --skills a,b     wire only the listed skills (cherry-pick)
-  init.sh --list           show manifest + installed state, change nothing
-  init.sh --help           this help
+  init.sh                      wire every installed verasic skill
+  init.sh --skills a,b         wire only the listed skills (cherry-pick)
+  init.sh --list               show manifest + installed state, change nothing
+  init.sh --verify             after wiring, run manifest verify scripts
+  init.sh --strict-integrity   compare integrity.sha256 hashes (detect only)
+  init.sh --check-updates      compare local VERSION to upstream (read-only)
+  init.sh --help               this help
 
 Idempotent: safe to re-run anytime. Run from anywhere inside the repo.
 Uses repo-local skills roots only — never wires from an external install path.
@@ -23,11 +28,17 @@ EOF
 SELECT=""
 SELECT_GIVEN=false
 LIST_ONLY=false
+VERIFY=false
+STRICT_INTEGRITY=false
+CHECK_UPDATES=false
 while (($#)); do
   case "$1" in
     --skills) SELECT="${2:?init: --skills needs a comma-separated list}"; SELECT_GIVEN=true; shift 2 ;;
     --skills=*) SELECT="${1#*=}"; SELECT_GIVEN=true; shift ;;
     --list) LIST_ONLY=true; shift ;;
+    --verify) VERIFY=true; shift ;;
+    --strict-integrity) STRICT_INTEGRITY=true; shift ;;
+    --check-updates) CHECK_UPDATES=true; shift ;;
     --help|-h) usage; exit 0 ;;
     *) echo "init: unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -49,6 +60,19 @@ cd "$REPO_ROOT"
 is_selected() {
   [[ -z "$SELECT" ]] && return 0
   [[ ",$SELECT," == *",$1,"* ]]
+}
+
+# parse_manifest_line name wire f3 f4 -> sets MANIFEST_* globals
+parse_manifest_line() {
+  local name="$1" wire="$2" f3="$3" f4="${4:-}"
+  MANIFEST_NAME="${name//[[:space:]]/}"
+  MANIFEST_WIRE="${wire//[[:space:]]/}"
+  MANIFEST_VERIFY="-"
+  MANIFEST_DESC="${f3%$'\r'}"
+  if [[ -n "$f4" ]]; then
+    MANIFEST_VERIFY="${f3//[[:space:]]/}"
+    MANIFEST_DESC="${f4%$'\r'}"
+  fi
 }
 
 # check_integrity skill_dir -> prints missing/empty lines; returns 0 when ok
@@ -84,10 +108,52 @@ check_integrity() {
   ((${#missing[@]} + ${#empty[@]} == 0))
 }
 
+# check_hash_integrity skill_dir -> prints modified:path lines; returns 0 when ok
+check_hash_integrity() {
+  local skill_dir="$1"
+  local hash_file="$skill_dir/integrity.sha256"
+  local line stripped stored rel computed modified=()
+
+  if [[ ! -f "$hash_file" ]]; then
+    return 0
+  fi
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    stripped="${line%%#*}"
+    stripped="${stripped#"${stripped%%[![:space:]]*}"}"
+    stripped="${stripped%"${stripped##*[![:space:]]}"}"
+    [[ -z "$stripped" ]] && continue
+    stored="${stripped%% *}"
+    rel="${stripped#"$stored"}"
+    rel="${rel#"${rel%%[![:space:]]*}"}"
+    [[ -z "$rel" ]] && continue
+    if [[ ! -f "$skill_dir/$rel" ]]; then
+      modified+=("$rel")
+      continue
+    fi
+    computed="$(sha256sum "$skill_dir/$rel" | awk '{print $1}')"
+    [[ "$computed" != "$stored" ]] && modified+=("$rel")
+  done < "$hash_file"
+
+  local item
+  for item in "${modified[@]}"; do
+    printf 'modified:%s\n' "$item"
+  done
+  ((${#modified[@]} == 0))
+}
+
 integrity_summary() {
   local skill_dir="$1"
-  local issues miss=0 emp=0 line
+  local issues miss=0 emp=0 mod=0 line
   if check_integrity "$skill_dir" >/dev/null 2>&1; then
+    if $STRICT_INTEGRITY && ! check_hash_integrity "$skill_dir" >/dev/null 2>&1; then
+      issues="$(check_hash_integrity "$skill_dir" 2>/dev/null || true)"
+      while IFS= read -r line; do
+        [[ "$line" == modified:* ]] && mod=$((mod + 1))
+      done <<<"$issues"
+      echo "${mod} modified"
+      return
+    fi
     echo "ok"
     return
   fi
@@ -102,6 +168,39 @@ integrity_summary() {
     echo "${miss} missing"
   else
     echo "${emp} empty"
+  fi
+}
+
+hash_issues_summary() {
+  local issues="$1"
+  local mod=0 line
+  while IFS= read -r line; do
+    [[ "$line" == modified:* ]] && mod=$((mod + 1))
+  done <<<"$issues"
+  if ((mod > 0)); then
+    echo "${mod} modified"
+  else
+    echo "ok"
+  fi
+}
+
+read_skill_version() {
+  local skill_dir="$1"
+  local vfile="$skill_dir/VERSION"
+  if [[ -f "$vfile" ]]; then
+    tr -d '[:space:]' < "$vfile"
+  else
+    echo "(missing)"
+  fi
+}
+
+fetch_remote_version() {
+  local name="$1"
+  local path="$REMOTE_VERSION_BASE/$name/VERSION"
+  if [[ "$REMOTE_VERSION_BASE" == http://* || "$REMOTE_VERSION_BASE" == https://* ]]; then
+    curl -fsSL --connect-timeout 5 --max-time 10 "$path" 2>/dev/null | tr -d '[:space:]' || true
+  elif [[ -f "$path" ]]; then
+    tr -d '[:space:]' < "$path"
   fi
 }
 
@@ -182,6 +281,23 @@ parse_github_env_status() {
   echo "wired|wire ok"
 }
 
+run_manifest_verify() {
+  local name="$1" skill_dir="$2" verify_script="$3" detail_out="$4"
+  [[ "$verify_script" == "-" || -z "$verify_script" ]] && return 0
+  [[ ! -f "$skill_dir/$verify_script" ]] && return 0
+
+  local rc=0 verify_log="$TMP/${name}.verify"
+  bash "$skill_dir/$verify_script" >"$verify_log" 2>&1 || rc=$?
+  if [[ -s "$verify_log" ]]; then
+    {
+      echo
+      echo " [manifest verify: $verify_script]"
+      sed 's/^/   /' "$verify_log"
+    } >>"$detail_out"
+  fi
+  return "$rc"
+}
+
 EXTERNAL_INVOKER=false
 [[ "$INVOKED_SKILLS_ROOT" != "$REPO_ROOT/"* ]] && EXTERNAL_INVOKER=true
 
@@ -214,14 +330,21 @@ summaries=()
 detail_files=()
 actions_lines=()
 manifest_names=","
+manifest_entries=()
 wired=0; verified=0; degraded=0; ready=0; action_needed=0
 not_installed=0; not_selected=0; unknown=0; failed=0; broken_install=0
+verify_failed=0
 list_ok=0
 
-while IFS='|' read -r name wire desc || [[ -n "$name" ]]; do
-  name="${name//[[:space:]]/}"; wire="${wire//[[:space:]]/}"; desc="${desc%$'\r'}"
+while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; do
+  parse_manifest_line "$raw_name" "$raw_wire" "$raw_f3" "${raw_f4:-}"
+  name="$MANIFEST_NAME"
+  wire="$MANIFEST_WIRE"
+  verify="$MANIFEST_VERIFY"
+  desc="$MANIFEST_DESC"
   [[ -z "$name" || "$name" == \#* ]] && continue
   manifest_names+="$name,"
+  manifest_entries+=("$name")
 
   if ! is_selected "$name"; then
     names+=("$name"); statuses+=("not selected"); summaries+=("skipped by --skills")
@@ -243,34 +366,56 @@ while IFS='|' read -r name wire desc || [[ -n "$name" ]]; do
     integrity_ok=false
   fi
 
+  hash_issues=""
+  hash_ok=true
+  if $STRICT_INTEGRITY; then
+    if ! hash_issues="$(check_hash_integrity "$skill_dir" 2>/dev/null)"; then
+      hash_ok=false
+    fi
+  fi
+
   if [[ "$wire" == "-" ]]; then
-    if $integrity_ok; then
+    if $integrity_ok && $hash_ok; then
       names+=("$name"); statuses+=("ready"); summaries+=("no repo wiring needed")
       detail_files+=("")
       actions_lines+=("integrity: ok")
       ready=$((ready + 1))
-    else
+    elif ! $integrity_ok; then
       names+=("$name"); statuses+=("broken install")
       summaries+=("required files missing — re-run the skills install")
       detail_files+=("$TMP/${name}.integrity")
       printf '%s\n' "$integrity_issues" >"$TMP/${name}.integrity"
       actions_lines+=("integrity: failed ($(integrity_summary "$skill_dir"))")
       broken_install=$((broken_install + 1))
+    else
+      names+=("$name"); statuses+=("broken install")
+      summaries+=("integrity hash mismatch — re-run the skills install")
+      detail_files+=("$TMP/${name}.hash")
+      printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
+      actions_lines+=("integrity: modified ($(hash_issues_summary "$hash_issues"))")
+      broken_install=$((broken_install + 1))
     fi
     continue
   fi
 
   if $LIST_ONLY; then
-    if $integrity_ok; then
+    if $integrity_ok && $hash_ok; then
       names+=("$name"); statuses+=("ok"); summaries+=("would run $wire")
       detail_files+=(""); actions_lines+=("integrity: ok")
       list_ok=$((list_ok + 1))
-    else
+    elif ! $integrity_ok; then
       names+=("$name"); statuses+=("broken install")
       summaries+=("required files missing — would not wire")
       detail_files+=("$TMP/${name}.integrity")
       printf '%s\n' "$integrity_issues" >"$TMP/${name}.integrity"
       actions_lines+=("integrity: failed ($(integrity_summary "$skill_dir"))")
+      broken_install=$((broken_install + 1))
+    else
+      names+=("$name"); statuses+=("broken install")
+      summaries+=("integrity hash mismatch — would not wire")
+      detail_files+=("$TMP/${name}.hash")
+      printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
+      actions_lines+=("integrity: modified ($(hash_issues_summary "$hash_issues"))")
       broken_install=$((broken_install + 1))
     fi
     continue
@@ -282,6 +427,16 @@ while IFS='|' read -r name wire desc || [[ -n "$name" ]]; do
     detail_files+=("$TMP/${name}.integrity")
     printf '%s\n' "$integrity_issues" >"$TMP/${name}.integrity"
     actions_lines+=("wire: skipped (integrity); integrity: failed ($(integrity_summary "$skill_dir"))")
+    broken_install=$((broken_install + 1))
+    continue
+  fi
+
+  if ! $hash_ok; then
+    names+=("$name"); statuses+=("broken install")
+    summaries+=("integrity hash mismatch before wire — re-run the skills install")
+    detail_files+=("$TMP/${name}.hash")
+    printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
+    actions_lines+=("wire: skipped (modified); integrity: modified ($(hash_issues_summary "$hash_issues"))")
     broken_install=$((broken_install + 1))
     continue
   fi
@@ -305,36 +460,90 @@ while IFS='|' read -r name wire desc || [[ -n "$name" ]]; do
     post_integrity_ok=false
   fi
 
+  post_hash_ok=true
+  post_hash_issues=""
+  if $STRICT_INTEGRITY; then
+    if ! post_hash_issues="$(check_hash_integrity "$skill_dir" 2>/dev/null)"; then
+      post_hash_ok=false
+    fi
+  fi
+
   action_log=""
   if [[ -s "$out" ]]; then
     action_log="$(grep -E '^bootstrap: step:' "$out" 2>/dev/null || true)"
   fi
   [[ -z "$action_log" ]] && action_log="wire: ran $wire"
 
+  verify_rc=0
+  verify_note=""
+  if $VERIFY && [[ "$rc" -eq 0 ]]; then
+    if run_manifest_verify "$name" "$skill_dir" "$verify" "$out"; then
+      verify_note="verify: ok"
+    else
+      verify_rc=$?
+      verify_note="verify: failed"
+      verify_failed=$((verify_failed + 1))
+    fi
+  fi
+
   case "$rc" in
     0)
       if [[ "$name" == verasic-github-env ]]; then
         IFS='|' read -r st sum <<< "$(parse_github_env_status "$(cat "$out")" "$rc" "$post_integrity_ok")"
+        if $VERIFY && [[ "$verify_rc" -ne 0 ]]; then
+          st="action needed"
+          sum="manifest verify failed — see details"
+        elif ! $post_hash_ok; then
+          st="degraded"
+          sum="wire ok but integrity hash mismatch"
+        fi
         names+=("$name"); statuses+=("$st"); summaries+=("${sum:-$desc}")
         case "$st" in
-          verified) verified=$((verified + 1)); actions_lines+=("$action_log; integrity: ok; verify: ok") ;;
-          degraded) degraded=$((degraded + 1)); actions_lines+=("$action_log; integrity: $([[ $post_integrity_ok == true ]] && echo ok || echo incomplete); verify: skipped") ;;
-          wired) wired=$((wired + 1)); actions_lines+=("$action_log; integrity: ok; verify: skipped (no token)") ;;
+          verified)
+            verified=$((verified + 1))
+            actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+            ;;
+          degraded)
+            degraded=$((degraded + 1))
+            if ! $post_hash_ok; then
+              actions_lines+=("$action_log; integrity: modified ($(hash_issues_summary "$post_hash_issues"))${verify_note:+; $verify_note}")
+              printf '%s\n' "$post_hash_issues" >>"$out"
+            else
+              actions_lines+=("$action_log; integrity: $([[ $post_integrity_ok == true ]] && echo ok || echo incomplete); verify: skipped${verify_note:+; $verify_note}")
+            fi
+            ;;
+          wired)
+            wired=$((wired + 1))
+            actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+            ;;
+          action\ needed)
+            action_needed=$((action_needed + 1))
+            actions_lines+=("$action_log; integrity: ok; $verify_note")
+            ;;
         esac
-      elif $post_integrity_ok; then
-        names+=("$name"); statuses+=("wired"); summaries+=("$desc")
-        actions_lines+=("$action_log; integrity: ok")
-        wired=$((wired + 1))
-      else
+      elif ! $post_integrity_ok; then
         names+=("$name"); statuses+=("degraded"); summaries+=("wire ok but integrity incomplete")
         printf '%s\n' "$post_issues" >>"$out"
-        actions_lines+=("$action_log; integrity: incomplete")
+        actions_lines+=("$action_log; integrity: incomplete${verify_note:+; $verify_note}")
         degraded=$((degraded + 1))
+      elif ! $post_hash_ok; then
+        names+=("$name"); statuses+=("degraded"); summaries+=("wire ok but integrity hash mismatch")
+        printf '%s\n' "$post_hash_issues" >>"$out"
+        actions_lines+=("$action_log; integrity: modified ($(hash_issues_summary "$post_hash_issues"))${verify_note:+; $verify_note}")
+        degraded=$((degraded + 1))
+      elif $VERIFY && [[ "$verify_rc" -ne 0 ]]; then
+        names+=("$name"); statuses+=("action needed"); summaries+=("manifest verify failed — see details")
+        actions_lines+=("$action_log; integrity: ok; $verify_note")
+        action_needed=$((action_needed + 1))
+      else
+        names+=("$name"); statuses+=("wired"); summaries+=("$desc")
+        actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+        wired=$((wired + 1))
       fi
       ;;
     3)
       names+=("$name"); statuses+=("action needed"); summaries+=("manual step required — see details")
-      actions_lines+=("$action_log; integrity: ok")
+      actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
       action_needed=$((action_needed + 1))
       ;;
     *)
@@ -390,15 +599,40 @@ else
       printf ' (no verasic-init)'
     fi
     echo
-    while IFS='|' read -r rname rwire _ || [[ -n "$rname" ]]; do
-      rname="${rname//[[:space:]]/}"
-      [[ -z "$rname" || "$rname" == \#* ]] && continue
-      if [[ -d "$root/$rname" ]]; then
-        printf '      %-22s %s\n' "$rname" "$(integrity_summary "$root/$rname")"
+    while IFS='|' read -r rname rwire rf3 rf4 || [[ -n "$rname" ]]; do
+      parse_manifest_line "$rname" "$rwire" "$rf3" "${rf4:-}"
+      [[ -z "$MANIFEST_NAME" || "$MANIFEST_NAME" == \#* ]] && continue
+      if [[ -d "$root/$MANIFEST_NAME" ]]; then
+        printf '      %-22s %s\n' "$MANIFEST_NAME" "$(integrity_summary "$root/$MANIFEST_NAME")"
       fi
     done < "$MANIFEST"
   done
 fi
+echo
+
+echo " versions"
+echo " --------"
+for mname in "${manifest_entries[@]}"; do
+  if skill_dir="$(resolve_skill_dir "$mname" 2>/dev/null)"; then
+    local_ver="$(read_skill_version "$skill_dir")"
+  else
+    local_ver="(not installed)"
+  fi
+  status_note=""
+  if $CHECK_UPDATES; then
+    remote_ver="$(fetch_remote_version "$mname")"
+    if [[ -z "$remote_ver" ]]; then
+      status_note="(upstream unavailable)"
+    elif [[ "$local_ver" == "$remote_ver" ]]; then
+      status_note="up to date"
+    else
+      status_note="${remote_ver} available"
+    fi
+    printf ' %-22s %-8s %s\n' "$mname" "$local_ver" "$status_note"
+  else
+    printf ' %-22s %s\n' "$mname" "$local_ver"
+  fi
+done
 echo
 
 printf ' %-22s %-15s %s\n' "SKILL" "STATUS" "SUMMARY"
@@ -444,10 +678,16 @@ if $LIST_ONLY; then
   printf ' result: %d ok · %d ready · %d broken install · %d not installed · %d not selected · %d unknown\n' \
     "$list_ok" "$ready" "$broken_install" "$not_installed" "$not_selected" "$unknown"
 else
-  printf ' result: %d verified · %d wired · %d degraded · %d ready · %d action needed · %d broken install · %d not installed · %d not selected · %d unknown · %d failed\n' \
+  printf ' result: %d verified · %d wired · %d degraded · %d ready · %d action needed · %d broken install · %d not installed · %d not selected · %d unknown · %d failed' \
     "$verified" "$wired" "$degraded" "$ready" "$action_needed" "$broken_install" "$not_installed" "$not_selected" "$unknown" "$failed"
+  if ((verify_failed > 0)); then
+    printf ' · %d verify failed' "$verify_failed"
+  fi
+  echo
   if ((failed > 0 || broken_install > 0)); then
     echo " next: fix broken installs and failures above, then re-run init (idempotent — safe to repeat)"
+  elif ((verify_failed > 0)); then
+    echo " next: fix verify failures above, then re-run init --verify"
   elif ((action_needed > 0)); then
     echo " next: complete the manual steps in the details above, then re-run init to confirm"
   elif ((unknown > 0)); then
@@ -459,6 +699,9 @@ fi
 echo "$RULE"
 
 ((failed == 0 && broken_install == 0)) || exit 1
+if ((verify_failed > 0)); then
+  exit 3
+fi
 if ((unknown > 0 && verified + wired + degraded + ready + action_needed + list_ok == 0)); then
   exit 2
 fi

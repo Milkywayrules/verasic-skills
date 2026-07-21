@@ -43,6 +43,8 @@ row 'verasic-git-commits' 'wired' "$out" && ok "git-commits wired" || bad "git-c
 row 'verasic-bugbot' 'ready' "$out" && ok "bugbot ready" || bad "bugbot ready"
 row 'verasic-fusion' 'ready' "$out" && ok "fusion ready" || bad "fusion ready"
 grep -q 'skill roots' <<<"$out" && ok "skill roots section" || bad "skill roots section"
+grep -q 'versions' <<<"$out" && ok "versions section" || bad "versions section"
+grep -qE 'verasic-init[[:space:]]+1\.1\.0' <<<"$out" && ok "versions row for verasic-init" || bad "versions row for verasic-init"
 grep -q 'actions' <<<"$out" && ok "actions section" || bad "actions section"
 [[ -f "$R/.envrc" ]] && ok ".envrc created" || bad ".envrc created"
 [[ -f "$R/.github-agent.local" ]] && ok ".github-agent.local scaffolded" || bad ".github-agent.local scaffolded"
@@ -201,6 +203,64 @@ cp -r "$SKILLS_SRC/verasic-init" "$R5/.cursor/skills/"
 rc=0
 (cd "$R5" && bash "$INIT_REL" >/dev/null 2>&1) || rc=$?
 [[ "$rc" -eq 1 ]] && ok "non-git repo rejected" || bad "non-git repo rejected (rc=$rc)"
+
+# --- legacy 3-field manifest backward compat ---
+R6="$TMP/legacy-manifest"
+make_repo "$R6" verasic-init verasic-bugbot
+printf '%s\n' 'verasic-bugbot|-|local review skill' > "$R6/.cursor/skills/verasic-init/manifest.txt"
+out6="$(cd "$R6" && bash "$INIT_REL")"
+row 'verasic-bugbot' 'ready' "$out6" && ok "3-field manifest backward compat" || bad "3-field manifest backward compat"
+
+# --- 4-field manifest verify column present ---
+grep -q 'scripts/check-gh.sh' "$SKILLS_SRC/verasic-init/manifest.txt" && ok "4-field manifest has verify column" || bad "4-field manifest has verify column"
+
+# --- --verify runs manifest verify script (mock check-gh) ---
+R7="$TMP/verify-flag"
+make_repo "$R7" verasic-init verasic-github-env
+mkdir -p "$R7/.cursor/skills/verasic-github-env/scripts"
+cat > "$R7/.cursor/skills/verasic-github-env/scripts/check-gh.sh" <<'MOCK'
+#!/usr/bin/env bash
+echo "check-gh: ok — mock verify"
+MOCK
+chmod +x "$R7/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
+out7v="$(cd "$R7" && bash "$INIT_REL" --verify)"
+grep -q 'verify: ok' <<<"$out7v" && ok "--verify runs check-gh" || bad "--verify runs check-gh"
+grep -q 'manifest verify' <<<"$out7v" && ok "--verify logs manifest verify output" || bad "--verify logs manifest verify output"
+
+# --- --verify failure exits 3 ---
+R7b="$TMP/verify-fail"
+make_repo "$R7b" verasic-init verasic-github-env
+cat > "$R7b/.cursor/skills/verasic-github-env/scripts/check-gh.sh" <<'MOCK'
+#!/usr/bin/env bash
+echo "check-gh: mock failure" >&2
+exit 1
+MOCK
+chmod +x "$R7b/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
+rc=0
+out7f="$(cd "$R7b" && bash "$INIT_REL" --verify 2>&1)" || rc=$?
+grep -q 'verify: failed' <<<"$out7f" && ok "--verify reports verify failed" || bad "--verify reports verify failed"
+[[ "$rc" -eq 3 ]] && ok "--verify failure exits 3" || bad "--verify failure exits 3 (rc=$rc)"
+
+# --- --strict-integrity detects modified file ---
+R8="$TMP/strict"
+make_repo "$R8" verasic-init verasic-bugbot
+echo "# tampered" >> "$R8/.cursor/skills/verasic-bugbot/SKILL.md"
+rc=0
+out8="$(cd "$R8" && bash "$INIT_REL" --strict-integrity 2>&1)" || rc=$?
+row 'verasic-bugbot' 'broken install' "$out8" && ok "--strict-integrity broken install row" || bad "--strict-integrity broken install row"
+grep -q 'modified' <<<"$out8" && ok "--strict-integrity reports modified" || bad "--strict-integrity reports modified"
+[[ "$rc" -eq 1 ]] && ok "--strict-integrity mismatch exits 1" || bad "--strict-integrity mismatch exits 1 (rc=$rc)"
+
+# --- --check-updates with mocked upstream ---
+R9="$TMP/updates"
+make_repo "$R9" verasic-init verasic-bugbot
+MOCK_BASE="$TMP/mock-upstream/skills"
+mkdir -p "$MOCK_BASE/verasic-bugbot" "$MOCK_BASE/verasic-init"
+printf '9.9.9\n' > "$MOCK_BASE/verasic-bugbot/VERSION"
+printf '1.1.0\n' > "$MOCK_BASE/verasic-init/VERSION"
+out9="$(cd "$R9" && VERASIC_INIT_REMOTE_VERSION_BASE="$MOCK_BASE" bash "$INIT_REL" --check-updates)"
+grep -q '9.9.9 available' <<<"$out9" && ok "--check-updates shows available version" || bad "--check-updates shows available version"
+grep -q 'up to date' <<<"$out9" && ok "--check-updates shows up to date row" || bad "--check-updates shows up to date row"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

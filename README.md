@@ -18,7 +18,7 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
 - **verasic-init** — one-command repo wiring for whichever verasic skills
   are installed. Detects, runs each skill's own wiring script idempotently,
-  prints a single setup report. Built for skills.sh installs where `setup.sh`
+  optional manifest verify and integrity hash checks, prints a single setup report. Built for skills.sh installs where `setup.sh`
   never runs.
 
 ## Install
@@ -74,6 +74,7 @@ Most skills ship a local `test-regression.sh` — run before publish, no CI requ
 ```markdown
 verasic-skills/
 ├── README.md # root: short pitch + install commands
+├── versions.lock # pinned skill semver for releases
 ├── .gitignore
 ├── setup.sh
 ├── .github/workflows/
@@ -140,7 +141,9 @@ verasic-skills/
 │ └── verasic-init/
 │ ├── SKILL.md
 │ ├── README.md
-│ ├── manifest.txt # registry: skill → wiring script
+│ ├── manifest.txt # registry: skill → wire → verify → description
+│ ├── VERSION
+│ ├── integrity.sha256
 │ ├── scripts/
 │ │ ├── init.sh # detect installed skills, wire, report
 │ │ └── test-regression.sh

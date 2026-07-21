@@ -1,5 +1,7 @@
 # required paths relative to skill dir
 SKILL.md
+VERSION
 scripts/wire-hook.sh
 hooks/commit-msg
 references/commit-protocol.md
+integrity.sha256
