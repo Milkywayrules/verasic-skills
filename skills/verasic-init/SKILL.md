@@ -15,7 +15,7 @@ Source of truth: `references/init-protocol.md` (wire contract, statuses, multi-r
 bash .cursor/skills/verasic-init/scripts/init.sh
 ```
 
-Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefix — the script itself needs no configuration. Append any flags the user gave (`--skills a,b`, `--list`, `--verify`, `--strict-integrity`, `--check-updates`).
+Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefix — the script itself needs no configuration. Append any flags the user gave (`--skills a,b`, `--list`, `--verify`, `--no-strict-integrity`, `--check-updates`).
 
 2. **Relay the report verbatim** — print init's full stdout to the user in a code block, unmodified, from the first `────` rule to the last. Do not summarize, soften, or reformat it. If init exits before printing a report (not a git repo, no repo-local install, broken manifest), relay its stderr message instead.
 3. If any row says `action needed`, walk the user through the manual steps shown in the details section, wait for them to finish, then re-run init to confirm.
@@ -27,13 +27,13 @@ Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefi
 bash .cursor/skills/verasic-init/scripts/init.sh --skills verasic-github-env,verasic-bugbot   # wire only these
 bash .cursor/skills/verasic-init/scripts/init.sh --list                                       # integrity + install state, change nothing
 bash .cursor/skills/verasic-init/scripts/init.sh --verify                                     # run manifest verify scripts after wire
-bash .cursor/skills/verasic-init/scripts/init.sh --strict-integrity                           # detect tampered skill files via integrity.sha256
+bash .cursor/skills/verasic-init/scripts/init.sh --no-strict-integrity                        # presence-only integrity (skip hash checks)
 bash .cursor/skills/verasic-init/scripts/init.sh --check-updates                              # compare local VERSION to upstream (read-only)
 ```
 
 ## How it works
 
-`manifest.txt` maps each verasic skill to its own wiring and optional verify script. Init discovers repo-local skills roots, checks each skill's `integrity.txt` (and optionally `integrity.sha256` with `--strict-integrity`), runs only installed skills' wire scripts, and never uses skills from outside the repository (even when invoked from another checkout). Exit code 3 from a wire script means "manual step required" (reported, not a failure). Exit code 3 from init means manifest verify failed with `--verify`.
+`manifest.txt` maps each verasic skill to its own wiring and optional verify script. Init discovers repo-local skills roots, checks each skill's `integrity.txt` and `integrity.sha256` hashes by default (pass `--no-strict-integrity` for presence-only), runs only installed skills' wire scripts, and never uses skills from outside the repository (even when invoked from another checkout). Exit code 3 from a wire script means "manual step required" (reported, not a failure). Exit code 3 from init means manifest verify failed with `--verify`.
 
 ## Hard rules
 

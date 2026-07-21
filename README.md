@@ -18,7 +18,7 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
 - **verasic-init** — one-command repo wiring for whichever verasic skills
   are installed. Detects, runs each skill's own wiring script idempotently,
-  optional manifest verify and integrity hash checks, prints a single setup report. Built for skills.sh installs where `setup.sh`
+  optional manifest verify and integrity hash checks (default on; opt out with `--no-strict-integrity`), prints a single setup report. Built for skills.sh installs where `setup.sh`
   never runs.
 
 ## Install

@@ -24,7 +24,7 @@ bash .cursor/skills/verasic-init/scripts/init.sh              # wire everything 
 bash .cursor/skills/verasic-init/scripts/init.sh --skills verasic-bugbot,verasic-git-commits
 bash .cursor/skills/verasic-init/scripts/init.sh --list       # inspect only, change nothing
 bash .cursor/skills/verasic-init/scripts/init.sh --verify   # run manifest verify scripts after wire
-bash .cursor/skills/verasic-init/scripts/init.sh --strict-integrity
+bash .cursor/skills/verasic-init/scripts/init.sh --no-strict-integrity  # presence-only (skip hash checks)
 bash .cursor/skills/verasic-init/scripts/init.sh --check-updates
 ```
 

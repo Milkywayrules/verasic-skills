@@ -8,7 +8,7 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 - Legacy three-field lines (`skill-name|wire-script|description`) remain valid — the third field is treated as description with no verify script.
 - Init discovers **repo-local** skills roots under the git root (`.agents/skills`, `.cursor/skills`, and `skills/` under other hidden agent folders). It **never** wires skills from outside the repository — even when init is invoked from an external install path.
 - Each skill ships `integrity.txt` listing required relative paths and `integrity.sha256` with expected hashes for those files (excluding `integrity.sha256` itself).
-- Init runs `check_integrity` before wiring and again after wire scripts when applicable. With `--strict-integrity`, `check_hash_integrity` compares live hashes and reports `modified:` paths (detect only — no auto-restore).
+- Init runs `check_integrity` before wiring and again after wire scripts when applicable. By default, `check_hash_integrity` compares live hashes against `integrity.sha256` and reports `modified:` paths (detect only — no auto-restore). Pass `--no-strict-integrity` for presence-only checks (skip hash comparison).
 - Each skill ships a semver `VERSION` file (one line, like `.nvmrc`). The report always includes a **versions** section with local versions; `--check-updates` fetches upstream `VERSION` files read-only.
 - Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases.
 - Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, runs, and reports.
@@ -33,7 +33,7 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 
 - `modified:<path>` — file missing or hash mismatch
 
-Used in `--list` mode and before/after wiring. `--strict-integrity` enables hash checks; hash mismatch before wire → `broken install`; after successful wire → `degraded`.
+Used in `--list` mode and before/after wiring. Hash checks run by default; hash mismatch before wire → `broken install`; after successful wire → `degraded`. With `--no-strict-integrity` (alias `--loose-integrity`), hash checks are skipped and actions note `presence-only`.
 
 ## Wire script contract
 
@@ -79,7 +79,7 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 | --------------- | ----------------------------------------------------------------------- |
 | `verified`      | wired + `check-gh.sh` passed (`verasic-github-env` only in slice A)     |
 | `wired`         | wiring script succeeded; integrity ok; verify skipped (no token)        |
-| `degraded`      | wire ran but integrity incomplete, hash mismatch (`--strict-integrity`), or verify skipped (check-gh missing) |
+| `degraded`      | wire ran but integrity incomplete, hash mismatch (default hash checks), or verify skipped (check-gh missing) |
 | `ready`         | installed skill-only skill; integrity ok                                |
 | `ok`            | `--list` only — would wire; integrity ok                                |
 | `broken install`| required integrity files missing or hash mismatch before wire           |

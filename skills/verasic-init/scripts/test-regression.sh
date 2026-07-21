@@ -34,6 +34,21 @@ INIT_REL=".cursor/skills/verasic-init/scripts/init.sh"
 
 row() { grep -qE "$1 +$2" <<<"$3"; }
 
+refresh_skill_hashes() {
+  local skill_dir="$1"
+  local integrity_file="$skill_dir/integrity.txt"
+  local hash_file="$skill_dir/integrity.sha256"
+  local line stripped
+  > "$hash_file"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    stripped="${line%%#*}"
+    stripped="${stripped//[[:space:]]/}"
+    [[ -z "$stripped" ]] && continue
+    [[ "$stripped" == "integrity.sha256" ]] && continue
+    (cd "$skill_dir" && sha256sum "$stripped") >> "$hash_file"
+  done < "$integrity_file"
+}
+
 # --- full wire on a fresh repo ---
 R="$TMP/full"
 make_repo "$R" verasic-init verasic-github-env verasic-git-commits verasic-bugbot verasic-fusion
@@ -223,6 +238,7 @@ cat > "$R7/.cursor/skills/verasic-github-env/scripts/check-gh.sh" <<'MOCK'
 echo "check-gh: ok — mock verify"
 MOCK
 chmod +x "$R7/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
+refresh_skill_hashes "$R7/.cursor/skills/verasic-github-env"
 out7v="$(cd "$R7" && bash "$INIT_REL" --verify)"
 grep -q 'verify: ok' <<<"$out7v" && ok "--verify runs check-gh" || bad "--verify runs check-gh"
 grep -q 'manifest verify' <<<"$out7v" && ok "--verify logs manifest verify output" || bad "--verify logs manifest verify output"
@@ -236,20 +252,37 @@ echo "check-gh: mock failure" >&2
 exit 1
 MOCK
 chmod +x "$R7b/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
+refresh_skill_hashes "$R7b/.cursor/skills/verasic-github-env"
 rc=0
 out7f="$(cd "$R7b" && bash "$INIT_REL" --verify 2>&1)" || rc=$?
 grep -q 'verify: failed' <<<"$out7f" && ok "--verify reports verify failed" || bad "--verify reports verify failed"
 [[ "$rc" -eq 3 ]] && ok "--verify failure exits 3" || bad "--verify failure exits 3 (rc=$rc)"
 
-# --- --strict-integrity detects modified file ---
+# --- default hash integrity detects modified file ---
 R8="$TMP/strict"
 make_repo "$R8" verasic-init verasic-bugbot
 echo "# tampered" >> "$R8/.cursor/skills/verasic-bugbot/SKILL.md"
 rc=0
-out8="$(cd "$R8" && bash "$INIT_REL" --strict-integrity 2>&1)" || rc=$?
-row 'verasic-bugbot' 'broken install' "$out8" && ok "--strict-integrity broken install row" || bad "--strict-integrity broken install row"
-grep -q 'modified' <<<"$out8" && ok "--strict-integrity reports modified" || bad "--strict-integrity reports modified"
-[[ "$rc" -eq 1 ]] && ok "--strict-integrity mismatch exits 1" || bad "--strict-integrity mismatch exits 1 (rc=$rc)"
+out8="$(cd "$R8" && bash "$INIT_REL" 2>&1)" || rc=$?
+row 'verasic-bugbot' 'broken install' "$out8" && ok "default hash broken install row" || bad "default hash broken install row"
+grep -q 'local patch detected' <<<"$out8" && ok "default hash reports local patch warning" || bad "default hash reports local patch warning"
+[[ "$rc" -eq 1 ]] && ok "default hash mismatch exits 1" || bad "default hash mismatch exits 1 (rc=$rc)"
+
+# --- --strict-integrity backward compat (no-op) ---
+rc=0
+out8b="$(cd "$R8" && bash "$INIT_REL" --strict-integrity 2>&1)" || rc=$?
+row 'verasic-bugbot' 'broken install' "$out8b" && ok "--strict-integrity alias still detects mismatch" || bad "--strict-integrity alias still detects mismatch"
+[[ "$rc" -eq 1 ]] && ok "--strict-integrity alias exits 1" || bad "--strict-integrity alias exits 1 (rc=$rc)"
+
+# --- --no-strict-integrity skips hash failure ---
+R8c="$TMP/loose"
+make_repo "$R8c" verasic-init verasic-bugbot
+echo "# tampered" >> "$R8c/.cursor/skills/verasic-bugbot/SKILL.md"
+rc=0
+out8c="$(cd "$R8c" && bash "$INIT_REL" --no-strict-integrity 2>&1)" || rc=$?
+row 'verasic-bugbot' 'ready' "$out8c" && ok "--no-strict-integrity skips hash failure" || bad "--no-strict-integrity skips hash failure"
+grep -q 'presence-only (--no-strict-integrity)' <<<"$out8c" && ok "--no-strict-integrity notes presence-only" || bad "--no-strict-integrity notes presence-only"
+[[ "$rc" -eq 0 ]] && ok "--no-strict-integrity exits 0" || bad "--no-strict-integrity exits 0 (rc=$rc)"
 
 # --- --check-updates with mocked upstream ---
 R9="$TMP/updates"

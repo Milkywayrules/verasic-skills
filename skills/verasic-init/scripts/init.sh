@@ -15,9 +15,10 @@ Usage:
   init.sh                      wire every installed verasic skill
   init.sh --skills a,b         wire only the listed skills (cherry-pick)
   init.sh --list               show manifest + installed state, change nothing
-  init.sh --verify             after wiring, run manifest verify scripts
-  init.sh --strict-integrity   compare integrity.sha256 hashes (detect only)
-  init.sh --check-updates      compare local VERSION to upstream (read-only)
+  init.sh --verify                 after wiring, run manifest verify scripts
+  init.sh --no-strict-integrity    presence-only integrity (skip hash checks)
+  init.sh --strict-integrity       hash checks on by default (backward compat, no-op)
+  init.sh --check-updates          compare local VERSION to upstream (read-only)
   init.sh --help               this help
 
 Idempotent: safe to re-run anytime. Run from anywhere inside the repo.
@@ -29,7 +30,7 @@ SELECT=""
 SELECT_GIVEN=false
 LIST_ONLY=false
 VERIFY=false
-STRICT_INTEGRITY=false
+STRICT_INTEGRITY=true
 CHECK_UPDATES=false
 while (($#)); do
   case "$1" in
@@ -37,7 +38,8 @@ while (($#)); do
     --skills=*) SELECT="${1#*=}"; SELECT_GIVEN=true; shift ;;
     --list) LIST_ONLY=true; shift ;;
     --verify) VERIFY=true; shift ;;
-    --strict-integrity) STRICT_INTEGRITY=true; shift ;;
+    --strict-integrity) shift ;;
+    --no-strict-integrity|--loose-integrity) STRICT_INTEGRITY=false; shift ;;
     --check-updates) CHECK_UPDATES=true; shift ;;
     --help|-h) usage; exit 0 ;;
     *) echo "init: unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -146,7 +148,11 @@ integrity_summary() {
   local skill_dir="$1"
   local issues miss=0 emp=0 mod=0 line
   if check_integrity "$skill_dir" >/dev/null 2>&1; then
-    if $STRICT_INTEGRITY && ! check_hash_integrity "$skill_dir" >/dev/null 2>&1; then
+    if ! $STRICT_INTEGRITY; then
+      echo "presence-only"
+      return
+    fi
+    if ! check_hash_integrity "$skill_dir" >/dev/null 2>&1; then
       issues="$(check_hash_integrity "$skill_dir" 2>/dev/null || true)"
       while IFS= read -r line; do
         [[ "$line" == modified:* ]] && mod=$((mod + 1))
@@ -182,6 +188,19 @@ hash_issues_summary() {
   else
     echo "ok"
   fi
+}
+
+integrity_action_ok() {
+  if $STRICT_INTEGRITY; then
+    echo "integrity: ok"
+  else
+    echo "integrity: presence-only (--no-strict-integrity)"
+  fi
+}
+
+integrity_action_modified() {
+  local issues="$1"
+  echo "integrity: modified ($(hash_issues_summary "$issues")) — local patch detected; pass --no-strict-integrity if intentional fork"
 }
 
 read_skill_version() {
@@ -378,7 +397,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
     if $integrity_ok && $hash_ok; then
       names+=("$name"); statuses+=("ready"); summaries+=("no repo wiring needed")
       detail_files+=("")
-      actions_lines+=("integrity: ok")
+      actions_lines+=("$(integrity_action_ok)")
       ready=$((ready + 1))
     elif ! $integrity_ok; then
       names+=("$name"); statuses+=("broken install")
@@ -392,7 +411,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
       summaries+=("integrity hash mismatch — re-run the skills install")
       detail_files+=("$TMP/${name}.hash")
       printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
-      actions_lines+=("integrity: modified ($(hash_issues_summary "$hash_issues"))")
+      actions_lines+=("$(integrity_action_modified "$hash_issues")")
       broken_install=$((broken_install + 1))
     fi
     continue
@@ -401,7 +420,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
   if $LIST_ONLY; then
     if $integrity_ok && $hash_ok; then
       names+=("$name"); statuses+=("ok"); summaries+=("would run $wire")
-      detail_files+=(""); actions_lines+=("integrity: ok")
+      detail_files+=(""); actions_lines+=("$(integrity_action_ok)")
       list_ok=$((list_ok + 1))
     elif ! $integrity_ok; then
       names+=("$name"); statuses+=("broken install")
@@ -415,7 +434,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
       summaries+=("integrity hash mismatch — would not wire")
       detail_files+=("$TMP/${name}.hash")
       printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
-      actions_lines+=("integrity: modified ($(hash_issues_summary "$hash_issues"))")
+      actions_lines+=("$(integrity_action_modified "$hash_issues")")
       broken_install=$((broken_install + 1))
     fi
     continue
@@ -436,7 +455,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
     summaries+=("integrity hash mismatch before wire — re-run the skills install")
     detail_files+=("$TMP/${name}.hash")
     printf '%s\n' "$hash_issues" >"$TMP/${name}.hash"
-    actions_lines+=("wire: skipped (modified); integrity: modified ($(hash_issues_summary "$hash_issues"))")
+    actions_lines+=("wire: skipped (modified); $(integrity_action_modified "$hash_issues")")
     broken_install=$((broken_install + 1))
     continue
   fi
@@ -501,12 +520,12 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
         case "$st" in
           verified)
             verified=$((verified + 1))
-            actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+            actions_lines+=("$action_log; $(integrity_action_ok)${verify_note:+; $verify_note}")
             ;;
           degraded)
             degraded=$((degraded + 1))
             if ! $post_hash_ok; then
-              actions_lines+=("$action_log; integrity: modified ($(hash_issues_summary "$post_hash_issues"))${verify_note:+; $verify_note}")
+              actions_lines+=("$action_log; $(integrity_action_modified "$post_hash_issues")${verify_note:+; $verify_note}")
               printf '%s\n' "$post_hash_issues" >>"$out"
             else
               actions_lines+=("$action_log; integrity: $([[ $post_integrity_ok == true ]] && echo ok || echo incomplete); verify: skipped${verify_note:+; $verify_note}")
@@ -514,11 +533,11 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
             ;;
           wired)
             wired=$((wired + 1))
-            actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+            actions_lines+=("$action_log; $(integrity_action_ok)${verify_note:+; $verify_note}")
             ;;
           action\ needed)
             action_needed=$((action_needed + 1))
-            actions_lines+=("$action_log; integrity: ok; $verify_note")
+            actions_lines+=("$action_log; $(integrity_action_ok); $verify_note")
             ;;
         esac
       elif ! $post_integrity_ok; then
@@ -529,21 +548,21 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
       elif ! $post_hash_ok; then
         names+=("$name"); statuses+=("degraded"); summaries+=("wire ok but integrity hash mismatch")
         printf '%s\n' "$post_hash_issues" >>"$out"
-        actions_lines+=("$action_log; integrity: modified ($(hash_issues_summary "$post_hash_issues"))${verify_note:+; $verify_note}")
+        actions_lines+=("$action_log; $(integrity_action_modified "$post_hash_issues")${verify_note:+; $verify_note}")
         degraded=$((degraded + 1))
       elif $VERIFY && [[ "$verify_rc" -ne 0 ]]; then
         names+=("$name"); statuses+=("action needed"); summaries+=("manifest verify failed — see details")
-        actions_lines+=("$action_log; integrity: ok; $verify_note")
+        actions_lines+=("$action_log; $(integrity_action_ok); $verify_note")
         action_needed=$((action_needed + 1))
       else
         names+=("$name"); statuses+=("wired"); summaries+=("$desc")
-        actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+        actions_lines+=("$action_log; $(integrity_action_ok)${verify_note:+; $verify_note}")
         wired=$((wired + 1))
       fi
       ;;
     3)
       names+=("$name"); statuses+=("action needed"); summaries+=("manual step required — see details")
-      actions_lines+=("$action_log; integrity: ok${verify_note:+; $verify_note}")
+      actions_lines+=("$action_log; $(integrity_action_ok)${verify_note:+; $verify_note}")
       action_needed=$((action_needed + 1))
       ;;
     *)
