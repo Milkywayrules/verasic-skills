@@ -3,7 +3,7 @@ name: verasic-github-env
 description: GitHub CLI auth for local AI agent harnesses — fine-grained PAT in gitignored .github-agent.local, direnv, gh verify. Use when setting up gh for agents, creating GH_TOKEN, wiring GitHub PR/issue/CI workflows per repo, or before any gh command when auth may be missing.
 ---
 
-Security: see `references/scanner-notes.md` and repo root `SECURITY.md` for expected scanner signals and trust model.
+Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md) for expected scanner signals and trust model.
 
 # Verasic GitHub Env — Local Agent Harness Auth
 

@@ -19,9 +19,9 @@ live under `.cursor/skills/verasic-git-commits/`.
 | `hooks/commit-msg`                               | Deterministic git hook layer                          |
 | `scripts/test-regression.sh`                     | Hook regression suite                                 |
 | `SKILL.md`                                       | Auto-trigger + orchestration                          |
-| `../../cursor/rules/verasic-git-commits.mdc`     | Always-applied digest (installed to `.cursor/rules/`) |
-| `../../cursor/commands/verasic-audit-commits.md` | `/verasic-audit-commits` slash command                |
-| `../../cursor/agents/verasic-commit-auditor.md`  | Audit subagent — isolated context, read-only          |
+| `.cursor/rules/verasic-git-commits.mdc`     | Always-applied digest (after `setup.sh`) |
+| `.cursor/commands/verasic-audit-commits.md` | `/verasic-audit-commits` slash command |
+| `.cursor/agents/verasic-commit-auditor.md`  | Audit subagent — isolated context, read-only |
 
 ## Three enforcement layers
 
@@ -96,7 +96,7 @@ overall **PASS / FAIL**.
 3. Fix Blockers (trailer strip via the `commit-tree` escape hatch — only with your approval), reword flagged messages, re-run until **PASS**.
 4. Push / open PR.
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
 
 ## Extend per repo
 

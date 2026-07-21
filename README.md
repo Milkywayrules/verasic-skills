@@ -86,6 +86,7 @@ Most skills ship a local `test-regression.sh` — run before publish, no CI requ
 ```markdown
 verasic-skills/
 ├── README.md # root: short pitch + install commands
+├── SECURITY.md # trust model, scanner signals, credential handling
 ├── versions.lock # pinned skill semver for releases
 ├── .gitignore
 ├── setup.sh

@@ -31,7 +31,7 @@ Adjust if any slug is unavailable on the harness or account.
 | Fable 5           | `claude-fable-5-thinking-xhigh`   |
 | GPT               | `gpt-5.6-sol-medium`              |
 | Codex             | `gpt-5.6-terra-medium`            |
-| Kimi              | `kimi-k2`                         |
+| Kimi              | `kimi-k2.7-code`                  |
 
 ## Aliases (normalize to slug before spawn)
 
@@ -48,7 +48,7 @@ Adjust if any slug is unavailable on the harness or account.
 | `grok-4.5`, `grok`                          | `cursor-grok-4.5-medium`          |
 | `gpt-5.6`, `gpt`, `sol`                     | `gpt-5.6-sol-medium`              |
 | `codex`, `terra`                            | `gpt-5.6-terra-medium`            |
-| `kimi`                                      | `kimi-k2`                         |
+| `kimi`                                      | `kimi-k2.7-code`                  |
 
 If the harness exposes a different canonical slug at runtime, prefer the harness list
 and update this file upstream. Slugs not on the harness list may still be valid elsewhere —
@@ -57,7 +57,7 @@ fail before spawn with substitutes; do not silently swap models.
 ## Harness availability (Cursor Task)
 
 These slugs are known to the catalog but **may fail** Task spawn on some accounts or quota
-states: `kimi-k2`, `claude-haiku-4-5` (validate before spawn — often unavailable in Cursor
+states: `kimi-k2.7-code`, `claude-haiku-4-5` (validate before spawn — often unavailable in Cursor
 Task). Prefer validating at pre-flight; use substitutes from the table below. GLM (`glm-5.2-high`) and frontier models may hit API usage limits —
 report unavailable slugs; fuse from surviving models unless all inputs are unusable.
 
@@ -71,7 +71,7 @@ report unavailable slugs; fuse from surviving models unless all inputs are unusa
 | `gemini-3-flash`                  | `glm-5.2-high`                    |
 | `gpt-5.6-terra-medium`            | `gpt-5.6-sol-medium`              |
 | `glm-5.2-high`                    | `cursor-grok-4.5-medium`          |
-| `kimi-k2`                         | `cursor-grok-4.5-medium`          |
+| `kimi-k2.7-code`                | `cursor-grok-4.5-medium`          |
 | `claude-haiku-4-5`                | `gemini-3-flash`                  |
 
 Always keep `composer-2.5-fast` when substituting.

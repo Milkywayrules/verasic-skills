@@ -3,7 +3,7 @@ name: verasic-git-commits
 description: Verasic git commit convention — message style, no co-authored/AI trailers, no AI-session language — plus a pre-push history audit. Use when writing any git commit message, when the user asks to commit changes, or asks to "audit commits", "check commit messages", or "clean commit history" before push/PR.
 ---
 
-Security: see `references/scanner-notes.md` and repo root `SECURITY.md` for expected scanner signals and trust model.
+Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md) for expected scanner signals and trust model.
 
 # Verasic Git Commits — Convention + Audit Orchestration
 

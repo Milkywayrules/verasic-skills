@@ -21,4 +21,4 @@
   verbatim but does not read `.github-agent.local`.
 - **Idempotent** — Safe to re-run; cherry-pick with `--skills`.
 
-See root [SECURITY.md](../../../SECURITY.md).
+See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md).

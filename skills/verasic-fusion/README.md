@@ -16,7 +16,7 @@ Paths relative to this skill folder. After `setup.sh`, the same files live under
 | `references/models.md`                    | Known model slugs                                                  |
 | `templates/`                              | Output templates (9 presets)                                       |
 | `SKILL.md`                                | Auto-trigger + orchestration                                       |
-| `../../cursor/commands/verasic-fusion.md` | `/verasic-fusion` slash command (installed to `.cursor/commands/`) |
+| `.cursor/commands/verasic-fusion.md` | `/verasic-fusion` slash command (after `setup.sh`) |
 
 ## Human workflow
 
@@ -68,7 +68,7 @@ No default models. No default mode.
 
 Readonly decision support — no edits, commits, or deploys.
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
 
 ## Extend
 

@@ -3,7 +3,7 @@ name: verasic-bugbot
 description: Bugbot-like local code review. Use when the user asks to "review changes", "bugbot review", "check my diff", "find bugs in my changes", or after completing a significant code change and wanting verification before commit/PR.
 ---
 
-Security: see `references/scanner-notes.md` and repo root `SECURITY.md` for expected scanner signals and trust model.
+Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md) for expected scanner signals and trust model.
 
 # Verasic Bugbot — Local Review Orchestration
 

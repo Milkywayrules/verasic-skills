@@ -18,7 +18,7 @@ live under `.cursor/skills/verasic-github-env/`.
 | `scripts/check-gh.sh`                       | Verify `GH_TOKEN` + `gh auth status`                  |
 | `scripts/test-regression.sh`                | Regression tests (local; no CI)                       |
 | `SKILL.md`                                  | Auto-trigger + orchestration                          |
-| `../../cursor/rules/verasic-github-env.mdc` | Always-applied digest for `gh` commands               |
+| `.cursor/rules/verasic-github-env.mdc` | Always-applied digest for `gh` commands (after `setup.sh`) |
 
 ## Install into a project
 
@@ -45,7 +45,7 @@ Or in Cursor: `/verasic-setup-github`
 Then:
 
 1. Create a fine-grained PAT scoped to this repo only (see setup-protocol.md).
-2. `cp .github-agent.local.example .github-agent.local` — set `GH_TOKEN`, `chmod 600`.
+2. Set `GH_TOKEN` in `.github-agent.local` — bootstrap scaffolds it if missing (`chmod 600`). Fallback if bootstrap was skipped: `cp .github-agent.local.example .github-agent.local`.
 3. `direnv allow` (optional).
 4. `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh`
 
@@ -65,7 +65,7 @@ Legacy: `load-gh-env.sh` still reads `GH_*` lines from `.env.local` if present.
 - `/verasic-setup-github` — bootstrap current repo
 - Regression: `bash .cursor/skills/verasic-github-env/scripts/test-regression.sh`
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
 
 ## Extend per repo
 

@@ -28,4 +28,4 @@
 - **Deterministic, small hook** — No network, no secret access; regex/strip + style checks
   only.
 
-See root [SECURITY.md](../../../SECURITY.md).
+See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md).

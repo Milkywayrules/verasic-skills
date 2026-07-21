@@ -63,7 +63,7 @@ Skill-only (any agent):
 npx skills add Milkywayrules/verasic-skills
 ```
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · root [SECURITY.md](../../../SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
 
 ## Regression tests
 
