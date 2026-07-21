@@ -198,6 +198,33 @@ assert_grep "$SKILL_ROOT/templates/source-ledger.yaml" 'tier:' 'source-ledger ti
 assert_grep "$SKILL_ROOT/templates/source-ledger.yaml" 'excerpt' 'source-ledger excerpt field'
 assert_grep "$SKILL_ROOT/templates/source-ledger.yaml" 'claim_ids' 'source-ledger claim_ids field'
 
+# --- Publish gate ---
+assert_file "$SKILL_ROOT/integrity.txt" 'integrity.txt exists'
+assert_file "$SKILL_ROOT/integrity.sha256" 'integrity.sha256 exists'
+assert_file "$SKILL_ROOT/references/use-cases.md" 'use-cases.md exists'
+assert_file "$SKILL_ROOT/scripts/test-exhaustive.sh" 'test-exhaustive.sh exists'
+assert_file "$SKILL_ROOT/scripts/test-exhaustive-protocol.sh" 'test-exhaustive-protocol.sh exists'
+
+hash_tmp="$(mktemp)"
+while IFS= read -r line || [[ -n "$line" ]]; do
+  stripped="${line%%#*}"
+  stripped="${stripped//[[:space:]]/}"
+  [[ -z "$stripped" ]] && continue
+  [[ "$stripped" == "integrity.sha256" ]] && continue
+  (cd "$SKILL_ROOT" && sha256sum "$stripped") >> "$hash_tmp"
+done < "$SKILL_ROOT/integrity.txt"
+if cmp -s "$hash_tmp" "$SKILL_ROOT/integrity.sha256"; then
+  ok 'integrity.sha256 matches integrity.txt entries'
+else
+  bad 'integrity.sha256 matches integrity.txt entries'
+fi
+rm -f "$hash_tmp"
+
+assert_grep "$SKILL_ROOT/references/use-cases.md" 'UC-0' 'use-cases UC-0 help'
+assert_grep "$SKILL_ROOT/references/use-cases.md" 'UC-7' 'use-cases UC-7 degraded'
+assert_grep "$SKILL_ROOT/references/use-cases.md" 'Publish gate' 'use-cases publish gate checklist'
+
+
 # --- Cursor command ---
 if [[ -n "$COMMAND_FILE" ]]; then
   assert_file "$COMMAND_FILE" 'cursor command verasic-deep-research.md'

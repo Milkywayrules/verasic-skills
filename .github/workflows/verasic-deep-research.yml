@@ -1,0 +1,23 @@
+name: verasic-deep-research
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-deep-research/**'
+      - 'cursor/commands/verasic-deep-research.md'
+      - '.github/workflows/verasic-deep-research.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-deep-research/**'
+      - 'cursor/commands/verasic-deep-research.md'
+      - '.github/workflows/verasic-deep-research.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: structural regression
+        run: bash skills/verasic-deep-research/scripts/test-regression.sh
+      - name: protocol exhaustive
+        run: bash skills/verasic-deep-research/scripts/test-exhaustive-protocol.sh

@@ -98,6 +98,22 @@ Skill-only (any agent): `npx skills add Milkywayrules/verasic-skills`
 
 Then: `/verasic-init` or `bash .cursor/skills/verasic-init/scripts/init.sh`
 
+## Testing / Publish gate
+
+From the verasic-skills repo root:
+
+```bash
+bash skills/verasic-deep-research/scripts/test-exhaustive.sh
+```
+
+After `setup.sh` in a consumer project:
+
+```bash
+bash .cursor/skills/verasic-deep-research/scripts/test-exhaustive.sh
+```
+
+Live harness checklist: `references/use-cases.md` (UC-0 through UC-7).
+
 ## Known limits
 
 - **Cursor-first** — parallel T2 spawn uses the Task tool; other agents run degraded sequential after confirmation.

@@ -1,0 +1,12 @@
+# required paths relative to skill dir
+SKILL.md
+VERSION
+references/research-protocol.md
+references/helper.md
+references/citation-protocol.md
+references/confidence-rubric.md
+references/drill-protocol.md
+templates/deep-research-brief.md
+templates/source-ledger.yaml
+scripts/test-regression.sh
+integrity.sha256
