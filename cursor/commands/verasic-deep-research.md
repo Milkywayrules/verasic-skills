@@ -80,7 +80,7 @@ T3 must not synthesize, merge ledger, spawn subagents, or score confidence.
 ## Deliver
 
 - **chat-only** — full brief sections in chat; headline + per-claim 5-axis in `## confidence`.
-- **chat+files** — chat summary + write `./docs/research/<slug>/deep-research-brief.md` and ledger files.
+- **chat+files** — chat summary + write `./docs/research/<slug>/deep-research-brief.md` and ledger files in the **same turn** (Agent mode). Do not end with chat-only and write files later unless I explicitly ask for staged delivery.
 - **files-only** — write files; chat gets short pointer only.
 
 Hard rules: verify-before-cite; no cite without ledger row; refuse insider/illegal sources.

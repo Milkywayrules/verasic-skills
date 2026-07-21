@@ -111,6 +111,10 @@ the user chose `chat+files` or `files-only`. Say so plainly and offer Agent mode
 When files are allowed, write under `./docs/research/<slug>/` unless the user gives
 another path. `<slug>` is a kebab-case short name derived from the question.
 
+**Agent mode + `chat+files`:** in the same turn before ending the response, deliver the chat summary
+**and** write the research files under the output path. Do not deliver chat-only first and defer file
+writes to a later turn unless the user explicitly asks for staged delivery.
+
 ## Pipeline
 
 ```text
@@ -275,6 +279,9 @@ Use sections from `templates/deep-research-brief.md` (required order):
 Chat deliverable: always show **headline confidence** + **full 5-axis per claim** in
 `## confidence` (see rubric). When `chat+files`, chat contains summary + headline;
 files hold full brief.
+
+**Same-turn delivery (Agent mode):** when `output` is `chat+files` and file writes are allowed, finish
+the turn with both the chat summary and the written files — not chat-only now with files promised later.
 
 ## Degraded path
 

@@ -27,9 +27,10 @@ Never duplicate the protocol in chat — follow it.
 
 1. **Help path** — if the user invokes deep research with no question or asks for help, relay
    `references/helper.md` (adjust path prefix for install root).
-2. **Pre-flight gate** — require question, `depth`, and `output`. No defaults on output format
-   or source boundary. Collect path when files are requested. Apply honesty notices per protocol
-   (see `references/helper.md` ## honesty).
+2. **Pre-flight gate** — require **all** pre-flight fields before any fetch or spawn:
+   **question**, `depth`, `output`, `source-boundary`, `languages`. **No defaults** on `output` or
+   `source-boundary` (recommend `public-standard` only after asking). Collect output path when
+   `output` includes files. Apply honesty notices per protocol (see `references/helper.md` ## honesty).
 3. **Read protocol** — read `references/research-protocol.md`, active `workflows/<depth>.md`, and supporting references before
    any fetch or spawn.
 4. **Dispatch T2/T3 per tier** — T1 main orchestrates; spawn T2 workers per depth preset via
