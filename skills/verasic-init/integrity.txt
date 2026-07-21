@@ -1,0 +1,5 @@
+# required paths relative to skill dir
+SKILL.md
+manifest.txt
+scripts/init.sh
+references/init-protocol.md

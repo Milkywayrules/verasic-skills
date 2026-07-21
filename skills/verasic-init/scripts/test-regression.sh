@@ -4,7 +4,6 @@ set -euo pipefail
 # Disposable regression tests for verasic-init. Creates temp repos in mktemp
 # dirs, never touches the source tree, cleans up on exit.
 
-# hermetic: ignore credentials inherited from the calling shell
 unset GH_TOKEN GH_REPO GITHUB_TOKEN 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,8 +19,10 @@ bad() { echo "FAIL: $1"; fail=$((fail + 1)); }
 
 make_repo() {
   local dir="$1"; shift
-  mkdir -p "$dir/.cursor/skills"
-  for s in "$@"; do
+  local roots=("$@")
+  local s root
+  mkdir -p "$dir/.cursor/skills" "$dir/.agents/skills"
+  for s in "${roots[@]}"; do
     cp -r "$SKILLS_SRC/$s" "$dir/.cursor/skills/"
   done
   git -C "$dir" init -q -b main
@@ -41,11 +42,13 @@ row 'verasic-github-env' 'wired' "$out" && ok "github-env wired" || bad "github-
 row 'verasic-git-commits' 'wired' "$out" && ok "git-commits wired" || bad "git-commits wired"
 row 'verasic-bugbot' 'ready' "$out" && ok "bugbot ready" || bad "bugbot ready"
 row 'verasic-fusion' 'ready' "$out" && ok "fusion ready" || bad "fusion ready"
+grep -q 'skill roots' <<<"$out" && ok "skill roots section" || bad "skill roots section"
+grep -q 'actions' <<<"$out" && ok "actions section" || bad "actions section"
 [[ -f "$R/.envrc" ]] && ok ".envrc created" || bad ".envrc created"
+[[ -f "$R/.github-agent.local" ]] && ok ".github-agent.local scaffolded" || bad ".github-agent.local scaffolded"
 hooks_path="$(git -C "$R" config core.hooksPath || true)"
 [[ "$hooks_path" == ".cursor/skills/verasic-git-commits/hooks" ]] && ok "hooksPath set" || bad "hooksPath set ($hooks_path)"
 
-# hook actually strips a trailer end-to-end
 ( cd "$R" && echo x > f.txt && git add f.txt && \
   git -c user.email=t@t -c user.name=t commit -q -m $'test: probe hook\n\nCo-authored-by: Bot <b@b.co>' )
 if git -C "$R" log -1 --format=%B | grep -qiE '^co-authored-by:'; then
@@ -64,34 +67,28 @@ out3="$(cd "$R" && bash "$INIT_REL" --skills verasic-bugbot)"
 row 'verasic-github-env' 'not selected' "$out3" && ok "cherry-pick skips github-env" || bad "cherry-pick skips github-env"
 row 'verasic-bugbot' 'ready' "$out3" && ok "cherry-pick keeps bugbot" || bad "cherry-pick keeps bugbot"
 
-# --- cherry-pick tolerates whitespace in --skills ---
 out3b="$(cd "$R" && bash "$INIT_REL" --skills ' verasic-bugbot , verasic-git-commits ')"
 row 'verasic-bugbot' 'ready' "$out3b" && ok "whitespace --skills selects" || bad "whitespace --skills selects"
 grep -q '0 unknown' <<<"$out3b" && ok "whitespace --skills no ghost rows" || bad "whitespace --skills no ghost rows"
 
-# --- empty --skills rejected ---
 rc=0
 (cd "$R" && bash "$INIT_REL" --skills= >/dev/null 2>&1) || rc=$?
 [[ "$rc" -eq 2 ]] && ok "empty --skills rejected" || bad "empty --skills rejected (rc=$rc)"
 
-# --- all-unknown selection: reported and exits 2 ---
 rc=0
 out4="$(cd "$R" && bash "$INIT_REL" --skills nope)" || rc=$?
 row 'nope' 'unknown' "$out4" && ok "unknown skill reported" || bad "unknown skill reported"
 grep -q '1 unknown' <<<"$out4" && ok "unknown counted in tally" || bad "unknown counted in tally"
 [[ "$rc" -eq 2 ]] && ok "all-unknown selection exits 2" || bad "all-unknown selection exits 2 (rc=$rc)"
 
-# --- mixed selection (one real, one typo) still succeeds ---
 rc=0
 out4b="$(cd "$R" && bash "$INIT_REL" --skills verasic-bugbot,nope)" || rc=$?
 [[ "$rc" -eq 0 ]] && ok "mixed selection exits 0" || bad "mixed selection exits 0 (rc=$rc)"
 row 'verasic-bugbot' 'ready' "$out4b" && ok "mixed selection wires real skill" || bad "mixed selection wires real skill"
 
-# --- init itself is in the manifest ---
 out4c="$(cd "$R" && bash "$INIT_REL" --skills verasic-init)"
 row 'verasic-init' 'ready' "$out4c" && ok "verasic-init selectable in manifest" || bad "verasic-init selectable in manifest"
 
-# --- tokened origin URL never printed ---
 R1b="$TMP/tokened"
 make_repo "$R1b" verasic-init verasic-bugbot
 git -C "$R1b" remote set-url origin https://x-access-token:ghp_FAKESECRET@github.com/acme/w.git
@@ -99,29 +96,35 @@ outT="$(cd "$R1b" && bash "$INIT_REL")"
 grep -q 'ghp_FAKESECRET' <<<"$outT" && bad "origin credentials stripped" || ok "origin credentials stripped"
 grep -q 'https://github.com/acme/w.git' <<<"$outT" && ok "origin still shown" || bad "origin still shown"
 
-# --- partial install (github-env missing) ---
 R2="$TMP/partial"
 make_repo "$R2" verasic-init verasic-bugbot
 out5="$(cd "$R2" && bash "$INIT_REL")"
 row 'verasic-github-env' 'not installed' "$out5" && ok "missing skill reported" || bad "missing skill reported"
 
-# --- installed skill with missing wire script → FAILED, exit 1 ---
+# --- gut missing file -> broken install ---
+R2a="$TMP/gut"
+make_repo "$R2a" verasic-init verasic-github-env
+rm "$R2a/.cursor/skills/verasic-github-env/SKILL.md"
+rc=0
+out5a="$(cd "$R2a" && bash "$INIT_REL" 2>/dev/null)" || rc=$?
+[[ "$rc" -eq 1 ]] && ok "gut missing file exits 1" || bad "gut missing file exits 1 (rc=$rc)"
+row 'verasic-github-env' 'broken install' "$out5a" && ok "gut missing file broken install row" || bad "gut missing file broken install row"
+
+# --- installed skill with missing wire script -> broken install ---
 R2b="$TMP/broken"
 make_repo "$R2b" verasic-init verasic-github-env
 rm "$R2b/.cursor/skills/verasic-github-env/scripts/bootstrap.sh"
 rc=0
 out5b="$(cd "$R2b" && bash "$INIT_REL" 2>/dev/null)" || rc=$?
 [[ "$rc" -eq 1 ]] && ok "broken install exits 1" || bad "broken install exits 1 (rc=$rc)"
-row 'verasic-github-env' 'FAILED' "$out5b" && ok "broken install FAILED row" || bad "broken install FAILED row"
+row 'verasic-github-env' 'broken install' "$out5b" && ok "broken install row" || bad "broken install row"
 
-# --- manifest without trailing newline keeps its last entry ---
 R2c="$TMP/notrail"
 make_repo "$R2c" verasic-init verasic-bugbot
 printf '%s' 'verasic-bugbot|-|local review' > "$R2c/.cursor/skills/verasic-init/manifest.txt"
 out5c="$(cd "$R2c" && bash "$INIT_REL")"
 row 'verasic-bugbot' 'ready' "$out5c" && ok "manifest last line without newline kept" || bad "manifest last line without newline kept"
 
-# --- lefthook repo → action needed, exit 0 ---
 R3="$TMP/lefthook"
 make_repo "$R3" verasic-init verasic-git-commits
 printf 'pre-commit:\n  commands:\n    lint:\n      run: true\n' > "$R3/lefthook.yml"
@@ -132,7 +135,6 @@ row 'verasic-git-commits' 'action needed' "$out6" && ok "lefthook action needed"
 grep -q 'lefthook detected' <<<"$out6" && ok "lefthook snippet shown" || bad "lefthook snippet shown"
 [[ -z "$(git -C "$R3" config core.hooksPath || true)" ]] && ok "lefthook hooksPath untouched" || bad "lefthook hooksPath untouched"
 
-# --- pre-existing global hooksPath is respected, not overridden ---
 R3b="$TMP/globalhooks"
 make_repo "$R3b" verasic-init verasic-git-commits
 mkdir -p "$TMP/managed-hooks" "$TMP/fakehome"
@@ -143,14 +145,54 @@ out6b="$(cd "$R3b" && HOME="$TMP/fakehome" git config --global core.hooksPath "$
 row 'verasic-git-commits' 'action needed' "$out6b" && ok "global hooksPath action needed" || bad "global hooksPath action needed"
 [[ -z "$(git -C "$R3b" config --local core.hooksPath || true)" ]] && ok "global hooksPath not overridden locally" || bad "global hooksPath not overridden locally"
 
-# --- list mode changes nothing ---
+# --- list mode: integrity ok ---
 R4="$TMP/list"
 make_repo "$R4" verasic-init verasic-github-env
 out7="$(cd "$R4" && bash "$INIT_REL" --list)"
 grep -q 'no changes made' <<<"$out7" && ok "list banner" || bad "list banner"
-row 'verasic-github-env' 'installed' "$out7" && ok "list shows installed" || bad "list shows installed"
+row 'verasic-github-env' 'ok' "$out7" && ok "list shows ok when integrity passes" || bad "list shows ok when integrity passes"
 grep -q 'wired' <<<"$out7" && bad "list tally has no wired" || ok "list tally has no wired"
 [[ ! -f "$R4/.envrc" ]] && ok "list changes nothing" || bad "list changes nothing"
+
+# --- list mode: integrity failure ---
+R4b="$TMP/list-broken"
+make_repo "$R4b" verasic-init verasic-github-env
+rm "$R4b/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
+rc=0
+out7b="$(cd "$R4b" && bash "$INIT_REL" --list 2>&1)" || rc=$?
+row 'verasic-github-env' 'broken install' "$out7b" && ok "list shows broken install" || bad "list shows broken install"
+[[ "$rc" -eq 1 ]] && ok "list broken install exits 1" || bad "list broken install exits 1 (rc=$rc)"
+
+# --- dual roots discovery ---
+R5d="$TMP/dual"
+mkdir -p "$R5d/.cursor/skills" "$R5d/.agents/skills"
+cp -r "$SKILLS_SRC/verasic-init" "$R5d/.agents/skills/"
+cp -r "$SKILLS_SRC/verasic-bugbot" "$R5d/.cursor/skills/"
+git -C "$R5d" init -q -b main
+git -C "$R5d" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: seed"
+git -C "$R5d" remote add origin git@github.com:Milkywayrules/usecharator.git
+outDual="$(cd "$R5d" && bash .agents/skills/verasic-init/scripts/init.sh --list)"
+grep -q '.agents/skills' <<<"$outDual" && ok "dual roots lists .agents/skills" || bad "dual roots lists .agents/skills"
+grep -q '.cursor/skills' <<<"$outDual" && ok "dual roots lists .cursor/skills" || bad "dual roots lists .cursor/skills"
+
+# --- external invoker + repo local skills ---
+R5e="$TMP/external"
+make_repo "$R5e" verasic-init verasic-bugbot
+EXTERNAL_INIT="$SKILLS_SRC/verasic-init/scripts/init.sh"
+outExt="$(cd "$R5e" && bash "$EXTERNAL_INIT" --list)"
+grep -q 'invoked from outside repo' <<<"$outExt" && ok "external invoker warning" || bad "external invoker warning"
+row 'verasic-bugbot' 'ready' "$outExt" && ok "external invoker uses repo skills" || bad "external invoker uses repo skills"
+grep -q 'skills root' <<<"$outExt" && grep -q "$R5e/.cursor/skills" <<<"$outExt" && ok "external invoker repo-local root" || bad "external invoker repo-local root"
+
+# --- external invoker, no local init -> exit 1 ---
+R5f="$TMP/no-local"
+mkdir -p "$R5f/.cursor/skills"
+cp -r "$SKILLS_SRC/verasic-bugbot" "$R5f/.cursor/skills/"
+git -C "$R5f" init -q -b main
+git -C "$R5f" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: seed"
+rc=0
+(cd "$R5f" && bash "$EXTERNAL_INIT" >/dev/null 2>&1) || rc=$?
+[[ "$rc" -eq 1 ]] && ok "no local init rejected" || bad "no local init rejected (rc=$rc)"
 
 # --- not a git repo ---
 R5="$TMP/nogit"

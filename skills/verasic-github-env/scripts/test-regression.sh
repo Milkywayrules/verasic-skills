@@ -97,6 +97,7 @@ assert \
   "bash -c 'set +eu; export GH_TOKEN=preset; source .cursor/skills/verasic-github-env/scripts/load-gh-env.sh; [[ \"\$GH_TOKEN\" == preset ]]'"
 
 printf '%s\n' '.env*' > .gitignore
+printf '%s\n' 'GH_TOKEN=' 'GH_REPO=Milkywayrules/usecharator' > .github-agent.local
 bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null
 if git check-ignore -q .env.example 2>/dev/null; then
   echo "FAIL: .env.example still ignored after .env* bootstrap"
@@ -264,6 +265,115 @@ if [[ "$warn_out" == *"chmod 600"* ]]; then
   pass=$((pass + 1))
 else
   echo "FAIL: check-gh missing chmod warning for mode 644"
+  fail=$((fail + 1))
+fi
+
+# bootstrap auto-chmod on loose credential file
+mkdir -p "$TMP/auto-chmod"
+setup_repo "$TMP/auto-chmod"
+printf '%s\n' 'GH_TOKEN=' 'GH_REPO=acme/x' > .github-agent.local
+chmod 644 .github-agent.local
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null 2>&1 || true
+mode="$(stat -c '%a' .github-agent.local 2>/dev/null || stat -f '%Lp' .github-agent.local)"
+if [[ "$mode" == 600 || "$mode" == 400 ]]; then
+  echo "PASS: bootstrap auto-chmod credential file"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap auto-chmod (mode=$mode)"
+  fail=$((fail + 1))
+fi
+
+# bootstrap --no-chmod preserves loose mode
+mkdir -p "$TMP/no-chmod"
+setup_repo "$TMP/no-chmod"
+printf '%s\n' 'GH_TOKEN=' 'GH_REPO=acme/x' > .github-agent.local
+chmod 644 .github-agent.local
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh --no-chmod >/dev/null 2>&1 || true
+mode="$(stat -c '%a' .github-agent.local 2>/dev/null || stat -f '%Lp' .github-agent.local)"
+if [[ "$mode" == 644 ]]; then
+  echo "PASS: bootstrap --no-chmod skips chmod"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap --no-chmod should preserve 644 (mode=$mode)"
+  fail=$((fail + 1))
+fi
+
+# bootstrap scaffolds .github-agent.local when missing
+mkdir -p "$TMP/scaffold"
+setup_repo "$TMP/scaffold"
+bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh >/dev/null 2>&1 || true
+if [[ -f .github-agent.local ]]; then
+  echo "PASS: bootstrap scaffolds .github-agent.local"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap scaffolds .github-agent.local"
+  fail=$((fail + 1))
+fi
+
+# bootstrap conditional verify skip without token
+mkdir -p "$TMP/verify-skip"
+setup_repo "$TMP/verify-skip"
+out="$(bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh 2>&1 || true)"
+if [[ "$out" == *"verify: skipped (no token)"* ]]; then
+  echo "PASS: bootstrap verify skipped without token"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap verify skip message missing"
+  fail=$((fail + 1))
+fi
+
+# bootstrap conditional verify run with fake token exits 3
+mkdir -p "$TMP/verify-fail"
+setup_repo "$TMP/verify-fail"
+printf '%s\n' 'GH_TOKEN=fake_token_for_test' 'GH_REPO=Milkywayrules/usecharator' > .github-agent.local
+chmod 600 .github-agent.local
+rc=0
+out="$(bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh 2>&1)" || rc=$?
+if [[ "$rc" -eq 3 && "$out" == *"verify: failed"* ]]; then
+  echo "PASS: bootstrap verify fails on fake token (exit 3)"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap verify fake token (rc=$rc)"
+  fail=$((fail + 1))
+fi
+
+# bootstrap reports credential source
+mkdir -p "$TMP/cred-src"
+setup_repo "$TMP/cred-src"
+printf '%s\n' 'GH_TOKEN=abc' 'GH_REPO=acme/x' > .github-agent.local
+chmod 600 .github-agent.local
+out="$(bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh 2>&1 || true)"
+if [[ "$out" == *"credential source: .github-agent.local"* ]]; then
+  echo "PASS: bootstrap reports credential source"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap credential source line missing"
+  fail=$((fail + 1))
+fi
+
+# migration nudge when GH_* only in .env.local
+mkdir -p "$TMP/migrate"
+setup_repo "$TMP/migrate"
+printf '%s\n' 'GH_TOKEN=legacy' 'GH_REPO=acme/x' > .env.local
+chmod 600 .env.local
+out="$(bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh 2>&1 || true)"
+if [[ "$out" == *"migration nudge"* && "$out" == *"credential source: .env.local"* ]]; then
+  echo "PASS: bootstrap migration nudge for .env.local"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap migration nudge missing"
+  fail=$((fail + 1))
+fi
+
+# bootstrap prints step lines
+mkdir -p "$TMP/steps"
+setup_repo "$TMP/steps"
+out="$(bash .cursor/skills/verasic-github-env/scripts/bootstrap.sh 2>&1 || true)"
+if [[ "$out" == *"bootstrap: step:"* ]]; then
+  echo "PASS: bootstrap prints step lines"
+  pass=$((pass + 1))
+else
+  echo "FAIL: bootstrap step lines missing"
   fail=$((fail + 1))
 fi
 

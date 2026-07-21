@@ -1,0 +1,5 @@
+# required paths relative to skill dir
+SKILL.md
+scripts/wire-hook.sh
+hooks/commit-msg
+references/commit-protocol.md

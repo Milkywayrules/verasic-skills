@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+NO_CHMOD=false
+while (($#)); do
+  case "$1" in
+    --no-chmod) NO_CHMOD=true; shift ;;
+    --help|-h)
+      cat <<'EOF'
+bootstrap — wire GitHub agent harness files into this repository
+
+Usage:
+  bootstrap.sh           scaffold env files, gitignore, optional verify
+  bootstrap.sh --no-chmod  skip auto chmod on credential files
+EOF
+      exit 0
+      ;;
+    *) echo "bootstrap: unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "bootstrap: must run inside a git repository" >&2
   exit 1
@@ -11,24 +29,36 @@ cd "$ROOT"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CHECK_GH="$SCRIPT_DIR/check-gh.sh"
+LOAD_GH="$SCRIPT_DIR/load-gh-env.sh"
 
-# display path for messages — relative when installed inside the repo
 SKILL_DISPLAY="$SKILL_ROOT"
 if [[ "$SKILL_ROOT" == "$ROOT/"* ]]; then
   SKILL_DISPLAY="${SKILL_ROOT#"$ROOT"/}"
 fi
 
+step_ran()    { echo "bootstrap: step: ran $*"; }
+step_skipped(){ echo "bootstrap: step: skipped $*"; }
+step_cannot() { echo "bootstrap: step: cannot $*"; }
+
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/parse-gh-repo.sh"
 
+origin_ok=true
 if ! origin_url="$(git remote get-url origin 2>/dev/null)"; then
-  echo "bootstrap: no git origin — set GH_REPO manually in .github-agent.local" >&2
+  echo "bootstrap: warning — no git origin; set GH_REPO manually in .github-agent.local" >&2
+  origin_ok=false
   GH_REPO="owner/repo"
 else
   if ! GH_REPO="$(verasic_parse_gh_repo_from_remote "$origin_url")"; then
-    echo "bootstrap: could not parse github.com owner/repo from origin — set GH_REPO manually" >&2
+    echo "bootstrap: warning — could not parse github.com owner/repo from origin — set GH_REPO manually" >&2
+    origin_ok=false
     GH_REPO="owner/repo"
   fi
+fi
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "bootstrap: warning — gh CLI not on PATH — install from https://cli.github.com" >&2
 fi
 
 file_has_line() {
@@ -36,18 +66,32 @@ file_has_line() {
   [[ -f "$file" ]] && grep -qE "$pattern" "$file"
 }
 
+secure_credential_file() {
+  local f="$1"
+  [[ -f "$f" ]] || return 0
+  local mode
+  mode="$(stat -c '%a' "$f" 2>/dev/null || stat -f '%Lp' "$f" 2>/dev/null || true)"
+  [[ -z "$mode" || "$mode" == 600 || "$mode" == 400 ]] && return 0
+  if $NO_CHMOD; then
+    step_skipped "chmod 600 $f (--no-chmod)"
+  else
+    chmod 600 "$f"
+    step_ran "chmod 600 $f"
+  fi
+}
+
 ensure_envrc() {
   local marker='dotenv_if_exists .github-agent.local'
   if [[ ! -f .envrc ]]; then
     cp "$SKILL_ROOT/templates/.envrc" .envrc
-    echo "bootstrap: wrote .envrc"
+    step_ran "write .envrc"
     return
   fi
   if grep -qF "$marker" .envrc; then
-    echo "bootstrap: .envrc already loads .github-agent.local — skipped"
+    step_skipped ".envrc loader (already present)"
   else
     printf '\n%s\n' "$marker" >> .envrc
-    echo "bootstrap: appended .github-agent.local loader to .envrc"
+    step_ran "append .envrc loader"
   fi
 }
 
@@ -60,7 +104,7 @@ GH_REPO=${GH_REPO}"
 ensure_env_example() {
   if [[ ! -f .env.example ]]; then
     printf '%s\n' "$ENV_SNIPPET" > .env.example
-    echo "bootstrap: created .env.example with GitHub block"
+    step_ran "create .env.example with GH block"
     return
   fi
 
@@ -71,27 +115,21 @@ ensure_env_example() {
   file_has_line .env.example '^GH_REPO=' && has_repo=true
 
   if $has_token && $has_repo; then
-    echo "bootstrap: .env.example already documents GH_TOKEN and GH_REPO — skipped"
+    step_skipped ".env.example GH block (complete)"
     return
   fi
 
   if $has_token || $has_repo; then
-    # append only the missing line — re-appending the whole block would duplicate the other var
     $has_token || printf 'GH_TOKEN=\n' >> .env.example
     $has_repo  || printf 'GH_REPO=%s\n' "$GH_REPO" >> .env.example
-    echo "bootstrap: completed GH block in .env.example"
+    step_ran "complete .env.example GH block"
     return
   fi
 
   printf '\n%s\n' "$ENV_SNIPPET" >> .env.example
-  echo "bootstrap: appended GitHub block to .env.example"
+  step_ran "append .env.example GH block"
 }
 
-# true only when the file is actually ignored AND the deciding rule lives in a
-# repo-committed .gitignore — a machine-local global excludesfile or
-# .git/info/exclude does not protect other clones, and a negation rule
-# (`!.env.local`) makes check-ignore --verbose match while the file stays
-# committable, so the quiet ignored-status check must come first
 repo_gitignored() {
   git check-ignore -q -- "$1" 2>/dev/null || return 1
   local src
@@ -108,7 +146,7 @@ ensure_gitignore() {
 !.env.example
 !.envrc
 EOF
-    echo "bootstrap: created .gitignore with agent secret patterns"
+    step_ran "create .gitignore"
     return
   fi
 
@@ -135,24 +173,36 @@ EOF
   fi
 
   if $changed; then
-    echo "bootstrap: updated .gitignore for agent secrets and committable templates"
+    step_ran "update .gitignore for agent secrets"
   else
-    echo "bootstrap: .gitignore already covers agent secrets — skipped"
+    step_skipped ".gitignore (already covers secrets)"
   fi
 }
 
 ensure_github_agent_example() {
   local dest=".github-agent.local.example"
   if [[ -f "$dest" ]]; then
-    echo "bootstrap: $dest already exists — skipped"
+    step_skipped "$dest (exists)"
     return
   fi
   sed "s|owner/repo|${GH_REPO}|" "$SKILL_ROOT/templates/github-agent.local.example" > "$dest"
-  echo "bootstrap: wrote $dest"
+  step_ran "write $dest"
 }
 
-# returns 1 when secrets are tracked so bootstrap can exit 3 (action needed)
-# instead of reporting a clean wire — a committed token is a rotation event
+ensure_github_agent_local() {
+  if [[ -f .github-agent.local ]]; then
+    step_skipped ".github-agent.local (exists)"
+    return
+  fi
+  if [[ -f .github-agent.local.example ]]; then
+    cp .github-agent.local.example .github-agent.local
+  else
+    sed "s|owner/repo|${GH_REPO}|" "$SKILL_ROOT/templates/github-agent.local.example" > .github-agent.local
+  fi
+  chmod 600 .github-agent.local 2>/dev/null || true
+  step_ran "scaffold .github-agent.local (empty GH_TOKEN)"
+}
+
 check_tracked_secrets() {
   local tracked=()
   while IFS= read -r path; do
@@ -180,24 +230,90 @@ warn_committable_templates() {
   fi
 }
 
+report_credential_source() {
+  local agent_has=false env_has=false src="(none)"
+  if [[ -f .github-agent.local ]] && grep -qE '^[[:space:]]*(export[[:space:]]+)?GH_TOKEN=.+$' .github-agent.local 2>/dev/null; then
+    agent_has=true
+    src=".github-agent.local"
+  fi
+  if [[ -f .env.local ]] && grep -qE '^[[:space:]]*(export[[:space:]]+)?GH_TOKEN=.+$' .env.local 2>/dev/null; then
+    env_has=true
+    if ! $agent_has; then
+      src=".env.local"
+      echo "bootstrap: migration nudge — GH_* found only in .env.local; prefer .github-agent.local for the PAT" >&2
+    fi
+  fi
+  if [[ -f .github-agent.local ]] && grep -qE '^[[:space:]]*(export[[:space:]]+)?GH_REPO=' .github-agent.local 2>/dev/null; then
+    [[ "$src" == "(none)" ]] && src=".github-agent.local"
+  elif [[ -f .env.local ]] && grep -qE '^[[:space:]]*(export[[:space:]]+)?GH_REPO=' .env.local 2>/dev/null; then
+    [[ "$src" == "(none)" ]] && src=".env.local"
+  fi
+  echo "bootstrap: credential source: $src"
+}
+
+run_verify() {
+  if [[ ! -f "$CHECK_GH" ]]; then
+    echo "bootstrap: verify: skipped (check-gh missing)"
+    step_cannot "verify (check-gh.sh missing)"
+    return 0
+  fi
+  # shellcheck disable=SC1091
+  source "$LOAD_GH"
+  if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "bootstrap: verify: skipped (no token)"
+    step_skipped "verify (GH_TOKEN unset)"
+    return 0
+  fi
+  step_ran "verify (check-gh.sh)"
+  if bash "$CHECK_GH" >&2; then
+    echo "bootstrap: verify: ok"
+    return 0
+  fi
+  echo "bootstrap: verify: failed"
+  return 1
+}
+
 ensure_envrc
 ensure_env_example
 ensure_gitignore
 ensure_github_agent_example
+ensure_github_agent_local
+secure_credential_file .github-agent.local
+secure_credential_file .env.local
+
 secrets_clean=true
 check_tracked_secrets || secrets_clean=false
 warn_committable_templates
+report_credential_source
+
+PAT_URL="https://github.com/settings/tokens?type=beta"
+VERIFY_STEP="  3. bash ${SKILL_DISPLAY}/scripts/check-gh.sh"
+if command -v direnv >/dev/null 2>&1; then
+  DIRENV_STEP="  3. direnv allow  # loads .github-agent.local via .envrc"
+  VERIFY_STEP="  4. bash ${SKILL_DISPLAY}/scripts/check-gh.sh"
+else
+  step_skipped "direnv hint (direnv not on PATH)"
+  DIRENV_STEP=""
+fi
 
 cat <<EOF
 
 Next steps:
   1. Create fine-grained PAT scoped to: ${GH_REPO}
-  2. cp .github-agent.local.example .github-agent.local  # set GH_TOKEN (chmod 600)
-  3. direnv allow  # optional, if using direnv
-  4. bash ${SKILL_DISPLAY}/scripts/check-gh.sh
+     ${PAT_URL}
+  2. Set GH_TOKEN in .github-agent.local (chmod 600) — template already scaffolded if missing
+${DIRENV_STEP:+$DIRENV_STEP$'\n'}${VERIFY_STEP}
 
 Full spec: ${SKILL_DISPLAY}/references/setup-protocol.md
 EOF
 
-# exit 3 = manual step required (verasic-init reports it as "action needed")
-$secrets_clean || exit 3
+verify_rc=0
+run_verify || verify_rc=$?
+
+if ! $secrets_clean; then
+  exit 3
+fi
+if ((verify_rc != 0)); then
+  exit 3
+fi
+exit 0
