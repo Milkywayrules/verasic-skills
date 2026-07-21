@@ -215,7 +215,7 @@ Templates live in `templates/<slug>.md`. The slug is what the user passes as
 | `board-verdict`         | BOD / leadership yes-no vote         |
 | `rfc-review`            | Spec / ADR / proposal review         |
 | `tradeoff-matrix`       | Architecture / option comparison     |
-| `research-brief`        | Landscape / exploration              |
+| `brief-research`        | Multi-model opinion brief — not verified deep-research ledger |
 | `risk-register`         | Launch / security / compliance risks |
 | `devils-advocate`       | Stress-test by arguing against       |
 | `premortem`             | Assume failure, work backward        |

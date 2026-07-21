@@ -32,7 +32,7 @@ acknowledge: proceed with N models    # only when roster exceeds hard cap (6)
 | `board-verdict`         | BOD yes/no vote                             |
 | `rfc-review`            | Spec / proposal review                      |
 | `tradeoff-matrix`       | Option comparison with matrix               |
-| `research-brief`        | Landscape / research                        |
+| `brief-research`        | Multi-model opinion brief — not `verasic-deep-research` ledger |
 | `risk-register`         | Risk table + priorities                     |
 | `devils-advocate`       | Argue against the proposal                  |
 | `premortem`             | Assume failure, work backward               |
@@ -40,6 +40,9 @@ acknowledge: proceed with N models    # only when roster exceeds hard cap (6)
 | `compare-to-status-quo` | Change vs inaction                          |
 
 Omit `template` for generic core skeleton only.
+
+**Renamed:** `research-brief` → `brief-research`. If you pass the old slug, the agent asks
+you to use `brief-research`.
 
 ## Example
 

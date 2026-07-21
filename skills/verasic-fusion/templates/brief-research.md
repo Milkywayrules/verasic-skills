@@ -1,6 +1,11 @@
-# Template: research-brief
+# Template: brief-research
 
-Landscape scan, competitor/tool/pattern research, open exploration with evidence.
+Multi-model opinion brief — landscape scan, competitor/tool/pattern exploration with
+evidence from each model's perspective.
+
+**Not** `verasic-deep-research` — this template does not produce a verified source
+ledger or confidence scoring. For ledger-backed research use `/verasic-deep-research`
+(when installed).
 
 ## Subagent answer shape
 

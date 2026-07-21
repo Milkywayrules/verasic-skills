@@ -87,7 +87,7 @@ Same as UC-2 but `mode: verbatim+fusion`.
 ```text
 mode: fusion
 models: composer-2.5-fast, gemini-3-flash, claude-sonnet-5-thinking-high, claude-opus-4-8-thinking-medium, gpt-5.6-sol-medium, cursor-grok-4.5-medium, glm-5.2-high
-template: research-brief
+template: brief-research
 
 What are the top three risks of multi-model agent orchestration?
 ```
@@ -236,7 +236,7 @@ Should we migrate our Postgres major version this quarter?
 | `board-verdict`         | UC-2      |
 | `rfc-review`            | UC-11     |
 | `tradeoff-matrix`       | UC-7      |
-| `research-brief`        | UC-5      |
+| `brief-research`        | UC-5      |
 | `risk-register`         | UC-12     |
 | `devils-advocate`       | UC-8      |
 | `premortem`             | UC-13     |
@@ -264,7 +264,7 @@ Last full pass: automated gate + live UCs UC-0 through UC-14 in Cursor.
 | UC-3       | verbatim               | PASS   | protocol + live harness                 |
 | UC-4       | verbatim+fusion order  | PASS   | protocol                                |
 | UC-5       | hard cap               | PASS   | `test-exhaustive-protocol.sh`           |
-| UC-5 brief | research-brief         | PASS   | live harness                            |
+| UC-5 brief | brief-research         | PASS   | live harness                            |
 | UC-6       | stakeholder-lens       | PASS   | protocol + live harness                 |
 | UC-7       | tradeoff-matrix        | PASS   | live harness                            |
 | UC-8       | devils-advocate        | PASS   | live harness                            |

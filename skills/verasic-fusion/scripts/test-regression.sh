@@ -37,7 +37,7 @@ EXPECTED_TEMPLATES=(
   board-verdict
   rfc-review
   tradeoff-matrix
-  research-brief
+  brief-research
   risk-register
   devils-advocate
   premortem

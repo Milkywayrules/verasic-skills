@@ -49,7 +49,7 @@ No default models. No default mode.
 | `board-verdict`         | BOD yes/no                   |
 | `rfc-review`            | Spec / proposal review       |
 | `tradeoff-matrix`       | Option matrix                |
-| `research-brief`        | Landscape research           |
+| `brief-research`        | Multi-model opinion brief (not deep-research ledger) |
 | `risk-register`         | Risk table                   |
 | `devils-advocate`       | Argue against                |
 | `premortem`             | Assume failure               |
