@@ -1,0 +1,23 @@
+name: verasic-init
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-init/**'
+      - 'skills/verasic-init/manifest.txt'
+      - 'cursor/commands/verasic-init.md'
+      - '.github/workflows/verasic-init.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-init/**'
+      - 'skills/verasic-init/manifest.txt'
+      - 'cursor/commands/verasic-init.md'
+      - '.github/workflows/verasic-init.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: init regression
+        run: bash skills/verasic-init/scripts/test-regression.sh

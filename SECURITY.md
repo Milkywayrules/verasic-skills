@@ -60,7 +60,9 @@ prose will not turn marketplace badges green; verify trust via source review and
    Agents follow those files; scripts only do what the protocol describes.
 2. **Hash integrity (default on)** — `verasic-init` compares installed files against
    per-skill `integrity.sha256` before wiring. Mismatch → `broken install` or
-   `degraded`; **detect-only, never auto-restore**.
+   `degraded`; **detect-only, never auto-restore**. Each skill's semver `VERSION` file
+   is listed in `integrity.txt` and hashed — the reported version matches the integrity
+   snapshot users verify.
 3. **Repo-local only** — Init wires skills from inside your git repo (`.cursor/skills/`,
    `.agents/skills/`, etc.). It never pulls wiring from an external checkout path.
 4. **Idempotent wiring** — Re-running init or bootstrap is safe; wire scripts do not
@@ -104,6 +106,8 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 - **Post-install wiring:** `/verasic-init` or `bash …/verasic-init/scripts/init.sh`.
 
 Prefer pinning to a tagged release or verifying `integrity.sha256` after install.
+Upstream enforces `versions.lock` ↔ `VERSION` sync via `scripts/check-versions.sh` in CI
+— see [references/release-protocol.md](references/release-protocol.md).
 
 ## Reporting issues
 
@@ -126,4 +130,5 @@ Include skill name, install path, command run, and redacted logs (never paste to
   - [skills/verasic-github-env/references/scanner-notes.md](skills/verasic-github-env/references/scanner-notes.md)
   - [skills/verasic-git-commits/references/scanner-notes.md](skills/verasic-git-commits/references/scanner-notes.md)
   - [skills/verasic-fusion/references/scanner-notes.md](skills/verasic-fusion/references/scanner-notes.md)
+  - [skills/verasic-deep-research/references/scanner-notes.md](skills/verasic-deep-research/references/scanner-notes.md)
   - [skills/verasic-bugbot/references/scanner-notes.md](skills/verasic-bugbot/references/scanner-notes.md)

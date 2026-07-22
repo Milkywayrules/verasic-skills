@@ -631,6 +631,7 @@ echo
 
 echo " versions"
 echo " --------"
+echo " (VERSION is hashed in integrity.sha256 — version and integrity move together)"
 for mname in "${manifest_entries[@]}"; do
   if skill_dir="$(resolve_skill_dir "$mname" 2>/dev/null)"; then
     local_ver="$(read_skill_version "$skill_dir")"

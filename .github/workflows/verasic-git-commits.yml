@@ -1,0 +1,23 @@
+name: verasic-git-commits
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-git-commits/**'
+      - 'cursor/commands/verasic-audit-commits.md'
+      - 'cursor/rules/verasic-git-commits.mdc'
+      - '.github/workflows/verasic-git-commits.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-git-commits/**'
+      - 'cursor/commands/verasic-audit-commits.md'
+      - 'cursor/rules/verasic-git-commits.mdc'
+      - '.github/workflows/verasic-git-commits.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: git-commits regression
+        run: bash skills/verasic-git-commits/scripts/test-regression.sh

@@ -1,0 +1,19 @@
+name: verasic-versions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: version manifest gate
+        run: bash scripts/check-versions.sh
+      - name: version regression
+        run: bash scripts/test-versions-regression.sh

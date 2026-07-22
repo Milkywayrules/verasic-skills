@@ -17,5 +17,10 @@ if [[ -f "$REPO_ROOT/skills/verasic-init/scripts/test-regression.sh" ]]; then
   bash "$REPO_ROOT/skills/verasic-init/scripts/test-regression.sh"
 fi
 
+if [[ -f "$REPO_ROOT/scripts/check-versions.sh" ]]; then
+  echo "== version manifest gate =="
+  bash "$REPO_ROOT/scripts/check-versions.sh"
+fi
+
 echo "== automated gate: PASS =="
 echo "Next: run live harness UCs UC-0 through UC-7 in Cursor (see references/use-cases.md)"

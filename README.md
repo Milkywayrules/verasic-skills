@@ -40,7 +40,21 @@ Re-run the same command anytime to update (it overwrites shipped files; extra fi
 npx skills add Milkywayrules/verasic-skills
 ```
 
-**Then wire the repo (both install paths, once):** run `/verasic-init` in Cursor, or directly:
+**Cursor + skills CLI (skills in `.agents/skills/`, slash commands manual):**
+
+```bash
+npx skills add Milkywayrules/verasic-skills
+git clone --depth 1 https://github.com/Milkywayrules/verasic-skills /tmp/verasic-skills
+mkdir -p .cursor/agents .cursor/commands .cursor/rules
+cp -r /tmp/verasic-skills/cursor/agents/.   .cursor/agents/
+cp -r /tmp/verasic-skills/cursor/commands/. .cursor/commands/
+cp -r /tmp/verasic-skills/cursor/rules/.    .cursor/rules/
+```
+
+Slash commands reference `.cursor/skills/…` by default; when skills live under
+`.agents/skills/`, the agent adjusts the path prefix (stated in each command file).
+
+**Then wire the repo (all install paths, once):** run `/verasic-init` in Cursor, or directly:
 
 ```bash
 bash .cursor/skills/verasic-init/scripts/init.sh   # adjust the prefix if your agent installs skills elsewhere (e.g. .agents/skills/)
@@ -83,9 +97,25 @@ Per-skill scanner notes:
 ## Testing
 
 Most skills ship a local `test-regression.sh` — run before publish, no CI required.
-**verasic-fusion** is the exception: it also has `test-exhaustive-protocol.sh`,
-`test-exhaustive.sh` (local full gate), and `.github/workflows/verasic-fusion.yml`
-(structural + protocol checks on push).
+**verasic-fusion** and **verasic-deep-research** also ship protocol exhaustive tests and
+GitHub Actions workflows. **Version manifest** is enforced repo-wide — see [Versioning](#versioning).
+
+## Versioning
+
+**Independent skill versioning:** git tags (`vX.Y.Z`) are bundle snapshots; each skill has its
+own semver in `skills/<name>/VERSION`. Root `versions.lock` must match every manifest skill —
+enforced by CI.
+
+```bash
+bash scripts/check-versions.sh          # release gate (lock ↔ VERSION ↔ integrity)
+bash scripts/refresh-integrity.sh <skill>  # after VERSION or integrity.txt changes
+bash scripts/test-all.sh                  # full automated router (local + tag CI)
+```
+
+Full release checklist: [references/release-protocol.md](references/release-protocol.md).
+
+After install, `verasic-init --list` shows local `VERSION` per skill. Strict integrity (default)
+hashes `VERSION` in `integrity.sha256` — tamper or stale bump fails as `broken install`.
 
 ## This Repo Hierarchy
 
@@ -93,11 +123,25 @@ Most skills ship a local `test-regression.sh` — run before publish, no CI requ
 verasic-skills/
 ├── README.md # root: short pitch + install commands
 ├── SECURITY.md # trust model, scanner signals, credential handling
-├── versions.lock # pinned skill semver for releases
-├── .gitignore
+├── versions.lock # release manifest — must match skills/*/VERSION (CI enforced)
+├── scripts/
+│ ├── check-versions.sh # lock ↔ VERSION ↔ integrity gate
+│ ├── refresh-integrity.sh # regenerate integrity.sha256 after bumps
+│ ├── test-all.sh # router: all regressions + version + protocol gates
+│ └── test-versions-regression.sh
+├── references/
+│ ├── release-protocol.md # release checklist (version + integrity)
+│ ├── release-notes-template.md # GitHub Release body template
+│ └── repo-meta.md # branch protection + maintainer settings
+├── CHANGELOG.md # bundle release summary
 ├── setup.sh
 ├── .github/workflows/
-│ └── verasic-fusion.yml # CI: fusion structural + protocol checks only
+│ ├── verasic-fusion.yml
+│ ├── verasic-deep-research.yml
+│ ├── verasic-init.yml
+│ ├── verasic-git-commits.yml
+│ ├── verasic-release.yml # full test-all on tag push
+│ └── verasic-versions.yml # version manifest on every main PR/push
 ├── skills/ # ← the units npx installs
 │ ├── verasic-bugbot/
 │ │ ├── SKILL.md
@@ -143,8 +187,14 @@ verasic-skills/
 │ │ │ ├── source-tiers.md
 │ │ │ ├── fusion-handoff.md
 │ │ │ └── scanner-notes.md
+│ │ ├── templates/
+│ │ │ ├── deep-research-brief.md
+│ │ │ └── source-ledger.yaml
 │ │ └── workflows/
-│ │     └── deep-research-brief.md
+│ │     ├── quick-scan.md
+│ │     ├── standard-research.md
+│ │     ├── adversarial-deep.md
+│ │     └── custom.md
 │ ├── verasic-git-commits/
 │ │ ├── SKILL.md
 │ │ ├── README.md
