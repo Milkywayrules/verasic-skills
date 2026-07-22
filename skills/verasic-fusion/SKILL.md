@@ -3,7 +3,7 @@ name: verasic-fusion
 description: Multi-model fusion for exploration and decision support. Use when the user asks to "fuse", "fusion", "multi-model", "ask several models", runs /verasic-fusion, or wants board-verdict, rfc-review, tradeoff-matrix, brief-research, risk-register, devils-advocate, premortem, stakeholder-lens, or compare-to-status-quo templates across named models (e.g. composer-2.5-fast, glm-5.2-high, gemini-3-flash).
 ---
 
-Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md) for expected scanner signals and trust model.
+Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md) for expected scanner signals and trust model.
 
 # Verasic Fusion — Multi-Model Orchestration
 

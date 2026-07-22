@@ -1,0 +1,23 @@
+name: verasic-bugbot
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-bugbot/**'
+      - 'cursor/commands/verasic-review.md'
+      - 'cursor/agents/verasic-bugbot.md'
+      - '.github/workflows/verasic-bugbot.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-bugbot/**'
+      - 'cursor/commands/verasic-review.md'
+      - 'cursor/agents/verasic-bugbot.md'
+      - '.github/workflows/verasic-bugbot.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bugbot regression
+        run: bash skills/verasic-bugbot/scripts/test-regression.sh

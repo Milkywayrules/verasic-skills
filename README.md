@@ -99,6 +99,8 @@ Per-skill scanner notes:
 Most skills ship a local `test-regression.sh` — run before publish, no CI required.
 **verasic-fusion** and **verasic-deep-research** also ship protocol exhaustive tests and
 GitHub Actions workflows. **Version manifest** is enforced repo-wide — see [Versioning](#versioning).
+`bash scripts/check-references.sh` validates concrete internal path references in markdown
+(backtick paths, local file links) — run via `test-all.sh` and CI after version gates.
 
 ## Versioning
 
@@ -126,6 +128,7 @@ verasic-skills/
 ├── versions.lock # release manifest — must match skills/*/VERSION (CI enforced)
 ├── scripts/
 │ ├── check-versions.sh # lock ↔ VERSION ↔ integrity gate
+│ ├── check-references.sh # validate markdown internal path refs
 │ ├── refresh-integrity.sh # regenerate integrity.sha256 after bumps
 │ ├── test-all.sh # router: all regressions + version + protocol gates
 │ └── test-versions-regression.sh

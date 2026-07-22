@@ -3,7 +3,7 @@ name: verasic-init
 description: One-command repo initialization for installed Verasic skills — discovers repo-local verasic-* skills, checks integrity.txt manifests, runs each skill's wiring script idempotently (github-env bootstrap, git-commits hook), and prints a setup report to relay verbatim. Use when the user asks to "init verasic", "set up verasic skills", "bootstrap this repo for verasic", or right after installing verasic-skills via setup.sh or skills.sh.
 ---
 
-Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md) for expected scanner signals and trust model.
+Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md) for expected scanner signals and trust model.
 
 # Verasic Init — Repo Wiring Orchestrator
 

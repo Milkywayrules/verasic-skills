@@ -68,7 +68,7 @@ No default models. No default mode.
 
 Readonly decision support — no edits, commits, or deploys.
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md)
 
 ## Extend
 

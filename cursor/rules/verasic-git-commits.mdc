@@ -17,7 +17,7 @@ installation is broken: say so and fall back to the digest below.
 - body (optional; blank line after subject): lowercase first sentence; explain **why**, not a file list; multiple items = `- ` list, one item per line
 - casing: lowercase first sentence; summary must start with a lowercase word (rephrase `feat: Docker support` → `feat: add Docker support`); natural casing for proper nouns/acronyms/components (`User ID`, `PROJ-1234`, `TabOverview`, `API`); backtick technical literals (`--set`, `git commit`, `src/foo.ts`, `TAG_NAME`)
 - never: `Co-authored-by:` trailers in **any casing**, `Generated with ...` lines, decorative emoji in subject
-- never: AI-session language — tool/model names, agent/orchestration vocabulary, plan-step references, chat narration, assistant voice (`I added`, `let me`, `this commit`); write as a teammate explaining why — full pattern tables + allowlist in `references/conventions.md`
+- never: AI-session language — tool/model names, agent/orchestration vocabulary, plan-step references, chat narration, assistant voice (`I added`, `let me`, `this commit`); write as a teammate explaining why — full pattern tables + allowlist in `.cursor/skills/verasic-git-commits/references/conventions.md`
 - never: `--no-verify` / `-n` on `git commit` — hooks are the enforcement floor, not an obstacle; if a hook rejects the message, fix the message
 - multi-line messages: HEREDOC so casing stays intentional
 
@@ -28,7 +28,7 @@ git log -1 --format=%B | grep -qiE '^co-authored-by:' && echo 'TRAILER PRESENT' 
 ```
 
 - **clean** → done
-- **TRAILER PRESENT** + not pushed → use the `git commit-tree` escape hatch in `references/commit-protocol.md`; **do not** loop on `--amend` (the wrapper re-injects)
+- **TRAILER PRESENT** + not pushed → use the `git commit-tree` escape hatch in `.cursor/skills/verasic-git-commits/references/commit-protocol.md`; **do not** loop on `--amend` (the wrapper re-injects)
 - already pushed → no force-push; report and fix on a follow-up with approval
 
 Repos with the verasic `commit-msg` hook wired (lefthook or `core.hooksPath`)

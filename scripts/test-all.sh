@@ -35,6 +35,7 @@ echo
 
 run_if 'version manifest gate' "$REPO_ROOT/scripts/check-versions.sh"
 run_if 'version regression' "$REPO_ROOT/scripts/test-versions-regression.sh"
+run_if 'internal reference check' "$REPO_ROOT/scripts/check-references.sh"
 
 while IFS= read -r skill; do
   run_if "$skill regression" "$REPO_ROOT/skills/$skill/scripts/test-regression.sh"

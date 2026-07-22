@@ -65,7 +65,7 @@ Legacy: `load-gh-env.sh` still reads `GH_*` lines from `.env.local` if present.
 - `/verasic-setup-github` — bootstrap current repo
 - Regression: `bash .cursor/skills/verasic-github-env/scripts/test-regression.sh`
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md)
 
 ## Extend per repo
 

@@ -17,3 +17,5 @@ jobs:
         run: bash scripts/check-versions.sh
       - name: version regression
         run: bash scripts/test-versions-regression.sh
+      - name: internal reference check
+        run: bash scripts/check-references.sh

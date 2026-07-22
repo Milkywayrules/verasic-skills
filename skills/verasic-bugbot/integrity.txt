@@ -4,4 +4,6 @@ VERSION
 references/review-protocol.md
 checklists/correctness.md
 checklists/security.md
+checklists/performance.md
+checklists/infra.md
 integrity.sha256

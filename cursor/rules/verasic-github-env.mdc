@@ -34,4 +34,4 @@ Verify with `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh` — not
 ## Verify / bootstrap
 
 - verify: `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh`
-- wire new repo: `/verasic-setup-github` or `scripts/bootstrap.sh`
+- wire new repo: `/verasic-setup-github` or `.cursor/skills/verasic-github-env/scripts/bootstrap.sh`

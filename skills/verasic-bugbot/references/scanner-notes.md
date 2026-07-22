@@ -19,4 +19,4 @@
 - **User-triggered** — Runs on explicit review request or after significant local changes.
 - **Zero findings is valid** — No incentive to invent issues.
 
-See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md).
+See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md).

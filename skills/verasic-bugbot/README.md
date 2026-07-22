@@ -48,7 +48,7 @@ Day-to-day loop:
 One-line verdict (`✅` / `🐛`), then issues ranked CRITICAL / HIGH / MEDIUM,
 each with file:line, evidence from the code, and a concrete fix.
 
-Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md)
+Security: [references/scanner-notes.md](references/scanner-notes.md) · upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md)
 
 ## Extend per project
 

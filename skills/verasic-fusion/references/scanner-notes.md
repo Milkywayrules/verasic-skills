@@ -22,4 +22,4 @@
 - **Degraded mode requires consent** — Sequential simulation only after user confirms when
   parallel subagents are unavailable.
 
-See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/v0.1.2/SECURITY.md).
+See upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md).
