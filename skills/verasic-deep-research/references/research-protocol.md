@@ -269,16 +269,16 @@ Use sections from `templates/deep-research-brief.md` (required order):
 
 - `## answer`
 - `## reasoning`
-- `## confidence` — headline + full 5-axis per claim in chat
+- `## confidence` — mandatory **Axis legend** table (SQ, EC, CG, CO, VR) plus note that scores are structured estimates; headline + full 5-axis per claim
 - `## conflicts`
 - `## claim ledger` (claims-investigation or explicit claim list only)
 - `## unverified`
 - `## references` — IEEE numbered list matching `[Sn]`
 - `## recommendation`
 
-Chat deliverable: always show **headline confidence** + **full 5-axis per claim** in
-`## confidence` (see rubric). When `chat+files`, chat contains summary + headline;
-files hold full brief.
+Chat deliverable: always include the **Axis legend** and show **headline confidence** +
+**full 5-axis per claim** in `## confidence` (see rubric and `templates/deep-research-brief.md`).
+When `chat+files`, chat contains summary + headline + legend; files hold full brief.
 
 **Same-turn delivery (Agent mode):** when `output` is `chat+files` and file writes are allowed, finish
 the turn with both the chat summary and the written files — not chat-only now with files promised later.

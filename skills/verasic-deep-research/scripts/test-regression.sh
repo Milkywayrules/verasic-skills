@@ -187,6 +187,11 @@ assert_file "$SKILL_ROOT/templates/source-ledger.yaml" 'template source-ledger.y
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## answer' 'brief template answer section'
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## reasoning' 'brief template reasoning section'
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## confidence' 'brief template confidence section'
+assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" 'Axis legend' 'brief template axis legend'
+assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" 'Source Quality' 'brief template SQ Source Quality'
+assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" 'structured estimates, not statistical certainty' 'brief template scores estimate note'
+assert_grep "$SKILL_ROOT/references/research-protocol.md" 'Axis legend' 'protocol requires axis legend in confidence'
+
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## conflicts' 'brief template conflicts section'
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## claim ledger' 'brief template claim ledger section'
 assert_grep "$SKILL_ROOT/templates/deep-research-brief.md" '## unverified' 'brief template unverified section'

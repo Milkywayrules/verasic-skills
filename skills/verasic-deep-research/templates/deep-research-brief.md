@@ -24,7 +24,19 @@ Flag assumptions and inference steps explicitly.
 - Call out the **weakest axis** for each material claim.
 - Note when sensitive-domain floor 60 applies.
 
-See `references/confidence-rubric.md` for axis definitions and bands.
+**Axis legend** (mandatory in every brief — chat and files):
+
+| Code | Axis | What it measures |
+| ---- | ---- | ---------------- |
+| SQ | Source Quality | Authority and tier of sources (T0–T3) |
+| EC | Evidence Convergence | Independent sources agreeing |
+| CG | Claim Grounding | How well excerpts support the claim |
+| CO | Coverage | Scope, geography, time, alternatives explored |
+| VR | Verification Rigor | Fetch success, ledger quality, recency |
+
+Scores are structured estimates, not statistical certainty.
+
+See `references/confidence-rubric.md` for axis definitions and scoring bands.
 
 ### ## conflicts
 
