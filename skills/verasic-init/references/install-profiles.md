@@ -7,9 +7,9 @@ Pass `--yes` (and usually `--profile …`) to apply repo wiring and optional Cur
 
 | Profile | Who | Skills root (wiring) | Cursor UX on `--yes` |
 | ------- | --- | -------------------- | -------------------- |
-| `cursor` | Cursor via `setup.sh` or skills under `.cursor/skills/` | `.cursor/skills/` | Fetches `cursor/` from upstream into `.cursor/{commands,rules,agents}/` |
+| `cursor` | Cursor via `setup.sh` or skills under `.cursor/skills/` | `.cursor/skills/` | Fetches scoped `cursor/` UX from upstream (see effective scope) |
 | `agent` | skills.sh, Claude Code, Codex, Kiro, Windsurf, or any agent using `*/skills/` | `.agents/skills/` (else first discovered root) | none |
-| `cursor-hybrid` | Cursor editor + `npx skills add` (skills in `.agents/skills/`) | `.agents/skills/` | same upstream fetch as `cursor` |
+| `cursor-hybrid` | Cursor editor + `npx skills add` (skills in `.agents/skills/`) | `.agents/skills/` | same scoped upstream fetch as `cursor` |
 
 Aliases: `--cursor`, `--agent`, `--cursor-hybrid`.
 
@@ -32,8 +32,12 @@ bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid -
 
 ## Upstream fetch (cursor / cursor-hybrid)
 
-On `--yes`, init downloads files listed in `references/cursor-ux-manifest.txt` from the
-installed skill's release tag by default:
+On `--yes`, init downloads files from `references/skill-ux-map.txt` filtered to the **effective scope** (see `references/init-protocol.md`):
+
+- With `--skills a,b`: scope is exactly those skills.
+- Without `--skills`: scope is manifest skills physically installed in the repo.
+
+Files are fetched from the installed skill's release tag by default:
 
 ```text
 https://raw.githubusercontent.com/Milkywayrules/verasic-skills/v<VERSION>/cursor/<path>
@@ -52,6 +56,8 @@ Fetch failure adds a `cursor-ux` **FAILED** row in the report and init exits **1
 Repo-root `cursor/` is the **single source of truth** — no bundled copy inside the skill.
 
 ## Usage after init
+
+When you cherry-pick with `--skills` or install a subset via skills.sh, the init report **usage** section lists only what is in **effective scope** — treat that as authoritative. The lists below describe a **full suite** install.
 
 ### cursor
 

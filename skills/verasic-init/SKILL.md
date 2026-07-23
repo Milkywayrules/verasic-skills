@@ -20,7 +20,7 @@ bash .cursor/skills/verasic-init/scripts/init.sh --profile agent   # optional pr
 
 Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefix. Append flags the user gave (`--list`, `--check-updates`, …).
 
-2. **Relay the plan verbatim** — print init's full stdout in a code block, unmodified. Explain the detected profile, checklist gaps, and usage section; **ask the user which profile to apply** (`cursor`, `agent`, `cursor-hybrid`) before mutating anything.
+2. **Relay the plan verbatim** — print init's full stdout in a code block, unmodified. Explain the detected profile, scope, checklist gaps, and usage section; **ask the user which profile to apply** (`cursor`, `agent`, `cursor-hybrid`) before mutating anything.
 
 3. **Apply after confirmation** — only when the user agrees:
 

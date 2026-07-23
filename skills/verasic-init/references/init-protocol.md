@@ -5,13 +5,14 @@ Single source of truth for how init plans and wires installed Verasic skills int
 ## Design
 
 - **Confirm-first:** default run prints a setup plan and changes nothing. Pass `--yes` to apply repo wiring and optional upstream Cursor UX fetch (`cursor` / `cursor-hybrid`). See `references/install-profiles.md`.
+- **Effective scope** threads through profile checklist, UX fetch, usage, versions, and skill-root listing. With `--skills a,b`, scope is exactly those skills; without `--skills`, scope is manifest skills physically installed in the repo. The report always includes a **scope** section (effective list + source).
 - `manifest.txt` is the registry: `skill-name|wire-script|verify-script|description` per line, `#` comments allowed. Wire script paths are relative to the skill's own directory; `-` means skill-only (no repo wiring). Verify script `-` means no manifest verify step; init runs it only with `--verify`.
 - Legacy three-field lines (`skill-name|wire-script|description`) remain valid — the third field is treated as description with no verify script.
 - Init discovers **repo-local** skills roots under the git root (`.agents/skills`, `.cursor/skills`, and `skills/` under other hidden agent folders). It **never** wires skills from outside the repository — even when init is invoked from an external install path.
 - Each skill ships `integrity.txt` listing required relative paths and `integrity.sha256` with expected hashes for those files (excluding `integrity.sha256` itself).
 - Init runs `check_integrity` before wiring and again after wire scripts when applicable. By default, `check_hash_integrity` compares live hashes against `integrity.sha256` and reports `modified:` paths (detect only — no auto-restore). Pass `--no-strict-integrity` for presence-only checks (skip hash comparison).
 - Each skill ships a semver `VERSION` file (one line, like `.nvmrc`). The report always includes a **versions** section with local versions; `--check-updates` fetches upstream `VERSION` files read-only.
-- Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases. **`scripts/check-versions.sh` enforces lock ↔ VERSION sync in CI** — see `references/release-protocol.md`.
+- Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases. **`scripts/check-versions.sh` enforces lock ↔ VERSION sync in CI** — see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/scripts/release-protocol.md).
 - `VERSION` is listed in each skill's `integrity.txt`; `integrity.sha256` hashes it. Bump `VERSION` → run `scripts/refresh-integrity.sh <skill>` before release.
 - Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, plans, runs (with `--yes`), and reports.
 
@@ -21,9 +22,9 @@ Profiles select the skills root and optional Cursor UX install. Spec: `reference
 
 | Profile | `--yes` installs | Skills root for wiring |
 | ------- | ---------------- | ---------------------- |
-| `cursor` | `.cursor/{commands,rules,agents}/` fetched from upstream `cursor/` at skill tag `v<VERSION>` (fallback `main`) | `.cursor/skills/` |
+| `cursor` | `.cursor/{commands,rules,agents}/` fetched from upstream `cursor/` at skill tag `v<VERSION>` (fallback `main`), filtered to effective scope | `.cursor/skills/` |
 | `agent` | nothing (skills.sh, Claude Code, Codex, Kiro, …) | `.agents/skills/` |
-| `cursor-hybrid` | same Cursor UX fetch as `cursor` | `.agents/skills/` |
+| `cursor-hybrid` | same scoped Cursor UX fetch as `cursor` | `.agents/skills/` |
 
 Flags: `--profile …`, aliases `--cursor`, `--agent`, `--cursor-hybrid`; default `--profile auto` detects from repo layout.
 
@@ -112,9 +113,10 @@ The full stdout of `init.sh` is the user-facing report. Agents relay it verbatim
 
 - repo root, origin (credentials stripped), selected skills root
 - external-invoker warning when applicable
+- **scope** — effective skill list and source (`--skills` or installed subset)
 - **install profile**, **profile checklist**, **usage** (omitted in `--list` only)
-- **skill roots** — each discovered root with per-skill integrity summary
-- **versions** — local `VERSION` per manifest skill; with `--check-updates`, upstream comparison
+- **skill roots** — each discovered root with per-skill integrity summary (scoped when `--skills`)
+- **versions** — local `VERSION` per skill in effective scope; with `--check-updates`, upstream comparison
 - status table, per-skill **details** (wire script output), **actions** (integrity + steps + verify)
 - result tally and a `next:` line
 
@@ -126,7 +128,7 @@ Errors before the report (not a git repo, no repo-local verasic-init, broken man
 2. Add a one-line semver `VERSION` file.
 3. Give the skill an idempotent wiring script following the contract above (or use `-` for wire and verify columns).
 4. Add one line to `manifest.txt` (four-field preferred).
-5. Bump `versions.lock` when releasing; run `bash scripts/check-versions.sh` (see `references/release-protocol.md`).
+5. Bump `versions.lock` when releasing; run `bash scripts/check-versions.sh` (see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/scripts/release-protocol.md)).
 6. Extend `scripts/test-regression.sh` with at least one assertion for it.
 
 ## Failure behavior

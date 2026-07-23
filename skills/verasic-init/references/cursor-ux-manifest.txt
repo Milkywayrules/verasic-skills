@@ -1,5 +1,6 @@
-# Cursor UX files fetched on --yes for cursor / cursor-hybrid profiles
-# Paths relative to repo-root cursor/ — must match find cursor -type f (see scripts/check-cursor-ux-manifest.sh)
+# Cursor UX paths relative to repo-root cursor/ — inventory for upstream sync checks.
+# Fetch uses references/skill-ux-map.txt filtered by effective scope (not this file directly).
+# Every path here must appear in skill-ux-map.txt (enforced by test-regression.sh T-map-sync).
 agents/verasic-bugbot.md
 agents/verasic-commit-auditor.md
 commands/verasic-audit-commits.md

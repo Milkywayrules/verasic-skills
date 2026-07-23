@@ -360,6 +360,47 @@ if [[ ! -f "$MANIFEST" ]]; then
   exit 1
 fi
 
+MANIFEST_LINES=()
+manifest_entries=()
+manifest_names=","
+while IFS= read -r mline || [[ -n "$mline" ]]; do
+  IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 <<< "$mline"
+  parse_manifest_line "$raw_name" "$raw_wire" "$raw_f3" "${raw_f4:-}"
+  [[ -z "$MANIFEST_NAME" || "$MANIFEST_NAME" == \#* ]] && continue
+  MANIFEST_LINES+=("$mline")
+  manifest_entries+=("$MANIFEST_NAME")
+  manifest_names+=",$MANIFEST_NAME,"
+done < "$MANIFEST"
+
+compute_effective_scope() {
+  local -a scope=() name
+  if $SELECT_GIVEN; then
+    IFS=',' read -ra requested <<< "$SELECT"
+    for req in "${requested[@]}"; do
+      [[ -z "$req" ]] && continue
+      scope+=("$req")
+    done
+    EFFECTIVE_SCOPE="$(IFS=,; echo "${scope[*]}")"
+    SCOPE_SOURCE="--skills"
+  else
+    for name in "${manifest_entries[@]}"; do
+      if resolve_skill_dir "$name" >/dev/null 2>&1; then
+        scope+=("$name")
+      fi
+    done
+    EFFECTIVE_SCOPE="$(IFS=,; echo "${scope[*]}")"
+    SCOPE_SOURCE="installed subset"
+  fi
+}
+
+in_effective_scope() {
+  [[ -z "${EFFECTIVE_SCOPE:-}" ]] && return 1
+  [[ ",$EFFECTIVE_SCOPE," == *",$1,"* ]]
+}
+
+compute_effective_scope
+VERASIC_INIT_SCOPE="$EFFECTIVE_SCOPE"
+
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -373,7 +414,7 @@ if $CONFIRMED && ! $LIST_ONLY; then
     init_skill_dir="$(resolve_skill_dir verasic-init)"
   fi
   if [[ "$PROFILE" == cursor || "$PROFILE" == cursor-hybrid ]]; then
-    verasic_profile_install_cursor_ux "$PROFILE" "$init_skill_dir" >"$PROFILE_INSTALL_LOG" 2>&1 || PROFILE_UX_RC=$?
+    verasic_profile_install_cursor_ux "$PROFILE" "$init_skill_dir" "$EFFECTIVE_SCOPE" >"$PROFILE_INSTALL_LOG" 2>&1 || PROFILE_UX_RC=$?
     ((PROFILE_UX_RC == 0)) || PROFILE_UX_FAILED=true
   fi
 fi
@@ -383,22 +424,19 @@ statuses=()
 summaries=()
 detail_files=()
 actions_lines=()
-manifest_names=","
-manifest_entries=()
 wired=0; verified=0; degraded=0; ready=0; action_needed=0
 not_installed=0; not_selected=0; unknown=0; failed=0; broken_install=0
 verify_failed=0
 list_ok=0
+wire_ran=0
 
-while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; do
+for mline in "${MANIFEST_LINES[@]}"; do
+  IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 <<< "$mline"
   parse_manifest_line "$raw_name" "$raw_wire" "$raw_f3" "${raw_f4:-}"
   name="$MANIFEST_NAME"
   wire="$MANIFEST_WIRE"
   verify="$MANIFEST_VERIFY"
   desc="$MANIFEST_DESC"
-  [[ -z "$name" || "$name" == \#* ]] && continue
-  manifest_names+="$name,"
-  manifest_entries+=("$name")
 
   if ! is_selected "$name"; then
     names+=("$name"); statuses+=("not selected"); summaries+=("skipped by --skills")
@@ -408,7 +446,11 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
   fi
 
   if ! skill_dir="$(resolve_skill_dir "$name")"; then
-    names+=("$name"); statuses+=("not installed"); summaries+=("$desc")
+    summary="$desc"
+    if ! $SELECT_GIVEN; then
+      summary="$desc — optional; install via skills.sh if needed"
+    fi
+    names+=("$name"); statuses+=("not installed"); summaries+=("$summary")
     detail_files+=(""); actions_lines+=("")
     not_installed=$((not_installed + 1))
     continue
@@ -506,6 +548,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
   out="$TMP/$name.out"
   rc=0
   bash "$skill_dir/$wire" >"$out" 2>&1 || rc=$?
+  wire_ran=$((wire_ran + 1))
   detail_files+=("$out")
 
   post_integrity_ok=true
@@ -606,7 +649,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
       failed=$((failed + 1))
       ;;
   esac
-done < "$MANIFEST"
+done
 
 if [[ -n "$SELECT" ]]; then
   IFS=',' read -ra requested <<< "$SELECT"
@@ -651,7 +694,8 @@ fi
 echo
 
 if ! $LIST_ONLY; then
-  verasic_profile_print_section "$PROFILE" "$SKILLS_ROOT" "$CONFIRMED"
+  verasic_profile_print_scope_section "$EFFECTIVE_SCOPE" "$SCOPE_SOURCE"
+  verasic_profile_print_section "$PROFILE" "$SKILLS_ROOT" "$CONFIRMED" "$EFFECTIVE_SCOPE" "$SCOPE_SOURCE"
   if [[ -n "$PROFILE_INSTALL_LOG" && -s "$PROFILE_INSTALL_LOG" ]]; then
     echo " profile actions"
     echo " ----------------"
@@ -674,13 +718,17 @@ else
       printf ' (no verasic-init)'
     fi
     echo
-    while IFS='|' read -r rname rwire rf3 rf4 || [[ -n "$rname" ]]; do
+    for rline in "${MANIFEST_LINES[@]}"; do
+      IFS='|' read -r rname rwire rf3 rf4 <<< "$rline"
       parse_manifest_line "$rname" "$rwire" "$rf3" "${rf4:-}"
       [[ -z "$MANIFEST_NAME" || "$MANIFEST_NAME" == \#* ]] && continue
+      if $SELECT_GIVEN && ! is_selected "$MANIFEST_NAME"; then
+        continue
+      fi
       if [[ -d "$root/$MANIFEST_NAME" ]]; then
         printf '      %-22s %s\n' "$MANIFEST_NAME" "$(integrity_summary "$root/$MANIFEST_NAME")"
       fi
-    done < "$MANIFEST"
+    done
   done
 fi
 echo
@@ -688,7 +736,16 @@ echo
 echo " versions"
 echo " --------"
 echo " (VERSION is hashed in integrity.sha256 — version and integrity move together)"
+scope_versions=()
+if [[ -n "$EFFECTIVE_SCOPE" ]]; then
+  IFS=',' read -ra scope_versions <<< "$EFFECTIVE_SCOPE"
+fi
+manifest_omitted=()
 for mname in "${manifest_entries[@]}"; do
+  in_effective_scope "$mname" || {
+    manifest_omitted+=("$mname")
+    continue
+  }
   if skill_dir="$(resolve_skill_dir "$mname" 2>/dev/null)"; then
     local_ver="$(read_skill_version "$skill_dir")"
   else
@@ -709,6 +766,9 @@ for mname in "${manifest_entries[@]}"; do
     printf ' %-22s %s\n' "$mname" "$local_ver"
   fi
 done
+if ((${#manifest_omitted[@]} > 0)) && ! $SELECT_GIVEN; then
+  echo "   (manifest skills omitted from scope — not installed: ${manifest_omitted[*]})"
+fi
 echo
 
 printf ' %-22s %-15s %s\n' "SKILL" "STATUS" "SUMMARY"

@@ -66,8 +66,9 @@ grep -q 'setup plan (no changes made)' <<<"$out0" && ok "default is plan mode" |
 grep -q 'install profile' <<<"$out0" && ok "plan shows install profile" || bad "plan shows install profile"
 grep -q 'profile checklist' <<<"$out0" && ok "plan shows profile checklist" || bad "plan shows profile checklist"
 grep -q 'pass --yes to apply' <<<"$out0" && ok "plan asks for confirmation" || bad "plan asks for confirmation"
-grep -qE 'would fetch(/sync)? \.cursor/' <<<"$out0" && ok "plan mentions upstream fetch" || bad "plan mentions upstream fetch"
-grep -q 'ux upstream' <<<"$out0" && grep -q 'v0.1.5' <<<"$out0" && ok "plan pins ux upstream to skill version" || bad "plan pins ux upstream to skill version"
+grep -qE 'would fetch [0-9]+ Cursor UX file\(s\) for scope' <<<"$out0" && ok "plan mentions scoped upstream fetch" || bad "plan mentions scoped upstream fetch"
+grep -q 'ux upstream' <<<"$out0" && grep -q 'v0.1.6' <<<"$out0" && ok "plan pins ux upstream to skill version" || bad "plan pins ux upstream to skill version"
+grep -q ' scope' <<<"$out0" && grep -q 'source:' <<<"$out0" && ok "plan shows scope section" || bad "plan shows scope section"
 [[ ! -f "$R0/.envrc" ]] && ok "plan does not wire .envrc" || bad "plan does not wire .envrc"
 
 # --- full wire on a fresh repo ---
@@ -80,7 +81,7 @@ row 'verasic-bugbot' 'ready' "$out" && ok "bugbot ready" || bad "bugbot ready"
 row 'verasic-fusion' 'ready' "$out" && ok "fusion ready" || bad "fusion ready"
 grep -q 'skill roots' <<<"$out" && ok "skill roots section" || bad "skill roots section"
 grep -q 'versions' <<<"$out" && ok "versions section" || bad "versions section"
-grep -qE 'verasic-init[[:space:]]+0\.1\.5' <<<"$out" && ok "versions row for verasic-init" || bad "versions row for verasic-init"
+grep -qE 'verasic-init[[:space:]]+0\.1\.6' <<<"$out" && ok "versions row for verasic-init" || bad "versions row for verasic-init"
 grep -q 'actions' <<<"$out" && ok "actions section" || bad "actions section"
 [[ -f "$R/.envrc" ]] && ok ".envrc created" || bad ".envrc created"
 [[ -f "$R/.github-agent.local" ]] && ok ".github-agent.local scaffolded" || bad ".github-agent.local scaffolded"
@@ -312,7 +313,7 @@ make_repo "$R9" verasic-init verasic-bugbot
 MOCK_BASE="$TMP/mock-upstream/skills"
 mkdir -p "$MOCK_BASE/verasic-bugbot" "$MOCK_BASE/verasic-init"
 printf '9.9.9\n' > "$MOCK_BASE/verasic-bugbot/VERSION"
-printf '0.1.5\n' > "$MOCK_BASE/verasic-init/VERSION"
+printf '0.1.6\n' > "$MOCK_BASE/verasic-init/VERSION"
 out9="$(cd "$R9" && VERASIC_INIT_REMOTE_VERSION_BASE="$MOCK_BASE" bash "$INIT_REL" --check-updates)"
 grep -q '9.9.9 available' <<<"$out9" && ok "--check-updates shows available version" || bad "--check-updates shows available version"
 grep -q 'up to date' <<<"$out9" && ok "--check-updates shows up to date row" || bad "--check-updates shows up to date row"
@@ -327,7 +328,8 @@ git -C "$R10" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore
 git -C "$R10" remote add origin git@github.com:Milkywayrules/usecharator.git
 out10="$(cd "$R10" && VERASIC_INIT_REMOTE_REPO_BASE="$MOCK_REPO" bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid)"
 [[ -f "$R10/.cursor/commands/verasic-init.md" ]] && ok "hybrid --yes fetches cursor commands" || bad "hybrid --yes fetches cursor commands"
-[[ -f "$R10/.cursor/rules/verasic-git-commits.mdc" ]] && ok "hybrid --yes fetches cursor rules" || bad "hybrid --yes fetches cursor rules"
+[[ -f "$R10/.cursor/rules/verasic-github-env.mdc" ]] && ok "hybrid --yes fetches scoped cursor rules" || bad "hybrid --yes fetches scoped cursor rules"
+[[ ! -f "$R10/.cursor/rules/verasic-git-commits.mdc" ]] && ok "hybrid scoped skips uninstalled git-commits rule" || bad "hybrid scoped skips uninstalled git-commits rule"
 grep -q 'installed Cursor UX from upstream' <<<"$out10" && ok "hybrid reports upstream fetch" || bad "hybrid reports upstream fetch"
 grep -q 'cursor-hybrid' <<<"$out10" && ok "hybrid report names profile" || bad "hybrid report names profile"
 row 'verasic-github-env' 'wired' "$out10" && ok "hybrid wires github-env from .agents/skills" || bad "hybrid wires github-env from .agents/skills"
@@ -353,6 +355,59 @@ out12="$(cd "$R12" && VERASIC_INIT_REMOTE_REPO_BASE="$TMP/dead-upstream" bash "$
 [[ "$rc" -eq 1 ]] && ok "ux fetch failure exits 1" || bad "ux fetch failure exits 1 (rc=$rc)"
 row 'cursor-ux' 'FAILED' "$out12" && ok "ux fetch failure FAILED row" || bad "ux fetch failure FAILED row"
 grep -q 'profile actions' <<<"$out12" && ok "ux fetch failure logs profile actions" || bad "ux fetch failure logs profile actions"
+
+# --- T-partial-cursor: scoped UX fetch only ---
+R13="$TMP/partial-cursor"
+make_repo "$R13" verasic-bugbot verasic-fusion verasic-init
+out13="$(init_yes "$R13" --yes --profile cursor --skills verasic-bugbot,verasic-fusion,verasic-init)"
+[[ -f "$R13/.cursor/commands/verasic-init.md" ]] && ok "T-partial-cursor fetches init command" || bad "T-partial-cursor fetches init command"
+[[ -f "$R13/.cursor/commands/verasic-fusion.md" ]] && ok "T-partial-cursor fetches fusion command" || bad "T-partial-cursor fetches fusion command"
+[[ -f "$R13/.cursor/commands/verasic-review.md" ]] && ok "T-partial-cursor fetches review command" || bad "T-partial-cursor fetches review command"
+[[ -f "$R13/.cursor/agents/verasic-bugbot.md" ]] && ok "T-partial-cursor fetches bugbot agent" || bad "T-partial-cursor fetches bugbot agent"
+[[ ! -f "$R13/.cursor/rules/verasic-git-commits.mdc" ]] && ok "T-partial-cursor skips git-commits rule" || bad "T-partial-cursor skips git-commits rule"
+[[ ! -f "$R13/.cursor/commands/verasic-setup-github.md" ]] && ok "T-partial-cursor skips setup-github" || bad "T-partial-cursor skips setup-github"
+grep -q 'no Cursor UX files for effective scope' <<<"$out13" && bad "T-partial-cursor should fetch some UX" || ok "T-partial-cursor fetched scoped UX"
+
+# --- T-partial-plan: scoped checklist and usage ---
+R14="$TMP/partial-plan"
+make_repo "$R14" verasic-bugbot verasic-fusion verasic-init
+out14="$(cd "$R14" && bash "$INIT_REL" --profile cursor --skills verasic-bugbot,verasic-fusion,verasic-init)"
+grep -q 'miss:.*verasic-git-commits.mdc' <<<"$out14" && bad "T-partial-plan checklist miss git-commits" || ok "T-partial-plan checklist no miss for git-commits"
+grep -q '/verasic-audit-commits' <<<"$out14" && bad "T-partial-plan usage mentions audit-commits" || ok "T-partial-plan usage omits excluded commands"
+grep -q '/verasic-fusion' <<<"$out14" && ok "T-partial-plan usage includes fusion" || bad "T-partial-plan usage includes fusion"
+grep -q 'would fetch 4 Cursor UX file(s) for scope' <<<"$out14" && ok "T-partial-plan scoped fetch count" || bad "T-partial-plan scoped fetch count"
+
+# --- T-partial-agent: skill-only scope, no .cursor files ---
+R15="$TMP/partial-agent"
+make_repo "$R15" verasic-bugbot verasic-fusion verasic-init
+out15="$(init_yes "$R15" --yes --profile agent --skills verasic-bugbot,verasic-fusion,verasic-init)"
+[[ ! -f "$R15/.cursor/commands/verasic-init.md" ]] && ok "T-partial-agent no cursor commands" || bad "T-partial-agent no cursor commands"
+grep -q 'scope has no repo wiring' <<<"$out15" && ok "T-partial-agent honest no-wiring banner" || bad "T-partial-agent honest no-wiring banner"
+
+# --- T-github-only: scoped github UX ---
+R16="$TMP/github-only"
+make_repo "$R16" verasic-init verasic-github-env
+out16="$(init_yes "$R16" --yes --profile cursor --skills verasic-github-env)"
+[[ -f "$R16/.cursor/commands/verasic-setup-github.md" ]] && ok "T-github-only fetches setup-github" || bad "T-github-only fetches setup-github"
+[[ -f "$R16/.cursor/rules/verasic-github-env.mdc" ]] && ok "T-github-only fetches github rule" || bad "T-github-only fetches github rule"
+[[ ! -f "$R16/.cursor/commands/verasic-init.md" ]] && ok "T-github-only skips init command" || bad "T-github-only skips init command"
+row 'verasic-github-env' 'wired' "$out16" && ok "T-github-only wires github-env" || bad "T-github-only wires github-env"
+
+# --- T-map-sync: skill-ux-map covers cursor-ux-manifest ---
+map_ok=true
+while IFS= read -r mpath; do
+  [[ -z "$mpath" || "$mpath" == \#* ]] && continue
+  grep -qF "|${mpath}|" "$SKILLS_SRC/verasic-init/references/skill-ux-map.txt" || { map_ok=false; break; }
+done < "$SKILLS_SRC/verasic-init/references/cursor-ux-manifest.txt"
+$map_ok && ok "T-map-sync manifest paths in skill-ux-map" || bad "T-map-sync manifest paths in skill-ux-map"
+
+# --- T-scope-banner: report contains scope section ---
+R17="$TMP/scope-banner"
+make_repo "$R17" verasic-init verasic-bugbot
+out17="$(cd "$R17" && bash "$INIT_REL" --skills verasic-bugbot,verasic-init)"
+grep -q '^ scope$' <<<"$out17" && ok "T-scope-banner scope heading" || bad "T-scope-banner scope heading"
+grep -q 'source: --skills' <<<"$out17" && ok "T-scope-banner scope source" || bad "T-scope-banner scope source"
+grep -q '• verasic-bugbot' <<<"$out17" && ok "T-scope-banner lists scoped skills" || bad "T-scope-banner lists scoped skills"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

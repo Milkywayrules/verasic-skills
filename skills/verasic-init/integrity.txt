@@ -4,7 +4,9 @@ VERSION
 manifest.txt
 scripts/init.sh
 scripts/profile.sh
+scripts/test-regression.sh
 references/init-protocol.md
 references/install-profiles.md
 references/cursor-ux-manifest.txt
+references/skill-ux-map.txt
 integrity.sha256

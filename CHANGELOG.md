@@ -8,6 +8,17 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
+## v0.1.6
+
+### Skills
+
+- **verasic-init** (`0.1.6`) — effective scope threads through profile checklist, usage, Cursor UX fetch, and versions; `--skills` cherry-pick and skills.sh partial installs are first-class; `references/skill-ux-map.txt` filters upstream UX; honest apply banners; scope section in every report; optional `not installed` framing for suite skills you did not install
+- **Other manifest skills** — unchanged at `0.1.3`
+
+### Infrastructure
+
+- `verasic-init` regression adds scope matrix tests (`T-partial-*`, `T-map-sync`, `T-scope-banner`)
+
 ## v0.1.5
 
 ### Skills

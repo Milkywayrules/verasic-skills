@@ -11,7 +11,8 @@ and equally useful after Cursor `setup.sh`.
 | --------------------------------- | ------------------------------------------------- |
 | `scripts/init.sh`                 | Orchestrator — plan, wire, report                 |
 | `scripts/profile.sh`                | Profile detect, checklist, upstream Cursor UX fetch |
-| `references/cursor-ux-manifest.txt` | File list fetched from upstream `cursor/`           |
+| `references/cursor-ux-manifest.txt` | Full upstream Cursor UX file list |
+| `references/skill-ux-map.txt`       | Skill → Cursor UX path mapping (scope filter) |
 | `references/install-profiles.md`    | Profile spec (cursor / agent / cursor-hybrid)       |
 | `manifest.txt`                      | Registry: skill → wiring → verify → description     |
 | `references/init-protocol.md`       | Wire contract, statuses, extension guide            |
@@ -61,7 +62,7 @@ Skills not installed are reported as `not installed` and skipped.
 
 ## Report
 
-Plan and apply reports include profile checklist, usage, versions, status table, details, actions, and a `next:` line. Agents relay verbatim. Re-running `--yes` is idempotent.
+Plan and apply reports include scope, profile checklist, usage, versions, status table, details, actions, and a `next:` line. With `--skills`, checklist/usage/UX fetch/versions reflect that subset only. Agents relay verbatim. Re-running `--yes` is idempotent.
 
 ## Install into a project
 
