@@ -1,9 +1,10 @@
 # verasic-init — protocol
 
-Single source of truth for how init wires installed Verasic skills into a repository.
+Single source of truth for how init plans and wires installed Verasic skills into a repository.
 
 ## Design
 
+- **Confirm-first:** default run prints a setup plan and changes nothing. Pass `--yes` to apply repo wiring and optional upstream Cursor UX fetch (`cursor` / `cursor-hybrid`). See `references/install-profiles.md`.
 - `manifest.txt` is the registry: `skill-name|wire-script|verify-script|description` per line, `#` comments allowed. Wire script paths are relative to the skill's own directory; `-` means skill-only (no repo wiring). Verify script `-` means no manifest verify step; init runs it only with `--verify`.
 - Legacy three-field lines (`skill-name|wire-script|description`) remain valid — the third field is treated as description with no verify script.
 - Init discovers **repo-local** skills roots under the git root (`.agents/skills`, `.cursor/skills`, and `skills/` under other hidden agent folders). It **never** wires skills from outside the repository — even when init is invoked from an external install path.
@@ -12,15 +13,29 @@ Single source of truth for how init wires installed Verasic skills into a reposi
 - Each skill ships a semver `VERSION` file (one line, like `.nvmrc`). The report always includes a **versions** section with local versions; `--check-updates` fetches upstream `VERSION` files read-only.
 - Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases. **`scripts/check-versions.sh` enforces lock ↔ VERSION sync in CI** — see `references/release-protocol.md`.
 - `VERSION` is listed in each skill's `integrity.txt`; `integrity.sha256` hashes it. Bump `VERSION` → run `scripts/refresh-integrity.sh <skill>` before release.
-- Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, runs, and reports.
+- Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, plans, runs (with `--yes`), and reports.
+
+## Install profiles
+
+Profiles select the skills root and optional Cursor UX install. Spec: `references/install-profiles.md`.
+
+| Profile | `--yes` installs | Skills root for wiring |
+| ------- | ---------------- | ---------------------- |
+| `cursor` | `.cursor/{commands,rules,agents}/` fetched from upstream `cursor/` at skill tag `v<VERSION>` (fallback `main`) | `.cursor/skills/` |
+| `agent` | nothing (skills.sh, Claude Code, Codex, Kiro, …) | `.agents/skills/` |
+| `cursor-hybrid` | same Cursor UX fetch as `cursor` | `.agents/skills/` |
+
+Flags: `--profile …`, aliases `--cursor`, `--agent`, `--cursor-hybrid`; default `--profile auto` detects from repo layout.
+
+Fetch failure for `cursor` / `cursor-hybrid` adds a `cursor-ux` **FAILED** row, prints URLs in **profile actions**, tallies in **failed**, and init exits **1** (repo wiring may still have run).
 
 ## Skills root selection
 
 1. Discover all repo-local skills directories.
 2. Require a repo-local `verasic-init/scripts/init.sh`. If none exists, exit 1 — do not fall back to the external invoker's skills tree.
-3. Select the wiring root:
+3. Select the wiring root (after profile resolution):
    - prefer the root that contains the **invoked** `verasic-init` when that root is repo-local;
-   - otherwise tie-break `.agents/skills`, then `.cursor/skills`, then first discovered root.
+   - otherwise tie-break per profile (see `references/install-profiles.md`).
 4. When the invoked init path is outside `REPO_ROOT`, print a **warning** in the report and still use repo-local skills only.
 
 ## Integrity checker
@@ -72,6 +87,7 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 | `verasic-git-commits` | `scripts/wire-hook.sh` | —                      | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
 | `verasic-bugbot`      | —                      | —                      | skill-only; nothing to wire                                                                                                                            |
 | `verasic-fusion`      | —                      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
+| `verasic-deep-research` | —                      | —                      | skill-only; ledger-backed research                                                                                                                     |
 | `verasic-init`        | —                      | —                      | this orchestrator; running it is the wiring                                                                                                            |
 
 ## Statuses in the report
@@ -88,7 +104,7 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 | `not installed` | in manifest but not present in any repo-local root                      |
 | `not selected`  | excluded by `--skills`                                                  |
 | `unknown`       | requested via `--skills` but not in the manifest                        |
-| `FAILED`        | wiring script errored — init exits 1                                    |
+| `FAILED`        | wiring script errored, or `cursor-ux` upstream fetch failed — init exits 1 |
 
 ## Report contract
 
@@ -96,6 +112,7 @@ The full stdout of `init.sh` is the user-facing report. Agents relay it verbatim
 
 - repo root, origin (credentials stripped), selected skills root
 - external-invoker warning when applicable
+- **install profile**, **profile checklist**, **usage** (omitted in `--list` only)
 - **skill roots** — each discovered root with per-skill integrity summary
 - **versions** — local `VERSION` per manifest skill; with `--check-updates`, upstream comparison
 - status table, per-skill **details** (wire script output), **actions** (integrity + steps + verify)
@@ -122,6 +139,7 @@ Errors before the report (not a git repo, no repo-local verasic-init, broken man
 - Manifest verify failure with `--verify` → exit 3.
 - `action needed`, `degraded`, `wired`, `verified`, and `--list` with only non-fatal rows → exit 0.
 - `--list`, `--check-updates`, and `--help` never modify the repository.
+- Default (no `--yes`, no `--list`) is plan-only — same read-only guarantee as `--list` for mutations, but includes profile guidance.
 
 ## Manifest parsing rules
 

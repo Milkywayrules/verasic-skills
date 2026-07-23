@@ -8,6 +8,19 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
+## v0.1.5
+
+### Skills
+
+- **verasic-init** (`0.1.5`) — confirm-first default (plan before `--yes`); install profiles (`cursor`, `agent`, `cursor-hybrid`); upstream fetch of `cursor/` UX at `v<verasic-init VERSION>` with `main` fallback (no bundled copy); `references/cursor-ux-manifest.txt` + `scripts/check-cursor-ux-manifest.sh`; Cursor UX fetch failure exits 1 with `cursor-ux` FAILED row
+- **Other manifest skills** — unchanged at `0.1.3` (independent per-skill semver; bundle tag `v0.1.5` is a snapshot, not a forced bump for every skill)
+
+### Infrastructure
+
+- `scripts/check-cursor-ux-manifest.sh` — keeps manifest aligned with repo-root `cursor/`; wired into `test-all.sh` and `verasic-init` CI
+- `SECURITY.md` — documents init cursor UX fetch and `.cursor/` writes on `--yes`
+- `/verasic-init` command — two-step plan then apply
+
 ## v0.1.4
 
 ### Skills

@@ -4,24 +4,35 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INVOKED_SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INVOKED_SKILLS_ROOT="$(cd "$INVOKED_SKILL_ROOT/.." && pwd)"
+# shellcheck source=profile.sh
+source "$SCRIPT_DIR/profile.sh"
 
 REMOTE_VERSION_BASE="${VERASIC_INIT_REMOTE_VERSION_BASE:-https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/skills}"
 
 usage() {
   cat <<'EOF'
-verasic-init — wire installed Verasic skills into this repository
+verasic-init — plan and wire installed Verasic skills into this repository
+
+Confirm-first: default prints a setup plan and changes nothing. Pass --yes to apply.
 
 Usage:
-  init.sh                      wire every installed verasic skill
-  init.sh --skills a,b         wire only the listed skills (cherry-pick)
-  init.sh --list               show manifest + installed state, change nothing
-  init.sh --verify                 after wiring, run manifest verify scripts
+  init.sh                          plan only (detect profile, show checklist + would-wire)
+  init.sh --yes                    apply using auto-detected profile
+  init.sh --yes --profile cursor   Cursor: wire + fetch .cursor/{commands,rules,agents} from upstream
+  init.sh --yes --profile agent    Agent host (skills.sh, Claude Code, Codex, Kiro, …): wire only
+  init.sh --yes --profile cursor-hybrid  skills in .agents/skills/ + Cursor slash UX
+  init.sh --skills a,b             cherry-pick (with --yes to apply)
+  init.sh --list                   manifest + integrity inspect, change nothing
+  init.sh --verify                 with --yes: run manifest verify scripts after wire
   init.sh --no-strict-integrity    presence-only integrity (skip hash checks)
   init.sh --strict-integrity       hash checks on by default (backward compat, no-op)
   init.sh --check-updates          compare local VERSION to upstream (read-only)
-  init.sh --help               this help
+  init.sh --help                   this help
 
-Idempotent: safe to re-run anytime. Run from anywhere inside the repo.
+Profile aliases: --cursor, --agent, --cursor-hybrid
+Spec: references/install-profiles.md (bundled in this skill)
+
+Idempotent: safe to re-run with --yes. Run from anywhere inside the repo.
 Uses repo-local skills roots only — never wires from an external install path.
 EOF
 }
@@ -32,12 +43,20 @@ LIST_ONLY=false
 VERIFY=false
 STRICT_INTEGRITY=true
 CHECK_UPDATES=false
+CONFIRMED=false
+PROFILE="auto"
 while (($#)); do
   case "$1" in
     --skills) SELECT="${2:?init: --skills needs a comma-separated list}"; SELECT_GIVEN=true; shift 2 ;;
     --skills=*) SELECT="${1#*=}"; SELECT_GIVEN=true; shift ;;
     --list) LIST_ONLY=true; shift ;;
     --verify) VERIFY=true; shift ;;
+    --yes|--confirm) CONFIRMED=true; shift ;;
+    --profile) PROFILE="${2:?init: --profile needs cursor, agent, cursor-hybrid, or auto}"; shift 2 ;;
+    --profile=*) PROFILE="${1#*=}"; shift ;;
+    --cursor) PROFILE=cursor; shift ;;
+    --agent) PROFILE=agent; shift ;;
+    --cursor-hybrid|--hybrid) PROFILE=cursor-hybrid; shift ;;
     --strict-integrity) shift ;;
     --no-strict-integrity|--loose-integrity) STRICT_INTEGRITY=false; shift ;;
     --check-updates) CHECK_UPDATES=true; shift ;;
@@ -247,21 +266,6 @@ discover_skill_roots() {
   printf '%s\n' "${unique[@]}"
 }
 
-select_skills_root() {
-  local -a roots=("$@")
-  local root
-  if [[ "$INVOKED_SKILLS_ROOT" == "$REPO_ROOT/"* ]]; then
-    printf '%s' "$INVOKED_SKILLS_ROOT"
-    return
-  fi
-  for pref in .agents/skills .cursor/skills; do
-    for root in "${roots[@]}"; do
-      [[ "$root" == "$REPO_ROOT/$pref" ]] && printf '%s' "$root" && return
-    done
-  done
-  printf '%s' "${roots[0]}"
-}
-
 resolve_skill_dir() {
   local name="$1"
   local root skill_path="$REPO_ROOT/$name"
@@ -332,7 +336,23 @@ if ((${#LOCAL_INIT_ROOTS[@]} == 0)); then
   exit 1
 fi
 
-SKILLS_ROOT="$(select_skills_root "${LOCAL_INIT_ROOTS[@]}")"
+if ! PROFILE="$(verasic_profile_normalize "$PROFILE")"; then
+  exit 2
+fi
+
+if [[ "$PROFILE" == auto ]]; then
+  PROFILE="$(verasic_profile_detect)"
+fi
+
+SKILLS_ROOT="$(verasic_profile_select_skills_root "$PROFILE" "${LOCAL_INIT_ROOTS[@]}")"
+
+PLAN_ONLY=false
+if $LIST_ONLY; then
+  PLAN_ONLY=true
+elif ! $CONFIRMED; then
+  PLAN_ONLY=true
+fi
+
 MANIFEST="$SKILLS_ROOT/verasic-init/manifest.txt"
 
 if [[ ! -f "$MANIFEST" ]]; then
@@ -342,6 +362,21 @@ fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+
+PROFILE_INSTALL_LOG=""
+PROFILE_UX_FAILED=false
+PROFILE_UX_RC=0
+if $CONFIRMED && ! $LIST_ONLY; then
+  PROFILE_INSTALL_LOG="$TMP/profile-install.log"
+  init_skill_dir="$SKILLS_ROOT/verasic-init"
+  if [[ ! -d "$init_skill_dir" ]]; then
+    init_skill_dir="$(resolve_skill_dir verasic-init)"
+  fi
+  if [[ "$PROFILE" == cursor || "$PROFILE" == cursor-hybrid ]]; then
+    verasic_profile_install_cursor_ux "$PROFILE" "$init_skill_dir" >"$PROFILE_INSTALL_LOG" 2>&1 || PROFILE_UX_RC=$?
+    ((PROFILE_UX_RC == 0)) || PROFILE_UX_FAILED=true
+  fi
+fi
 
 names=()
 statuses=()
@@ -417,7 +452,7 @@ while IFS='|' read -r raw_name raw_wire raw_f3 raw_f4 || [[ -n "$raw_name" ]]; d
     continue
   fi
 
-  if $LIST_ONLY; then
+  if $PLAN_ONLY; then
     if $integrity_ok && $hash_ok; then
       names+=("$name"); statuses+=("ok"); summaries+=("would run $wire")
       detail_files+=(""); actions_lines+=("$(integrity_action_ok)")
@@ -585,6 +620,15 @@ if [[ -n "$SELECT" ]]; then
   done
 fi
 
+if $PROFILE_UX_FAILED; then
+  names+=("cursor-ux")
+  statuses+=("FAILED")
+  summaries+=("upstream Cursor UX fetch failed — see profile actions")
+  detail_files+=("$PROFILE_INSTALL_LOG")
+  actions_lines+=("profile: fetch failed (exit $PROFILE_UX_RC)")
+  failed=$((failed + 1))
+fi
+
 RULE="────────────────────────────────────────────────────────────────"
 origin="$(git remote get-url origin 2>/dev/null || echo '(no origin remote)')"
 origin="$(printf '%s' "$origin" | sed -E 's#://[^/@]*@#://#')"
@@ -592,17 +636,29 @@ origin="$(printf '%s' "$origin" | sed -E 's#://[^/@]*@#://#')"
 echo "$RULE"
 if $LIST_ONLY; then
   echo " verasic-init · installed skills (no changes made)"
+elif $PLAN_ONLY; then
+  echo " verasic-init · setup plan (no changes made)"
 else
   echo " verasic-init · repository setup report"
 fi
 echo "$RULE"
 printf ' %-18s %s\n' "repo root" "$REPO_ROOT"
 printf ' %-18s %s\n' "origin" "$origin"
-printf ' %-18s %s\n' "skills root" "$SKILLS_ROOT"
+printf ' %-18s %s\n' "skills root" "${SKILLS_ROOT#"$REPO_ROOT"/}"
 if $EXTERNAL_INVOKER; then
   printf ' %-18s %s\n' "warning" "init invoked from outside repo ($INVOKED_SKILLS_ROOT) — using repo-local skills only"
 fi
 echo
+
+if ! $LIST_ONLY; then
+  verasic_profile_print_section "$PROFILE" "$SKILLS_ROOT" "$CONFIRMED"
+  if [[ -n "$PROFILE_INSTALL_LOG" && -s "$PROFILE_INSTALL_LOG" ]]; then
+    echo " profile actions"
+    echo " ----------------"
+    sed 's/^/   /' "$PROFILE_INSTALL_LOG"
+    echo
+  fi
+fi
 
 echo " skill roots"
 echo " -----------"
@@ -704,16 +760,20 @@ else
     printf ' · %d verify failed' "$verify_failed"
   fi
   echo
-  if ((failed > 0 || broken_install > 0)); then
-    echo " next: fix broken installs and failures above, then re-run init (idempotent — safe to repeat)"
+  if $PLAN_ONLY; then
+    verasic_profile_plan_next false "$PROFILE"
+  elif $PROFILE_UX_FAILED; then
+    echo " next: fix Cursor UX fetch in profile actions (network or VERASIC_INIT_REMOTE_REPO_BASE), then re-run --yes --profile $PROFILE"
+  elif ((failed > 0 || broken_install > 0)); then
+    echo " next: fix broken installs and failures above, then re-run with --yes --profile $PROFILE"
   elif ((verify_failed > 0)); then
-    echo " next: fix verify failures above, then re-run init --verify"
+    echo " next: fix verify failures above, then re-run --yes --profile $PROFILE --verify"
   elif ((action_needed > 0)); then
-    echo " next: complete the manual steps in the details above, then re-run init to confirm"
+    echo " next: complete the manual steps in the details above, then re-run --yes --profile $PROFILE"
   elif ((unknown > 0)); then
     echo " next: fix the unknown skill name(s) above and re-run with corrected --skills"
   else
-    echo " next: follow any 'Next steps' lines in details above; re-run init anytime (idempotent)"
+    echo " next: follow any 'Next steps' lines in details above; re-run --yes anytime (idempotent)"
   fi
 fi
 echo "$RULE"

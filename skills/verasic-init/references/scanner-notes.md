@@ -2,8 +2,9 @@
 
 ## Why scanners may flag this skill
 
-- **Network (`curl`)** — `--check-updates` fetches upstream `VERSION` files from
-  `raw.githubusercontent.com` (read-only, 5–10 s timeout). No POST, no auth.
+- **Network (`curl`)** — `--check-updates` fetches upstream `VERSION` files; `--yes`
+  with `cursor` / `cursor-hybrid` fetches `cursor/` UX files from
+  `raw.githubusercontent.com` (read-only, per-file timeout). No POST, no auth.
 - **Orchestration of sensitive wiring** — Init invokes `bootstrap.sh` and `wire-hook.sh`,
   which touch credentials templates and git hooks. Static analysis often treats
   "calls script that touches secrets/hooks" as high risk.

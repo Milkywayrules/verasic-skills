@@ -19,10 +19,7 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 - **verasic-github-env** — GitHub CLI auth for local agent harnesses.
   Fine-grained PAT per repo in gitignored `.github-agent.local`, optional direnv,
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
-- **verasic-init** — one-command repo wiring for whichever verasic skills
-  are installed. Detects, runs each skill's own wiring script idempotently,
-  optional manifest verify and integrity hash checks (default on; opt out with `--no-strict-integrity`), prints a single setup report. Built for skills.sh installs where `setup.sh`
-  never runs.
+- **verasic-init** — confirm-first repo setup for installed verasic skills: plan (profile, checklist, usage), then `--yes` to wire repo-level enforcement and optionally fetch Cursor UX from upstream. Built for skills.sh installs where `setup.sh` never runs.
 
 ## Install
 
@@ -40,10 +37,16 @@ Re-run the same command anytime to update (it overwrites shipped files; extra fi
 npx skills add Milkywayrules/verasic-skills
 ```
 
-**Cursor + skills CLI (skills in `.agents/skills/`, slash commands manual):**
+**Cursor + skills CLI (skills in `.agents/skills/`):**
 
 ```bash
 npx skills add Milkywayrules/verasic-skills
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid   # fetches Cursor UX from upstream
+```
+
+Manual copy (optional — same result as hybrid fetch):
+
+```bash
 git clone --depth 1 https://github.com/Milkywayrules/verasic-skills /tmp/verasic-skills
 mkdir -p .cursor/agents .cursor/commands .cursor/rules
 cp -r /tmp/verasic-skills/cursor/agents/.   .cursor/agents/
@@ -54,13 +57,16 @@ cp -r /tmp/verasic-skills/cursor/rules/.    .cursor/rules/
 Slash commands reference `.cursor/skills/…` by default; when skills live under
 `.agents/skills/`, the agent adjusts the path prefix (stated in each command file).
 
-**Then wire the repo (all install paths, once):** run `/verasic-init` in Cursor, or directly:
+**Then set up the repo (all install paths):** run `/verasic-init` in Cursor — it shows a **plan first** (profile, checklist, usage), then apply with `--yes` after you confirm. Or directly:
 
 ```bash
-bash .cursor/skills/verasic-init/scripts/init.sh   # adjust the prefix if your agent installs skills elsewhere (e.g. .agents/skills/)
+bash .cursor/skills/verasic-init/scripts/init.sh              # plan only (default)
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor   # apply
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile agent    # skills.sh / Claude Code / Codex / Kiro / …
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid  # npx skills + Cursor UX
 ```
 
-It detects the installed skills, wires each one idempotently, and prints a report — after that, everything enforces itself.
+Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/skills/`). Profile spec ships in the skill: `references/install-profiles.md`. Cursor/hybrid profiles fetch UX from upstream on `--yes` (network required).
 
 ## Usage
 
@@ -69,7 +75,7 @@ It detects the installed skills, wires each one idempotently, and prints a repor
 - `/verasic-review` — review branch changes vs the default branch
 - `/verasic-review uncommitted` — review staged + unstaged only
 - `/verasic-audit-commits` — audit branch commit history before push/PR
-- `/verasic-init` — wire every installed verasic skill into the repo (cherry-pick with `--skills a,b`)
+- `/verasic-init` — plan setup (profile + checklist + usage), then apply with `--yes` after you confirm
 - `/verasic-setup-github` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
 - Commit convention needs no invocation — the always-applied rule enforces it on every commit
 - GitHub env rule applies automatically before `gh` commands when installed
@@ -129,6 +135,7 @@ verasic-skills/
 ├── scripts/
 │ ├── check-versions.sh # lock ↔ VERSION ↔ integrity gate
 │ ├── check-references.sh # validate markdown internal path refs
+│ ├── check-cursor-ux-manifest.sh # cursor/ ↔ cursor-ux-manifest sync gate
 │ ├── refresh-integrity.sh # regenerate integrity.sha256 after bumps
 │ ├── test-all.sh # router: all regressions + version + protocol gates
 │ └── test-versions-regression.sh
@@ -231,22 +238,25 @@ verasic-skills/
 │ ├── VERSION
 │ ├── integrity.sha256
 │ ├── scripts/
-│ │ ├── init.sh # detect installed skills, wire, report
+│ │ ├── init.sh # plan + wire + report
+│ │ ├── profile.sh # profile detect, upstream UX fetch
 │ │ └── test-regression.sh
 │ └── references/
-│ └── init-protocol.md # ← single source of truth
+│ ├── init-protocol.md # ← single source of truth
+│ ├── install-profiles.md
+│ └── cursor-ux-manifest.txt
 └── cursor/
-├── agents/
-│ ├── verasic-bugbot.md # thin pointer to the review protocol
-│ └── verasic-commit-auditor.md # thin pointer to the audit protocol
-├── commands/
-│ ├── verasic-review.md
-│ ├── verasic-fusion.md
-│ ├── verasic-deep-research.md
-│ ├── verasic-audit-commits.md
-│ ├── verasic-setup-github.md
-│ └── verasic-init.md
-└── rules/
-├── verasic-git-commits.mdc # always-applied digest + pointer
-└── verasic-github-env.mdc
+    ├── agents/
+    │ ├── verasic-bugbot.md # thin pointer to the review protocol
+    │ └── verasic-commit-auditor.md # thin pointer to the audit protocol
+    ├── commands/
+    │ ├── verasic-review.md
+    │ ├── verasic-fusion.md
+    │ ├── verasic-deep-research.md
+    │ ├── verasic-audit-commits.md
+    │ ├── verasic-setup-github.md
+    │ └── verasic-init.md
+    └── rules/
+        ├── verasic-git-commits.mdc # always-applied digest + pointer
+        └── verasic-github-env.mdc
 ```

@@ -1,46 +1,61 @@
 ---
 name: verasic-init
-description: One-command repo initialization for installed Verasic skills — discovers repo-local verasic-* skills, checks integrity.txt manifests, runs each skill's wiring script idempotently (github-env bootstrap, git-commits hook), and prints a setup report to relay verbatim. Use when the user asks to "init verasic", "set up verasic skills", "bootstrap this repo for verasic", or right after installing verasic-skills via setup.sh or skills.sh.
+description: Confirm-first repo setup for installed Verasic skills — detects install profile (cursor, agent, cursor-hybrid), prints checklist and usage, then with --yes wires github-env bootstrap and git-commits hook and optionally fetches Cursor UX from upstream raw GitHub. Use when the user asks to "init verasic", "set up verasic skills", "bootstrap this repo for verasic", or right after installing via setup.sh or skills.sh.
 ---
 
 Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md) for expected scanner signals and trust model.
 
-# Verasic Init — Repo Wiring Orchestrator
+# Verasic Init — Repo Setup Orchestrator
 
-Source of truth: `references/init-protocol.md` (wire contract, statuses, multi-root discovery, extension guide).
+Source of truth: `references/init-protocol.md` (wire contract, statuses, extension guide). Profiles: `references/install-profiles.md`.
 
 ## Workflow
 
-1. From the repo root, run the script at `scripts/init.sh` inside this skill's directory. In Cursor installs that is:
+1. **Plan first (default)** — from the repo root, run without `--yes`:
 
 ```bash
 bash .cursor/skills/verasic-init/scripts/init.sh
+bash .cursor/skills/verasic-init/scripts/init.sh --profile agent   # optional profile hint
 ```
 
-Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefix — the script itself needs no configuration. Append any flags the user gave (`--skills a,b`, `--list`, `--verify`, `--no-strict-integrity`, `--check-updates`).
+Installed under a different root (e.g. `.agents/skills/`)? Adjust the path prefix. Append flags the user gave (`--list`, `--check-updates`, …).
 
-2. **Relay the report verbatim** — print init's full stdout to the user in a code block, unmodified, from the first `────` rule to the last. Do not summarize, soften, or reformat it. If init exits before printing a report (not a git repo, no repo-local install, broken manifest), relay its stderr message instead.
-3. If any row says `action needed`, walk the user through the manual steps shown in the details section, wait for them to finish, then re-run init to confirm.
-4. If `verasic-github-env` shows `wired`, `verified`, or `action needed`, remind the user of its human steps (create PAT, set `GH_TOKEN` in `.github-agent.local`, verify with `check-gh.sh`).
+2. **Relay the plan verbatim** — print init's full stdout in a code block, unmodified. Explain the detected profile, checklist gaps, and usage section; **ask the user which profile to apply** (`cursor`, `agent`, `cursor-hybrid`) before mutating anything.
 
-## Cherry-pick and inspect
+3. **Apply after confirmation** — only when the user agrees:
 
 ```bash
-bash .cursor/skills/verasic-init/scripts/init.sh --skills verasic-github-env,verasic-bugbot   # wire only these
-bash .cursor/skills/verasic-init/scripts/init.sh --list                                       # integrity + install state, change nothing
-bash .cursor/skills/verasic-init/scripts/init.sh --verify                                     # run manifest verify scripts after wire
-bash .cursor/skills/verasic-init/scripts/init.sh --no-strict-integrity                        # presence-only integrity (skip hash checks)
-bash .cursor/skills/verasic-init/scripts/init.sh --check-updates                              # compare local VERSION to upstream (read-only)
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor
 ```
 
-## How it works
+Relay that report verbatim too.
 
-`manifest.txt` maps each verasic skill to its own wiring and optional verify script. Init discovers repo-local skills roots, checks each skill's `integrity.txt` and `integrity.sha256` hashes by default (pass `--no-strict-integrity` for presence-only), runs only installed skills' wire scripts, and never uses skills from outside the repository (even when invoked from another checkout). Exit code 3 from a wire script means "manual step required" (reported, not a failure). Exit code 3 from init means manifest verify failed with `--verify`.
+4. If any row says `action needed`, walk the user through manual steps in details, wait, then re-run with `--yes`.
+5. If `verasic-github-env` was wired, remind: create PAT, set `GH_TOKEN` in `.github-agent.local`, verify with `check-gh.sh`.
+
+## Profiles
+
+| Profile | Who |
+| ------- | --- |
+| `cursor` | Full Cursor (`setup.sh` or skills under `.cursor/skills/`) |
+| `agent` | skills.sh, Claude Code, Codex, Kiro, Windsurf, … |
+| `cursor-hybrid` | `npx skills add` (`.agents/skills/`) + Cursor slash UX |
+
+Aliases: `--cursor`, `--agent`, `--cursor-hybrid`. Default auto-detects from repo layout.
+
+## Inspect and cherry-pick
+
+```bash
+bash .cursor/skills/verasic-init/scripts/init.sh --list
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --skills verasic-github-env,verasic-bugbot
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --verify --profile cursor
+bash .cursor/skills/verasic-init/scripts/init.sh --check-updates
+```
 
 ## Hard rules
 
-- Init is idempotent — safe to re-run anytime; never warn the user against re-running.
-- Relay the report verbatim; the report is the user-facing deliverable.
-- Never run `gh auth login` or edit the user's lefthook/husky config — wire scripts print snippets instead.
-- Init must run inside a git repository; it changes nothing with `--list` or `--help`.
+- **Never run `--yes` without user confirmation** — default plan is the safe path.
+- Relay reports verbatim; they are the user-facing deliverable.
+- Never run `gh auth login` or edit lefthook/husky config — wire scripts print snippets instead.
+- Init must run inside a git repository; `--list` and plan mode change nothing.
 - Repo-local skills only — external invoker paths get a warning, not silent cross-repo wiring.

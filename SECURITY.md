@@ -19,7 +19,7 @@ Published on [skills.sh](https://skills.sh/milkywayrules/verasic-skills).
 | Secrets / credentials | `verasic-github-env` documents `.github-agent.local` and `GH_TOKEN` |
 | Git hook wiring | `verasic-git-commits` installs a `commit-msg` hook via `core.hooksPath` |
 | `git config` | Wire scripts set repo-local hook paths idempotently |
-| Network (`curl`) | `verasic-init --check-updates` fetches upstream `VERSION` files read-only |
+| Network (`curl`) | `verasic-init --check-updates` fetches upstream `VERSION` files; `--yes` with cursor profiles fetches `cursor/` UX files read-only |
 | Shell execution | Bootstrap, verify, and regression scripts are bash |
 
 These are **expected false positives** for a local-dev harness — not indicators of
@@ -48,7 +48,8 @@ Per-skill detail: `skills/<name>/references/scanner-notes.md` (linked in [Relate
 
 Snyk scores the **whole skill bundle** at install time. Harness skills intentionally
 document credentials, install git hooks, run bash wiring scripts, and (for init) may
-`curl` upstream version files. Static analysis treats those patterns as high risk even
+`curl` upstream version files and (on `--yes` cursor profiles) upstream `cursor/` UX files.
+Static analysis treats those patterns as high risk even
 when the behavior is read-only, repo-local, and documented. **Critical here means
 "matches sensitive-dev-tool heuristics" — not "malware" or "CVE in production."** More
 prose will not turn marketplace badges green; verify trust via source review and
@@ -90,7 +91,7 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 
 | Skill | Repo mutations | Network | Notes |
 | ----- | -------------- | ------- | ----- |
-| **verasic-init** | Runs other skills' wire scripts; no direct file edits of its own | Optional: `--check-updates` curls upstream `VERSION` | Orchestrator only |
+| **verasic-init** | Runs wire scripts; with `--yes --profile cursor` or `cursor-hybrid` writes `.cursor/{commands,rules,agents}/` from upstream fetch | `--check-updates` curls upstream `VERSION`; cursor profiles curl upstream `cursor/` UX files | Orchestrator; confirm-first default |
 | **verasic-github-env** | `.envrc`, `.env.example` GH block, `.gitignore`, credential template | Via `gh` after you set `GH_TOKEN` | Does not create PATs or run `gh auth login` loops |
 | **verasic-git-commits** | Sets `git config core.hooksPath` to skill hooks (or prints lefthook snippet) | None | Hook strips attribution trailers pre-commit; audit is read-only |
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
@@ -103,7 +104,7 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
   `npx skills add`: read `SKILL.md` and scripts first; prefer a pinned tag URL over
   `main` when piping remote shell; verify `integrity.sha256` after install.
 - **Skills only:** `npx skills add Milkywayrules/verasic-skills`.
-- **Post-install wiring:** `/verasic-init` or `bash …/verasic-init/scripts/init.sh`.
+- **Post-install wiring:** `/verasic-init` (plan first), then `bash …/verasic-init/scripts/init.sh --yes --profile …`.
 
 Prefer pinning to a tagged release or verifying `integrity.sha256` after install.
 Upstream enforces `versions.lock` ↔ `VERSION` sync via `scripts/check-versions.sh` in CI

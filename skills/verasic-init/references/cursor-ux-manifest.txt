@@ -1,0 +1,12 @@
+# Cursor UX files fetched on --yes for cursor / cursor-hybrid profiles
+# Paths relative to repo-root cursor/ — must match find cursor -type f (see scripts/check-cursor-ux-manifest.sh)
+agents/verasic-bugbot.md
+agents/verasic-commit-auditor.md
+commands/verasic-audit-commits.md
+commands/verasic-deep-research.md
+commands/verasic-fusion.md
+commands/verasic-init.md
+commands/verasic-review.md
+commands/verasic-setup-github.md
+rules/verasic-git-commits.mdc
+rules/verasic-github-env.mdc

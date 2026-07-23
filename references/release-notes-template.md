@@ -26,9 +26,17 @@ curl -fsSL https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/s
 
 # skills CLI (pin this release)
 npx skills add Milkywayrules/verasic-skills@vX.Y.Z
+
+# Agent-only (no Cursor UX) — after skills install
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile agent
 ```
 
-Then: `/verasic-init` or `bash .cursor/skills/verasic-init/scripts/init.sh`
+Then: `/verasic-init` (plan first), then apply:
+
+```bash
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor
+# or hybrid: bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
 
 ### Verify
 

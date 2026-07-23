@@ -33,6 +33,7 @@ echo "== verasic-skills test-all =="
 echo "repo: $REPO_ROOT"
 echo
 
+run_if 'cursor UX manifest gate' "$REPO_ROOT/scripts/check-cursor-ux-manifest.sh"
 run_if 'version manifest gate' "$REPO_ROOT/scripts/check-versions.sh"
 run_if 'version regression' "$REPO_ROOT/scripts/test-versions-regression.sh"
 run_if 'internal reference check' "$REPO_ROOT/scripts/check-references.sh"

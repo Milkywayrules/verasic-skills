@@ -5,13 +5,17 @@ on:
     paths:
       - 'skills/verasic-init/**'
       - 'skills/verasic-init/manifest.txt'
-      - 'cursor/commands/verasic-init.md'
+      - 'cursor/**'
+      - 'skills/verasic-init/references/cursor-ux-manifest.txt'
+      - 'scripts/check-cursor-ux-manifest.sh'
       - '.github/workflows/verasic-init.yml'
   pull_request:
     paths:
       - 'skills/verasic-init/**'
       - 'skills/verasic-init/manifest.txt'
-      - 'cursor/commands/verasic-init.md'
+      - 'cursor/**'
+      - 'skills/verasic-init/references/cursor-ux-manifest.txt'
+      - 'scripts/check-cursor-ux-manifest.sh'
       - '.github/workflows/verasic-init.yml'
 
 jobs:
@@ -19,5 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: cursor UX manifest
+        run: bash scripts/check-cursor-ux-manifest.sh
       - name: init regression
         run: bash skills/verasic-init/scripts/test-regression.sh

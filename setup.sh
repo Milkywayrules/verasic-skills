@@ -14,4 +14,4 @@ cp -r "$TMP/cursor/rules/."    .cursor/rules/
 cp -r "$TMP/skills/."          .cursor/skills/
 
 echo "✅ verasic skills installed into .cursor/ — try /verasic-fusion, /verasic-deep-research, /verasic-review, /verasic-audit-commits, or /verasic-setup-github"
-echo "➡️  next: run /verasic-init (or: bash .cursor/skills/verasic-init/scripts/init.sh) to wire skills into this repo"
+echo "➡️  next: run /verasic-init — it shows a plan first; confirm, then apply with --yes"

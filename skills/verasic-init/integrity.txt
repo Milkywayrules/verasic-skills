@@ -3,5 +3,8 @@ SKILL.md
 VERSION
 manifest.txt
 scripts/init.sh
+scripts/profile.sh
 references/init-protocol.md
+references/install-profiles.md
+references/cursor-ux-manifest.txt
 integrity.sha256

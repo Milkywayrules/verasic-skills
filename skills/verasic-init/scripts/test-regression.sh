@@ -49,22 +49,44 @@ refresh_skill_hashes() {
   done < "$integrity_file"
 }
 
+MOCK_REPO="$TMP/mock-upstream-repo"
+mkdir -p "$MOCK_REPO/cursor"
+cp -r "$SKILLS_SRC/../cursor/." "$MOCK_REPO/cursor/"
+
+init_yes() {
+  local dir="$1"; shift
+  (cd "$dir" && VERASIC_INIT_REMOTE_REPO_BASE="$MOCK_REPO" bash "$INIT_REL" "$@")
+}
+
+# --- plan mode: no mutations by default ---
+R0="$TMP/plan"
+make_repo "$R0" verasic-init verasic-github-env verasic-git-commits
+out0="$(cd "$R0" && bash "$INIT_REL")"
+grep -q 'setup plan (no changes made)' <<<"$out0" && ok "default is plan mode" || bad "default is plan mode"
+grep -q 'install profile' <<<"$out0" && ok "plan shows install profile" || bad "plan shows install profile"
+grep -q 'profile checklist' <<<"$out0" && ok "plan shows profile checklist" || bad "plan shows profile checklist"
+grep -q 'pass --yes to apply' <<<"$out0" && ok "plan asks for confirmation" || bad "plan asks for confirmation"
+grep -qE 'would fetch(/sync)? \.cursor/' <<<"$out0" && ok "plan mentions upstream fetch" || bad "plan mentions upstream fetch"
+grep -q 'ux upstream' <<<"$out0" && grep -q 'v0.1.5' <<<"$out0" && ok "plan pins ux upstream to skill version" || bad "plan pins ux upstream to skill version"
+[[ ! -f "$R0/.envrc" ]] && ok "plan does not wire .envrc" || bad "plan does not wire .envrc"
+
 # --- full wire on a fresh repo ---
 R="$TMP/full"
 make_repo "$R" verasic-init verasic-github-env verasic-git-commits verasic-bugbot verasic-fusion
-out="$(cd "$R" && bash "$INIT_REL")"
+out="$(init_yes "$R" --yes --profile cursor)"
 row 'verasic-github-env' 'wired' "$out" && ok "github-env wired" || bad "github-env wired"
 row 'verasic-git-commits' 'wired' "$out" && ok "git-commits wired" || bad "git-commits wired"
 row 'verasic-bugbot' 'ready' "$out" && ok "bugbot ready" || bad "bugbot ready"
 row 'verasic-fusion' 'ready' "$out" && ok "fusion ready" || bad "fusion ready"
 grep -q 'skill roots' <<<"$out" && ok "skill roots section" || bad "skill roots section"
 grep -q 'versions' <<<"$out" && ok "versions section" || bad "versions section"
-grep -qE 'verasic-init[[:space:]]+0\.1\.3' <<<"$out" && ok "versions row for verasic-init" || bad "versions row for verasic-init"
+grep -qE 'verasic-init[[:space:]]+0\.1\.5' <<<"$out" && ok "versions row for verasic-init" || bad "versions row for verasic-init"
 grep -q 'actions' <<<"$out" && ok "actions section" || bad "actions section"
 [[ -f "$R/.envrc" ]] && ok ".envrc created" || bad ".envrc created"
 [[ -f "$R/.github-agent.local" ]] && ok ".github-agent.local scaffolded" || bad ".github-agent.local scaffolded"
 hooks_path="$(git -C "$R" config core.hooksPath || true)"
 [[ "$hooks_path" == ".cursor/skills/verasic-git-commits/hooks" ]] && ok "hooksPath set" || bad "hooksPath set ($hooks_path)"
+[[ -f "$R/.cursor/commands/verasic-init.md" ]] && ok "cursor --yes fetches commands" || bad "cursor --yes fetches commands"
 
 ( cd "$R" && echo x > f.txt && git add f.txt && \
   git -c user.email=t@t -c user.name=t commit -q -m $'test: probe hook\n\nCo-authored-by: Bot <b@b.co>' )
@@ -75,16 +97,16 @@ else
 fi
 
 # --- idempotency ---
-out2="$(cd "$R" && bash "$INIT_REL")"
+out2="$(init_yes "$R" --yes --profile cursor)"
 grep -q '0 failed' <<<"$out2" && ok "re-run clean" || bad "re-run clean"
 row 'verasic-git-commits' 'wired' "$out2" && ok "re-run hook already wired" || bad "re-run hook already wired"
 
 # --- cherry-pick ---
-out3="$(cd "$R" && bash "$INIT_REL" --skills verasic-bugbot)"
+out3="$(init_yes "$R" --yes --profile agent --skills verasic-bugbot)"
 row 'verasic-github-env' 'not selected' "$out3" && ok "cherry-pick skips github-env" || bad "cherry-pick skips github-env"
 row 'verasic-bugbot' 'ready' "$out3" && ok "cherry-pick keeps bugbot" || bad "cherry-pick keeps bugbot"
 
-out3b="$(cd "$R" && bash "$INIT_REL" --skills ' verasic-bugbot , verasic-git-commits ')"
+out3b="$(init_yes "$R" --yes --profile agent --skills ' verasic-bugbot , verasic-git-commits ')"
 row 'verasic-bugbot' 'ready' "$out3b" && ok "whitespace --skills selects" || bad "whitespace --skills selects"
 grep -q '0 unknown' <<<"$out3b" && ok "whitespace --skills no ghost rows" || bad "whitespace --skills no ghost rows"
 
@@ -103,19 +125,19 @@ out4b="$(cd "$R" && bash "$INIT_REL" --skills verasic-bugbot,nope)" || rc=$?
 [[ "$rc" -eq 0 ]] && ok "mixed selection exits 0" || bad "mixed selection exits 0 (rc=$rc)"
 row 'verasic-bugbot' 'ready' "$out4b" && ok "mixed selection wires real skill" || bad "mixed selection wires real skill"
 
-out4c="$(cd "$R" && bash "$INIT_REL" --skills verasic-init)"
+out4c="$(init_yes "$R" --yes --profile agent --skills verasic-init)"
 row 'verasic-init' 'ready' "$out4c" && ok "verasic-init selectable in manifest" || bad "verasic-init selectable in manifest"
 
 R1b="$TMP/tokened"
 make_repo "$R1b" verasic-init verasic-bugbot
 git -C "$R1b" remote set-url origin https://x-access-token:ghp_FAKESECRET@github.com/acme/w.git
-outT="$(cd "$R1b" && bash "$INIT_REL")"
+outT="$(init_yes "$R1b" --yes --profile cursor)"
 grep -q 'ghp_FAKESECRET' <<<"$outT" && bad "origin credentials stripped" || ok "origin credentials stripped"
 grep -q 'https://github.com/acme/w.git' <<<"$outT" && ok "origin still shown" || bad "origin still shown"
 
 R2="$TMP/partial"
 make_repo "$R2" verasic-init verasic-bugbot
-out5="$(cd "$R2" && bash "$INIT_REL")"
+out5="$(init_yes "$R2" --yes --profile agent)"
 row 'verasic-github-env' 'not installed' "$out5" && ok "missing skill reported" || bad "missing skill reported"
 
 # --- gut missing file -> broken install ---
@@ -123,7 +145,7 @@ R2a="$TMP/gut"
 make_repo "$R2a" verasic-init verasic-github-env
 rm "$R2a/.cursor/skills/verasic-github-env/SKILL.md"
 rc=0
-out5a="$(cd "$R2a" && bash "$INIT_REL" 2>/dev/null)" || rc=$?
+out5a="$(init_yes "$R2a" --yes --profile agent 2>/dev/null)" || rc=$?
 [[ "$rc" -eq 1 ]] && ok "gut missing file exits 1" || bad "gut missing file exits 1 (rc=$rc)"
 row 'verasic-github-env' 'broken install' "$out5a" && ok "gut missing file broken install row" || bad "gut missing file broken install row"
 
@@ -132,21 +154,21 @@ R2b="$TMP/broken"
 make_repo "$R2b" verasic-init verasic-github-env
 rm "$R2b/.cursor/skills/verasic-github-env/scripts/bootstrap.sh"
 rc=0
-out5b="$(cd "$R2b" && bash "$INIT_REL" 2>/dev/null)" || rc=$?
+out5b="$(init_yes "$R2b" --yes --profile agent 2>/dev/null)" || rc=$?
 [[ "$rc" -eq 1 ]] && ok "broken install exits 1" || bad "broken install exits 1 (rc=$rc)"
 row 'verasic-github-env' 'broken install' "$out5b" && ok "broken install row" || bad "broken install row"
 
 R2c="$TMP/notrail"
 make_repo "$R2c" verasic-init verasic-bugbot
 printf '%s' 'verasic-bugbot|-|local review' > "$R2c/.cursor/skills/verasic-init/manifest.txt"
-out5c="$(cd "$R2c" && bash "$INIT_REL")"
+out5c="$(init_yes "$R2c" --yes --profile agent)"
 row 'verasic-bugbot' 'ready' "$out5c" && ok "manifest last line without newline kept" || bad "manifest last line without newline kept"
 
 R3="$TMP/lefthook"
 make_repo "$R3" verasic-init verasic-git-commits
 printf 'pre-commit:\n  commands:\n    lint:\n      run: true\n' > "$R3/lefthook.yml"
 rc=0
-out6="$(cd "$R3" && bash "$INIT_REL")" || rc=$?
+out6="$(init_yes "$R3" --yes --profile cursor)" || rc=$?
 [[ "$rc" -eq 0 ]] && ok "lefthook run exits 0" || bad "lefthook run exits 0 (rc=$rc)"
 row 'verasic-git-commits' 'action needed' "$out6" && ok "lefthook action needed" || bad "lefthook action needed"
 grep -q 'lefthook detected' <<<"$out6" && ok "lefthook snippet shown" || bad "lefthook snippet shown"
@@ -157,7 +179,7 @@ make_repo "$R3b" verasic-init verasic-git-commits
 mkdir -p "$TMP/managed-hooks" "$TMP/fakehome"
 rc=0
 out6b="$(cd "$R3b" && HOME="$TMP/fakehome" git config --global core.hooksPath "$TMP/managed-hooks" && \
-         HOME="$TMP/fakehome" bash "$INIT_REL")" || rc=$?
+         HOME="$TMP/fakehome" VERASIC_INIT_REMOTE_REPO_BASE="$MOCK_REPO" bash "$INIT_REL" --yes --profile cursor)" || rc=$?
 [[ "$rc" -eq 0 ]] && ok "global hooksPath run exits 0" || bad "global hooksPath run exits 0 (rc=$rc)"
 row 'verasic-git-commits' 'action needed' "$out6b" && ok "global hooksPath action needed" || bad "global hooksPath action needed"
 [[ -z "$(git -C "$R3b" config --local core.hooksPath || true)" ]] && ok "global hooksPath not overridden locally" || bad "global hooksPath not overridden locally"
@@ -199,7 +221,7 @@ EXTERNAL_INIT="$SKILLS_SRC/verasic-init/scripts/init.sh"
 outExt="$(cd "$R5e" && bash "$EXTERNAL_INIT" --list)"
 grep -q 'invoked from outside repo' <<<"$outExt" && ok "external invoker warning" || bad "external invoker warning"
 row 'verasic-bugbot' 'ready' "$outExt" && ok "external invoker uses repo skills" || bad "external invoker uses repo skills"
-grep -q 'skills root' <<<"$outExt" && grep -q "$R5e/.cursor/skills" <<<"$outExt" && ok "external invoker repo-local root" || bad "external invoker repo-local root"
+grep -q 'skills root' <<<"$outExt" && grep -q '.cursor/skills' <<<"$outExt" && ok "external invoker repo-local root" || bad "external invoker repo-local root"
 
 # --- external invoker, no local init -> exit 1 ---
 R5f="$TMP/no-local"
@@ -223,7 +245,7 @@ rc=0
 R6="$TMP/legacy-manifest"
 make_repo "$R6" verasic-init verasic-bugbot
 printf '%s\n' 'verasic-bugbot|-|local review skill' > "$R6/.cursor/skills/verasic-init/manifest.txt"
-out6="$(cd "$R6" && bash "$INIT_REL")"
+out6="$(init_yes "$R6" --yes --profile agent)"
 row 'verasic-bugbot' 'ready' "$out6" && ok "3-field manifest backward compat" || bad "3-field manifest backward compat"
 
 # --- 4-field manifest verify column present ---
@@ -239,7 +261,7 @@ echo "check-gh: ok — mock verify"
 MOCK
 chmod +x "$R7/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
 refresh_skill_hashes "$R7/.cursor/skills/verasic-github-env"
-out7v="$(cd "$R7" && bash "$INIT_REL" --verify)"
+out7v="$(init_yes "$R7" --yes --verify --profile cursor)"
 grep -q 'verify: ok' <<<"$out7v" && ok "--verify runs check-gh" || bad "--verify runs check-gh"
 grep -q 'manifest verify' <<<"$out7v" && ok "--verify logs manifest verify output" || bad "--verify logs manifest verify output"
 
@@ -254,7 +276,7 @@ MOCK
 chmod +x "$R7b/.cursor/skills/verasic-github-env/scripts/check-gh.sh"
 refresh_skill_hashes "$R7b/.cursor/skills/verasic-github-env"
 rc=0
-out7f="$(cd "$R7b" && bash "$INIT_REL" --verify 2>&1)" || rc=$?
+out7f="$(init_yes "$R7b" --yes --verify --profile cursor 2>&1)" || rc=$?
 grep -q 'verify: failed' <<<"$out7f" && ok "--verify reports verify failed" || bad "--verify reports verify failed"
 [[ "$rc" -eq 3 ]] && ok "--verify failure exits 3" || bad "--verify failure exits 3 (rc=$rc)"
 
@@ -263,14 +285,14 @@ R8="$TMP/strict"
 make_repo "$R8" verasic-init verasic-bugbot
 echo "# tampered" >> "$R8/.cursor/skills/verasic-bugbot/SKILL.md"
 rc=0
-out8="$(cd "$R8" && bash "$INIT_REL" 2>&1)" || rc=$?
+out8="$(init_yes "$R8" --yes --profile agent 2>&1)" || rc=$?
 row 'verasic-bugbot' 'broken install' "$out8" && ok "default hash broken install row" || bad "default hash broken install row"
 grep -q 'local patch detected' <<<"$out8" && ok "default hash reports local patch warning" || bad "default hash reports local patch warning"
 [[ "$rc" -eq 1 ]] && ok "default hash mismatch exits 1" || bad "default hash mismatch exits 1 (rc=$rc)"
 
 # --- --strict-integrity backward compat (no-op) ---
 rc=0
-out8b="$(cd "$R8" && bash "$INIT_REL" --strict-integrity 2>&1)" || rc=$?
+out8b="$(init_yes "$R8" --yes --profile agent --strict-integrity 2>&1)" || rc=$?
 row 'verasic-bugbot' 'broken install' "$out8b" && ok "--strict-integrity alias still detects mismatch" || bad "--strict-integrity alias still detects mismatch"
 [[ "$rc" -eq 1 ]] && ok "--strict-integrity alias exits 1" || bad "--strict-integrity alias exits 1 (rc=$rc)"
 
@@ -279,7 +301,7 @@ R8c="$TMP/loose"
 make_repo "$R8c" verasic-init verasic-bugbot
 echo "# tampered" >> "$R8c/.cursor/skills/verasic-bugbot/SKILL.md"
 rc=0
-out8c="$(cd "$R8c" && bash "$INIT_REL" --no-strict-integrity 2>&1)" || rc=$?
+out8c="$(init_yes "$R8c" --yes --profile agent --no-strict-integrity 2>&1)" || rc=$?
 row 'verasic-bugbot' 'ready' "$out8c" && ok "--no-strict-integrity skips hash failure" || bad "--no-strict-integrity skips hash failure"
 grep -q 'presence-only (--no-strict-integrity)' <<<"$out8c" && ok "--no-strict-integrity notes presence-only" || bad "--no-strict-integrity notes presence-only"
 [[ "$rc" -eq 0 ]] && ok "--no-strict-integrity exits 0" || bad "--no-strict-integrity exits 0 (rc=$rc)"
@@ -290,10 +312,47 @@ make_repo "$R9" verasic-init verasic-bugbot
 MOCK_BASE="$TMP/mock-upstream/skills"
 mkdir -p "$MOCK_BASE/verasic-bugbot" "$MOCK_BASE/verasic-init"
 printf '9.9.9\n' > "$MOCK_BASE/verasic-bugbot/VERSION"
-printf '0.1.3\n' > "$MOCK_BASE/verasic-init/VERSION"
+printf '0.1.5\n' > "$MOCK_BASE/verasic-init/VERSION"
 out9="$(cd "$R9" && VERASIC_INIT_REMOTE_VERSION_BASE="$MOCK_BASE" bash "$INIT_REL" --check-updates)"
 grep -q '9.9.9 available' <<<"$out9" && ok "--check-updates shows available version" || bad "--check-updates shows available version"
 grep -q 'up to date' <<<"$out9" && ok "--check-updates shows up to date row" || bad "--check-updates shows up to date row"
+
+# --- cursor-hybrid fetches Cursor UX from upstream (mock local repo base) ---
+R10="$TMP/hybrid"
+mkdir -p "$R10/.agents/skills"
+cp -r "$SKILLS_SRC/verasic-init" "$R10/.agents/skills/"
+cp -r "$SKILLS_SRC/verasic-github-env" "$R10/.agents/skills/"
+git -C "$R10" init -q -b main
+git -C "$R10" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: seed"
+git -C "$R10" remote add origin git@github.com:Milkywayrules/usecharator.git
+out10="$(cd "$R10" && VERASIC_INIT_REMOTE_REPO_BASE="$MOCK_REPO" bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid)"
+[[ -f "$R10/.cursor/commands/verasic-init.md" ]] && ok "hybrid --yes fetches cursor commands" || bad "hybrid --yes fetches cursor commands"
+[[ -f "$R10/.cursor/rules/verasic-git-commits.mdc" ]] && ok "hybrid --yes fetches cursor rules" || bad "hybrid --yes fetches cursor rules"
+grep -q 'installed Cursor UX from upstream' <<<"$out10" && ok "hybrid reports upstream fetch" || bad "hybrid reports upstream fetch"
+grep -q 'cursor-hybrid' <<<"$out10" && ok "hybrid report names profile" || bad "hybrid report names profile"
+row 'verasic-github-env' 'wired' "$out10" && ok "hybrid wires github-env from .agents/skills" || bad "hybrid wires github-env from .agents/skills"
+
+# --- agent profile plan for skills.sh layout ---
+R11="$TMP/agent-plan"
+mkdir -p "$R11/.agents/skills"
+cp -r "$SKILLS_SRC/verasic-init" "$R11/.agents/skills/"
+cp -r "$SKILLS_SRC/verasic-bugbot" "$R11/.agents/skills/"
+git -C "$R11" init -q -b main
+git -C "$R11" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: seed"
+out11="$(cd "$R11" && bash .agents/skills/verasic-init/scripts/init.sh --profile agent)"
+grep -q 'profile.*agent' <<<"$out11" && ok "agent profile in plan" || bad "agent profile in plan"
+grep -q 'Claude Code' <<<"$out11" && ok "agent usage mentions other hosts" || bad "agent usage mentions other hosts"
+grep -q 'setup plan' <<<"$out11" && ok "agent plan makes no changes" || bad "agent plan makes no changes"
+
+# --- cursor UX fetch failure exits 1 ---
+R12="$TMP/ux-fail"
+make_repo "$R12" verasic-init verasic-github-env
+mkdir -p "$TMP/dead-upstream"
+rc=0
+out12="$(cd "$R12" && VERASIC_INIT_REMOTE_REPO_BASE="$TMP/dead-upstream" bash "$INIT_REL" --yes --profile cursor 2>&1)" || rc=$?
+[[ "$rc" -eq 1 ]] && ok "ux fetch failure exits 1" || bad "ux fetch failure exits 1 (rc=$rc)"
+row 'cursor-ux' 'FAILED' "$out12" && ok "ux fetch failure FAILED row" || bad "ux fetch failure FAILED row"
+grep -q 'profile actions' <<<"$out12" && ok "ux fetch failure logs profile actions" || bad "ux fetch failure logs profile actions"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"
