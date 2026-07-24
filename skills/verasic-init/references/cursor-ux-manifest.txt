@@ -1,7 +1,8 @@
 # Cursor UX paths relative to repo-root cursor/ — inventory for upstream sync checks.
 # Fetch uses references/skill-ux-map.txt filtered by effective scope (not this file directly).
 # Every path here must appear in skill-ux-map.txt (enforced by test-regression.sh T-map-sync).
-agents/verasic-bugbot.md
+agents/verasic-bug-reviewer.md
+agents/verasic-security-reviewer.md
 agents/verasic-commit-auditor.md
 commands/verasic-audit-commits.md
 commands/verasic-disclosure-red-team.md
@@ -9,6 +10,7 @@ commands/verasic-deep-research.md
 commands/verasic-fusion.md
 commands/verasic-init.md
 commands/verasic-review.md
+commands/verasic-security-review.md
 commands/verasic-setup-github.md
 rules/verasic-git-commits.mdc
 rules/verasic-agent-disclosure.mdc

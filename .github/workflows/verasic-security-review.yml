@@ -1,0 +1,23 @@
+name: verasic-security-review
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-security-review/**'
+      - 'cursor/commands/verasic-security-review.md'
+      - 'cursor/agents/verasic-security-reviewer.md'
+      - '.github/workflows/verasic-security-review.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-security-review/**'
+      - 'cursor/commands/verasic-security-review.md'
+      - 'cursor/agents/verasic-security-reviewer.md'
+      - '.github/workflows/verasic-security-review.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: security-review regression
+        run: bash skills/verasic-security-review/scripts/test-regression.sh

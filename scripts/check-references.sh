@@ -43,6 +43,7 @@ map_install_path() {
   case "$ref" in
     .cursor/skills/*) echo "skills/${ref#.cursor/skills/}" ;;
     .agents/skills/*) echo "skills/${ref#.agents/skills/}" ;;
+    .agents/cursor/agents/*) echo "cursor/agents/${ref#.agents/cursor/agents/}" ;;
     .cursor/agents/*) echo "cursor/agents/${ref#.cursor/agents/}" ;;
     .cursor/commands/*) echo "cursor/commands/${ref#.cursor/commands/}" ;;
     .cursor/rules/*) echo "cursor/rules/${ref#.cursor/rules/}" ;;
@@ -67,7 +68,9 @@ skill_root_for() {
     base="${base%.md}"
     base="${base%.mdc}"
     case "$base" in
-      verasic-bugbot|verasic-review) echo "$SKILLS_DIR/verasic-bugbot" ;;
+      verasic-bugbot|verasic-review|verasic-bug-reviewer) echo "$SKILLS_DIR/verasic-bugbot" ;;
+      verasic-security-review|verasic-security-reviewer) echo "$SKILLS_DIR/verasic-security-review" ;;
+      verasic-config) echo "$SKILLS_DIR/verasic-config" ;;
       verasic-fusion) echo "$SKILLS_DIR/verasic-fusion" ;;
       verasic-deep-research) echo "$SKILLS_DIR/verasic-deep-research" ;;
       verasic-init) echo "$SKILLS_DIR/verasic-init" ;;
@@ -109,12 +112,26 @@ should_skip_ref() {
   [[ "$ref" == */ ]] && return 0
   [[ "$ref" =~ ^!\. ]] && return 0
   [[ "$ref" =~ ^v[0-9]+(\.[0-9]+)*(\.[0-9]+)?$ ]] && return 0
+  [[ "$ref" =~ ^\([0-9]+/[0-9]+\)$ ]] && return 0
+  [[ "$ref" =~ \([0-9]+/[0-9]+\) ]] && return 0
 
   case "$ref" in
-    .cursor/skills|.cursor/skills/|.agents/skills|.agents/skills/|skills/|skills)
+    .cursor/skills|.cursor/skills/|.agents/skills|.agents/skills/|.agents/cursor/agents|.agents/cursor/agents/|skills/|skills)
       return 0
       ;;
     AGENTS.md|CLAUDE.md|.envrc|.env.example|.gitignore|.github-agent.local)
+      return 0
+      ;;
+    .verasicrc.json|.verasicrc.jsonc|verasic.config.ts)
+      return 0
+      ;;
+    verasic/.gitkeep|verasic/security-reviews/.gitkeep|.verasic/security-reviews/.gitkeep)
+      return 0
+      ;;
+    auth/crypto/webhook/input|p/default)
+      return 0
+      ;;
+    verasic-bugbot.md|verasic-bug-reviewer.md|verasic-security-reviewer.md)
       return 0
       ;;
     blob/main|Milkywayrules/verasic-skills|actions/checkout)
@@ -123,7 +140,7 @@ should_skip_ref() {
     .md|.mdc|SKILL.md|integrity.sha256|integrity.txt|test-regression.sh)
       return 0
       ;;
-    laravel.md|flutter.md|src/foo.ts|scripts/release.sh|refs/remotes/origin/HEAD)
+    laravel.md|flutter.md|src/foo.ts|src/api/auth.ts:42|scripts/release.sh|refs/remotes/origin/HEAD)
       return 0
       ;;
     verasic-jsdoc-and-comments.mdc)

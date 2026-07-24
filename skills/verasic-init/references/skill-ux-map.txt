@@ -1,7 +1,9 @@
 # skill-name|cursor-relpath|kind  (relpath relative to repo-root .cursor/)
 # kind: rule | command | agent
-verasic-bugbot|agents/verasic-bugbot.md|agent
+verasic-bugbot|agents/verasic-bug-reviewer.md|agent
 verasic-bugbot|commands/verasic-review.md|command
+verasic-security-review|agents/verasic-security-reviewer.md|agent
+verasic-security-review|commands/verasic-security-review.md|command
 verasic-git-commits|agents/verasic-commit-auditor.md|agent
 verasic-git-commits|commands/verasic-audit-commits.md|command
 verasic-git-commits|rules/verasic-git-commits.mdc|rule

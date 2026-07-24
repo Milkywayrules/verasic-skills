@@ -1,0 +1,14 @@
+# required paths relative to skill dir
+SKILL.md
+README.md
+VERSION
+schema/verasic.config.ts
+templates/verasic.config.ts.example
+templates/.verasicrc.json.example
+templates/.verasicrc.jsonc.example
+references/config-schema.md
+references/scanner-notes.md
+scripts/scaffold-artifacts.sh
+scripts/resolve-config.sh
+scripts/test-regression.sh
+integrity.sha256

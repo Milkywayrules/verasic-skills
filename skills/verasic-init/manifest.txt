@@ -8,6 +8,8 @@ verasic-github-governance-init|-|-|plan-first governance factory — run factory
 verasic-git-commits|scripts/wire-hook.sh|-|commit convention + deterministic commit-msg hook
 verasic-agent-disclosure|scripts/wire-rule.sh|-|agent disclosure policy + red-team catalog
 verasic-bugbot|-|-|local bugbot-style code review (no repo wiring)
+verasic-security-review|-|-|STRIDE security review on git diff (skill-only wiring)
+verasic-config|scripts/scaffold-artifacts.sh|-|repo config hub — artifact dirs and verasic.config.ts scaffold
 verasic-fusion|-|-|multi-model fusion for exploration and decision support (no repo wiring)
 verasic-deep-research|-|-|verified deep research with source ledger and confidence scoring
 verasic-init|-|-|this orchestrator (running it is the wiring)

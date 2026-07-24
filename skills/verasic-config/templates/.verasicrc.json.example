@@ -1,0 +1,15 @@
+{
+  "artifacts": {
+    "trackedDir": "verasic",
+    "localDir": ".verasic",
+    "indexLocal": false
+  },
+  "securityReview": {
+    "scanner": "off",
+    "strictness": "strict",
+    "report": {
+      "write": true,
+      "promote": "both"
+    }
+  }
+}

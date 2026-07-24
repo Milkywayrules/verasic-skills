@@ -1,0 +1,34 @@
+/**
+ * Verasic repo config — copy to repo root as verasic.config.ts
+ * Primary config hub for security review, bugbot, fusion, deep-research, etc.
+ *
+ * Alternative: .verasicrc.json (strict JSON) or .verasicrc.jsonc (JSON with comments)
+ * at repo root. Do not commit secrets here.
+ */
+
+import type { VerasicConfig } from './.cursor/skills/verasic-config/schema/verasic.config';
+// cursor-hybrid install: './.agents/skills/verasic-config/schema/verasic.config'
+
+const config: VerasicConfig = {
+  artifacts: {
+    // Durable artifacts you may commit and want indexed (team policies, promoted reports)
+    trackedDir: 'verasic',
+    // Gitignored local runs — pairs with trackedDir; agent reads when given an explicit path
+    localDir: '.verasic',
+    // When false, init scaffold may append localDir to .cursorignore
+    indexLocal: false,
+  },
+  securityReview: {
+    // off | semgrep | opengrep | auto (auto tries opengrep then semgrep)
+    scanner: 'off',
+    // strict = fewer findings, higher bar; assertive = broader surface
+    strictness: 'strict',
+    report: {
+      write: true,
+      // both = full local + promoted tracked copy; local | tracked for one side only
+      promote: 'both',
+    },
+  },
+};
+
+export default config;

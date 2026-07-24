@@ -8,7 +8,29 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
-_(next bundle)_
+### Skills
+
+- **verasic-config** — scaffold honors `artifacts.indexLocal: false` from `.verasicrc` (not only `VERASIC_INDEX_LOCAL=false`)
+- **verasic-security-review** — regression asserts cursor command/agent; scanner docs clarify user-supplied rules until bundled packs ship; SKILL.md documents `.agents/cursor/` hybrid path
+- **verasic-bugbot** — `/verasic-review` command states bugbot-only scope; cross-tip to `/verasic-security-review`
+
+## v0.1.12
+
+### Skills
+
+- **verasic-security-review** (`0.1.1`) — new: STRIDE security review on git diff, optional Semgrep/OpenGrep scanner, confidence rubric, artifact output
+- **verasic-config** (`0.1.1`) — new: repo config hub — `verasic.config.ts` / `.verasicrc` schema, artifact dir scaffold, shared path resolution
+- **verasic-init** (`0.1.12`) — manifest registers config + security-review; skill-ux-map uses `verasic-bug-reviewer` + `verasic-security-reviewer`; profile usage lists `/verasic-security-review`
+- **verasic-bugbot** (`0.1.4`) — subagent renamed to `verasic-bug-reviewer`; cross-tip to `/verasic-security-review` for auth/crypto/webhook/input diffs
+
+### Infrastructure
+
+- **cursor/** — `verasic-bugbot.md` → `verasic-bug-reviewer.md`; add `verasic-security-reviewer.md` + `/verasic-security-review` command
+- `.github/workflows/verasic-config.yml` + `verasic-security-review.yml` — path-filtered CI regressions mirroring bugbot pattern
+- `.github/workflows/verasic-bugbot.yml` — path filter updated for `verasic-bug-reviewer.md`
+- **README.md** + **SECURITY.md** — document config + security-review skills, usage, scan signals, capability table
+- **scripts/check-references.sh** — map `verasic-bug-reviewer`, `verasic-security-reviewer`, `verasic-config` cursor refs
+- `.gitignore` — ignore `knowledge-base-of-king-the-user/` symlink pollution
 
 ## v0.1.11
 

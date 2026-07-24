@@ -1,0 +1,19 @@
+name: verasic-config
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-config/**'
+      - '.github/workflows/verasic-config.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-config/**'
+      - '.github/workflows/verasic-config.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: config regression
+        run: bash skills/verasic-config/scripts/test-regression.sh

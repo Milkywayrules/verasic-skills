@@ -52,11 +52,16 @@ Full spec: [references/install-profiles.md](references/install-profiles.md)
 
 ## What `--yes` wires (repo-level)
 
-| Skill                 | Wiring                                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `verasic-github-env`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template                                            |
-| `verasic-git-commits` | `core.hooksPath` → commit-msg hook (or manual snippet if lefthook/husky exists)                                 |
-| `verasic-bugbot`      | nothing — skill-only                                                                                            |
+| Skill                      | Wiring                                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `verasic-github-env`       | `.envrc`, `.env.example` GH block, `.gitignore`, credential template                                            |
+| `verasic-git-commits`      | `core.hooksPath` → commit-msg hook (or manual snippet if lefthook/husky exists)                                 |
+| `verasic-config`           | `verasic.config.ts` scaffold, `verasic/` + `.verasic/` dirs, `.gitignore` for localDir                          |
+| `verasic-bugbot`           | nothing — skill-only; UX via init fetch                                                                         |
+| `verasic-security-review`  | nothing — skill-only; UX via init fetch                                                                         |
+| `verasic-fusion`           | nothing — skill-only                                                                                            |
+| `verasic-deep-research`    | nothing — skill-only                                                                                            |
+| `verasic-agent-disclosure` | disclosure rule via `wire-rule.sh`                                                                              |
 
 Skills not installed are reported as `not installed` and skipped.
 

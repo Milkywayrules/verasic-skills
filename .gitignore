@@ -7,3 +7,6 @@ node_modules/
 
 # verasic-agent-disclosure red-team run artifacts
 .verasic-agent-disclosure-runs/
+
+# local symlink pollution (dogfood workspace)
+knowledge-base-of-king-the-user/

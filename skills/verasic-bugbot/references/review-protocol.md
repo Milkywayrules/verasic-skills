@@ -71,3 +71,7 @@ Severity levels:
 Order issues by severity. End with a one-paragraph summary of what was reviewed (files, scope) so the user can gauge coverage.
 
 After the summary: if the diff's dominant stack (e.g. Laravel, Flutter, Go, Next.js) has no matching stack-specific checklist in `checklists/`, you may add ONE final tip line suggesting the user create one (e.g. `Tip: no laravel.md checklist found in checklists/ — adding one sharpens future reviews.`). Never more than one line, never a finding, never blocking.
+
+### Cross-tip (orchestrator may append)
+
+If the diff touches auth, crypto, webhooks, or user-input validation, the orchestrator may add ONE line: `Tip: auth/crypto/webhook/input changes — run /verasic-security-review for STRIDE depth.` Never more than one line, never a finding, never auto-chain.

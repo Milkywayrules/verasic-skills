@@ -329,6 +329,7 @@ verasic_profile_print_usage_scoped() {
 
   verasic_profile_scope_contains verasic-init "$scope_csv" && has_cmd=true
   verasic_profile_scope_contains verasic-bugbot "$scope_csv" && { has_cmd=true; has_agent=true; }
+  verasic_profile_scope_contains verasic-security-review "$scope_csv" && { has_cmd=true; has_agent=true; }
   verasic_profile_scope_contains verasic-git-commits "$scope_csv" && { has_cmd=true; has_rule=true; has_agent=true; }
   verasic_profile_scope_contains verasic-github-env "$scope_csv" && { has_cmd=true; has_rule=true; }
   verasic_profile_scope_contains verasic-fusion "$scope_csv" && has_cmd=true
@@ -337,6 +338,7 @@ verasic_profile_print_usage_scoped() {
   if [[ "$profile" == agent ]]; then
     echo "   • Invoke by skill name for skills in scope — no /verasic-* commands unless you add Cursor UX"
     verasic_profile_scope_contains verasic-bugbot "$scope_csv" && echo "   • verasic-bugbot — local bugbot-style code review (read SKILL.md)"
+    verasic_profile_scope_contains verasic-security-review "$scope_csv" && echo "   • verasic-security-review — STRIDE security review on git diff (read SKILL.md)"
     verasic_profile_scope_contains verasic-fusion "$scope_csv" && echo "   • verasic-fusion — multi-model fusion for exploration and decision support"
     verasic_profile_scope_contains verasic-deep-research "$scope_csv" && echo "   • verasic-deep-research — ledger-backed research with confidence scoring"
     verasic_profile_scope_contains verasic-git-commits "$scope_csv" && echo "   • verasic-git-commits — commit convention + deterministic commit-msg hook"
@@ -347,6 +349,7 @@ verasic_profile_print_usage_scoped() {
     local cmds=()
     verasic_profile_scope_contains verasic-init "$scope_csv" && cmds+=("/verasic-init")
     verasic_profile_scope_contains verasic-bugbot "$scope_csv" && cmds+=("/verasic-review")
+    verasic_profile_scope_contains verasic-security-review "$scope_csv" && cmds+=("/verasic-security-review")
     verasic_profile_scope_contains verasic-fusion "$scope_csv" && cmds+=("/verasic-fusion")
     verasic_profile_scope_contains verasic-deep-research "$scope_csv" && cmds+=("/verasic-deep-research")
     verasic_profile_scope_contains verasic-git-commits "$scope_csv" && cmds+=("/verasic-audit-commits")
@@ -364,7 +367,8 @@ verasic_profile_print_usage_scoped() {
     fi
     if $has_agent; then
       local agents=()
-      verasic_profile_scope_contains verasic-bugbot "$scope_csv" && agents+=("verasic-bugbot")
+      verasic_profile_scope_contains verasic-bugbot "$scope_csv" && agents+=("verasic-bug-reviewer")
+      verasic_profile_scope_contains verasic-security-review "$scope_csv" && agents+=("verasic-security-reviewer")
       verasic_profile_scope_contains verasic-git-commits "$scope_csv" && agents+=("verasic-commit-auditor")
       if ((${#agents[@]} > 0)); then
         local ajoined="${agents[0]}"

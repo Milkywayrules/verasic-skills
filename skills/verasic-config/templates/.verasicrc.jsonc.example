@@ -1,0 +1,17 @@
+{
+  // Verasic repo config — copy to repo root as .verasicrc.jsonc (JSON with comments)
+  // Strict JSON alias: .verasicrc.json — one root object, not JSONL
+  "artifacts": {
+    "trackedDir": "verasic", // durable, commit-friendly
+    "localDir": ".verasic", // gitignored local runs
+    "indexLocal": false
+  },
+  "securityReview": {
+    "scanner": "off", // off | semgrep | opengrep | auto
+    "strictness": "strict", // strict | assertive
+    "report": {
+      "write": true,
+      "promote": "both" // both | local | tracked
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# required paths relative to skill dir
+SKILL.md
+VERSION
+README.md
+references/security-review-protocol.md
+references/confidence-rubric.md
+references/scanner-adapter.md
+references/config-schema.md
+references/scanner-notes.md
+checklists/security.md
+scripts/test-regression.sh
+scripts/run-scanner.sh
+integrity.sha256

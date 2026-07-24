@@ -651,6 +651,70 @@ for mline in "${MANIFEST_LINES[@]}"; do
   esac
 done
 
+# Auto-run verasic-config scaffold when another skill is in scope but config was
+# not cherry-picked (scaffold checklist §E).
+if ! $PLAN_ONLY && $CONFIRMED && $SELECT_GIVEN && ! is_selected verasic-config; then
+  config_wire="scripts/scaffold-artifacts.sh"
+  if config_dir="$(resolve_skill_dir verasic-config 2>/dev/null)" && [[ -f "$config_dir/$config_wire" ]]; then
+    need_config_scaffold=false
+    if [[ -n "$EFFECTIVE_SCOPE" ]]; then
+      IFS=',' read -ra _scope_parts <<< "$EFFECTIVE_SCOPE"
+      for _sc_name in "${_scope_parts[@]}"; do
+        [[ "$_sc_name" == verasic-init ]] && continue
+        if resolve_skill_dir "$_sc_name" >/dev/null 2>&1; then
+          need_config_scaffold=true
+          break
+        fi
+      done
+    fi
+    if $need_config_scaffold; then
+      _cfg_integrity_ok=true
+      _cfg_hash_ok=true
+      if ! check_integrity "$config_dir" >/dev/null 2>&1; then
+        _cfg_integrity_ok=false
+      fi
+      if $STRICT_INTEGRITY && ! check_hash_integrity "$config_dir" >/dev/null 2>&1; then
+        _cfg_hash_ok=false
+      fi
+      if $_cfg_integrity_ok && $_cfg_hash_ok; then
+        out="$TMP/verasic-config-autoscaffold.out"
+        rc=0
+        bash "$config_dir/$config_wire" >"$out" 2>&1 || rc=$?
+        wire_ran=$((wire_ran + 1))
+        detail_files+=("$out")
+        action_log=""
+        if [[ -s "$out" ]]; then
+          action_log="$(grep -E '^scaffold: step:' "$out" 2>/dev/null || true)"
+        fi
+        [[ -z "$action_log" ]] && action_log="wire: ran $config_wire (auto)"
+        case "$rc" in
+          0)
+            names+=("verasic-config")
+            statuses+=("wired")
+            summaries+=("repo config hub — artifact dirs and verasic.config.ts scaffold (auto)")
+            actions_lines+=("$action_log; $(integrity_action_ok)")
+            wired=$((wired + 1))
+            ;;
+          3)
+            names+=("verasic-config")
+            statuses+=("action needed")
+            summaries+=("manual step required — see details")
+            actions_lines+=("$action_log; $(integrity_action_ok)")
+            action_needed=$((action_needed + 1))
+            ;;
+          *)
+            names+=("verasic-config")
+            statuses+=("FAILED")
+            summaries+=("exit $rc — see details")
+            actions_lines+=("wire: failed (exit $rc)")
+            failed=$((failed + 1))
+            ;;
+        esac
+      fi
+    fi
+  fi
+fi
+
 if [[ -n "$SELECT" ]]; then
   IFS=',' read -ra requested <<< "$SELECT"
   for req in "${requested[@]}"; do

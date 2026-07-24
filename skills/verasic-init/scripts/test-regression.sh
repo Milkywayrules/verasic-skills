@@ -364,7 +364,7 @@ out13="$(init_yes "$R13" --yes --profile cursor --skills verasic-bugbot,verasic-
 [[ -f "$R13/.cursor/commands/verasic-init.md" ]] && ok "T-partial-cursor fetches init command" || bad "T-partial-cursor fetches init command"
 [[ -f "$R13/.cursor/commands/verasic-fusion.md" ]] && ok "T-partial-cursor fetches fusion command" || bad "T-partial-cursor fetches fusion command"
 [[ -f "$R13/.cursor/commands/verasic-review.md" ]] && ok "T-partial-cursor fetches review command" || bad "T-partial-cursor fetches review command"
-[[ -f "$R13/.cursor/agents/verasic-bugbot.md" ]] && ok "T-partial-cursor fetches bugbot agent" || bad "T-partial-cursor fetches bugbot agent"
+[[ -f "$R13/.cursor/agents/verasic-bug-reviewer.md" ]] && ok "T-partial-cursor fetches bugbot agent" || bad "T-partial-cursor fetches bugbot agent"
 [[ ! -f "$R13/.cursor/rules/verasic-git-commits.mdc" ]] && ok "T-partial-cursor skips git-commits rule" || bad "T-partial-cursor skips git-commits rule"
 [[ ! -f "$R13/.cursor/commands/verasic-setup-github.md" ]] && ok "T-partial-cursor skips setup-github" || bad "T-partial-cursor skips setup-github"
 grep -q 'no Cursor UX files for effective scope' <<<"$out13" && bad "T-partial-cursor should fetch some UX" || ok "T-partial-cursor fetched scoped UX"
@@ -409,6 +409,39 @@ out17="$(cd "$R17" && bash "$INIT_REL" --skills verasic-bugbot,verasic-init)"
 grep -q '^ scope$' <<<"$out17" && ok "T-scope-banner scope heading" || bad "T-scope-banner scope heading"
 grep -q 'source: --skills' <<<"$out17" && ok "T-scope-banner scope source" || bad "T-scope-banner scope source"
 grep -q '• verasic-bugbot' <<<"$out17" && ok "T-scope-banner lists scoped skills" || bad "T-scope-banner lists scoped skills"
+
+# --- T-manifest-security-config ---
+grep -qE '^verasic-security-review\|' "$SKILLS_SRC/verasic-init/manifest.txt" && ok "T-manifest lists security-review" || bad "T-manifest lists security-review"
+grep -qE '^verasic-config\|' "$SKILLS_SRC/verasic-init/manifest.txt" && ok "T-manifest lists verasic-config" || bad "T-manifest lists verasic-config"
+grep -q 'verasic-security-reviewer.md' "$SKILLS_SRC/verasic-init/references/skill-ux-map.txt" && ok "T-ux-map lists security agent" || bad "T-ux-map lists security agent"
+grep -q 'verasic-bug-reviewer.md' "$SKILLS_SRC/verasic-init/references/skill-ux-map.txt" && ok "T-ux-map lists bug-reviewer agent" || bad "T-ux-map lists bug-reviewer agent"
+
+# --- T-config-wire ---
+R18="$TMP/config-wire"
+make_repo "$R18" verasic-init verasic-config
+out18="$(init_yes "$R18" --yes --profile agent --skills verasic-config,verasic-init)"
+row 'verasic-config' 'wired' "$out18" && ok "T-config-wire wires verasic-config" || bad "T-config-wire wires verasic-config"
+grep -q '.verasic/' "$R18/.gitignore" && ok "T-config-wire gitignores localDir" || bad "T-config-wire gitignores localDir"
+[[ -f "$R18/.verasic/security-reviews/.gitkeep" ]] && ok "T-config-wire scaffolds local dirs" || bad "T-config-wire scaffolds local dirs"
+
+# --- T-security-usage + UX fetch ---
+R19="$TMP/security-wire"
+make_repo "$R19" verasic-init verasic-security-review
+out19="$(cd "$R19" && bash "$INIT_REL" --profile cursor --skills verasic-security-review,verasic-init)"
+grep -q '/verasic-security-review' <<<"$out19" && ok "T-security-usage lists command" || bad "T-security-usage lists command"
+out20="$(init_yes "$R19" --yes --profile cursor --skills verasic-security-review,verasic-init)"
+[[ -f "$R19/.cursor/commands/verasic-security-review.md" ]] && ok "T-security-ux fetches command" || bad "T-security-ux fetches command"
+[[ -f "$R19/.cursor/agents/verasic-security-reviewer.md" ]] && ok "T-security-ux fetches agent" || bad "T-security-ux fetches agent"
+grep -q '# mock' "$R19/.cursor/commands/verasic-init.md" && bad "T-security-ux fetched mock init" || ok "T-security-ux non-mock init"
+
+# --- T-security-scaffold: security-only init auto-scaffolds config when present ---
+R21="$TMP/security-scaffold"
+make_repo "$R21" verasic-init verasic-security-review verasic-config
+out21="$(init_yes "$R21" --yes --profile agent --skills verasic-security-review,verasic-init)"
+row 'verasic-config' 'wired' "$out21" && ok "T-security-scaffold auto-wires verasic-config" || bad "T-security-scaffold auto-wires verasic-config"
+grep -q '.verasic/' "$R21/.gitignore" && ok "T-security-scaffold gitignores localDir" || bad "T-security-scaffold gitignores localDir"
+[[ -f "$R21/verasic.config.ts" ]] && ok "T-security-scaffold creates verasic.config.ts" || bad "T-security-scaffold creates verasic.config.ts"
+[[ -f "$R21/verasic/.gitkeep" ]] && ok "T-security-scaffold creates trackedDir" || bad "T-security-scaffold creates trackedDir"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

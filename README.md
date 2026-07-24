@@ -6,6 +6,11 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
   agent, no Bugbot subscription needed. Reviews git diffs for real bugs
   (logic, security, races, perf) with an aggressive low-noise filter. Style
   nitpicks are never reported.
+- **verasic-security-review** — STRIDE-focused security review on git diff with
+  optional Semgrep/OpenGrep scanner pass, confidence scoring, and artifact output.
+  Complements bugbot — depth on auth, crypto, webhooks, and input validation.
+- **verasic-config** — repo config hub for Verasic skills: `verasic.config.ts` /
+  `.verasicrc` schema, artifact dir scaffold, and shared path resolution.
 - **verasic-fusion** — multi-model fusion for exploration and decision support.
   Run the same question across models you name, with optional templates
   (board-verdict, rfc-review, tradeoff-matrix, and more). Main agent orchestrates;
@@ -82,6 +87,7 @@ Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/sk
 - `/verasic-deep-research` — ledger-backed research (requires `depth`, `output`, `source-boundary`, question)
 - `/verasic-review` — review branch changes vs the default branch
 - `/verasic-review uncommitted` — review staged + unstaged only
+- `/verasic-security-review` — STRIDE security review on branch or uncommitted diff
 - `/verasic-audit-commits` — audit branch commit history before push/PR
 - `/verasic-disclosure-red-team` — run agent disclosure adversarial regression
 - `/verasic-init` — plan setup (profile + checklist + usage), then apply with `--yes` after you confirm
@@ -93,6 +99,8 @@ Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/sk
 Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-deep-research/README.md](skills/verasic-deep-research/README.md) ·
 [skills/verasic-bugbot/README.md](skills/verasic-bugbot/README.md) ·
+[skills/verasic-security-review/README.md](skills/verasic-security-review/README.md) ·
+[skills/verasic-config/README.md](skills/verasic-config/README.md) ·
 [skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
 [skills/verasic-agent-disclosure/README.md](skills/verasic-agent-disclosure/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
@@ -113,6 +121,8 @@ Per-skill scanner notes:
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
 [verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
 [verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md) ·
+[verasic-security-review](skills/verasic-security-review/references/scanner-notes.md) ·
+[verasic-config](skills/verasic-config/references/scanner-notes.md) ·
 [verasic-github-governance](skills/verasic-github-governance/references/scanner-notes.md) ·
 [verasic-github-governance-init](skills/verasic-github-governance-init/references/scanner-notes.md)
 
@@ -169,6 +179,8 @@ verasic-skills/
 │ ├── verasic-init.yml
 │ ├── verasic-git-commits.yml
 │ ├── verasic-bugbot.yml
+│ ├── verasic-config.yml
+│ ├── verasic-security-review.yml
 │ ├── verasic-release.yml # full test-all on tag push
 │ └── verasic-versions.yml # version manifest on every main PR/push
 ├── skills/ # ← the units npx installs
@@ -182,6 +194,21 @@ verasic-skills/
 │ │ ├── security.md
 │ │ ├── performance.md
 │ │ └── infra.md
+│ ├── verasic-security-review/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ ├── references/
+│ │ │ └── security-review-protocol.md # ← single source of truth
+│ │ └── checklists/
+│ │     └── security.md
+│ ├── verasic-config/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ ├── schema/
+│ │ │ └── verasic.config.ts
+│ │ └── scripts/
+│ │     ├── scaffold-artifacts.sh # wire repo: artifact dirs + config scaffold
+│ │     └── test-regression.sh
 │ ├── verasic-fusion/
 │ │ ├── SKILL.md
 │ │ ├── README.md
@@ -312,11 +339,13 @@ verasic-skills/
 │ └── cursor-ux-manifest.txt
 └── cursor/
     ├── agents/
-    │ ├── verasic-bugbot.md # thin pointer to the review protocol
+    │ ├── verasic-bug-reviewer.md # thin pointer to the review protocol
+    │ ├── verasic-security-reviewer.md # thin pointer to security-review protocol
     │ ├── verasic-commit-auditor.md # thin pointer to the audit protocol
     │ └── verasic-github-governance.md # thin pointer to governance protocol
     ├── commands/
     │ ├── verasic-review.md
+    │ ├── verasic-security-review.md
     │ ├── verasic-fusion.md
     │ ├── verasic-deep-research.md
     │ ├── verasic-audit-commits.md

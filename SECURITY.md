@@ -40,6 +40,8 @@ as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
 | **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
 | **verasic-deep-research** | — | — | Critical (bundle) | Yes — bundle + subagent/fetch protocol keywords |
 | **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
+| **verasic-security-review** | — | — | Critical (bundle) | Yes — bundle + STRIDE/scanner protocol keywords |
+| **verasic-config** | — | — | Critical (bundle) | Yes — bundle + config schema keywords |
 | **verasic-agent-disclosure** | — | — | Critical (bundle) | Yes — rule wiring + adversarial red-team catalog |
 | **verasic-github-governance** | — | — | Critical (bundle) | Yes — git hooks, hook wiring, CI templates |
 | **verasic-github-governance-init** | — | — | Critical (bundle) | Yes — factory orchestrator; inherits governance + `gh` when `--open-pr` |
@@ -101,6 +103,8 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
 | **verasic-deep-research** | None (research only) | Readonly web fetch + model APIs when invoked | Ledger-backed citations; no file writes in ask mode |
 | **verasic-bugbot** | None (review only) | None | Reads git diffs and full files; reports bugs |
+| **verasic-security-review** | Optional artifact dirs under `.verasic/` when config enables writes | Optional Semgrep/OpenGrep when installed and config enables scanner | STRIDE review on git diff; read-only by default |
+| **verasic-config** | Scaffolds `verasic.config.ts`, `verasic/`, `.verasic/`, `.gitignore` localDir entry | None | Shared config resolution for review/fusion skills |
 | **verasic-agent-disclosure** | Copies disclosure rule to `.cursor/rules/` via `wire-rule.sh` | None (red-team may invoke Cursor Agent CLI) | Policy + red-team catalog; confirm-first |
 | **verasic-github-governance** | Bootstrap copies CI/hook templates; `wire-hooks.sh` sets hook paths | Via `gh` when doctor hints at plan or `--open-pr` factory path | Soft-first; OpenTofu hard path is plan-gated and not copied to product repos |
 | **verasic-github-governance-init** | Runs governance factory scripts with `--yes` only | Via `gh` when `--open-pr` | Plan-first orchestrator; never auto-applies without confirmation |
@@ -141,6 +145,8 @@ Include skill name, install path, command run, and redacted logs (never paste to
   - [skills/verasic-fusion/references/scanner-notes.md](skills/verasic-fusion/references/scanner-notes.md)
   - [skills/verasic-deep-research/references/scanner-notes.md](skills/verasic-deep-research/references/scanner-notes.md)
   - [skills/verasic-bugbot/references/scanner-notes.md](skills/verasic-bugbot/references/scanner-notes.md)
+  - [skills/verasic-security-review/references/scanner-notes.md](skills/verasic-security-review/references/scanner-notes.md)
+  - [skills/verasic-config/references/scanner-notes.md](skills/verasic-config/references/scanner-notes.md)
   - [skills/verasic-agent-disclosure/references/scanner-notes.md](skills/verasic-agent-disclosure/references/scanner-notes.md)
   - [skills/verasic-github-governance/references/scanner-notes.md](skills/verasic-github-governance/references/scanner-notes.md)
   - [skills/verasic-github-governance-init/references/scanner-notes.md](skills/verasic-github-governance-init/references/scanner-notes.md)
