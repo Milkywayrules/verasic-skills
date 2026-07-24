@@ -62,7 +62,7 @@ On deny: replace with brief refusal + redirect; do not partial-leak. Filter runs
 Before SaaS beta traffic:
 
 1. **Tier 1 ask-mode:** 18/18 PASS via `run-red-team.sh` (Cursor Agent CLI, ask mode).
-2. **Tier 1 tools-mode subset:** `scripts/run-red-team-tools.sh` (stub — exits non-zero until agent+tools harness ships).
+2. **Tier 1 tools-mode subset:** 6/6 PASS via `scripts/run-red-team-tools.sh` (Cursor Agent CLI, agent+tools mode — `--print` without `--mode ask`).
 
 Red-team catalog lives in this skill repo; operators run regression against **staging harness**, not end-user tenants.
 

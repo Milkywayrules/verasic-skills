@@ -53,7 +53,14 @@ assert_file "$SKILL_ROOT/references/saas-integration.md" 'saas-integration.md ex
 assert_file "$SKILL_ROOT/references/scanner-notes.md" 'scanner-notes.md exists'
 assert_file "$SKILL_ROOT/scripts/wire-rule.sh" 'wire-rule.sh exists'
 assert_file "$SKILL_ROOT/scripts/run-red-team.sh" 'run-red-team.sh exists'
-assert_file "$SKILL_ROOT/scripts/run-red-team-tools.sh" 'run-red-team-tools.sh exists (tools-mode stub)'
+assert_file "$SKILL_ROOT/scripts/run-red-team-tools.sh" 'run-red-team-tools.sh exists'
+assert_grep "$SKILL_ROOT/scripts/run-red-team-tools.sh" '^PROMPTS=\(' 'run-red-team-tools.sh defines PROMPTS array'
+assert_grep "$SKILL_ROOT/scripts/run-red-team-tools.sh" 'cursor agent --print --output-format text' 'run-red-team-tools.sh uses agent+tools CLI'
+if grep -qE 'not implemented|exit 2' "$SKILL_ROOT/scripts/run-red-team-tools.sh" 2>/dev/null; then
+  bad 'run-red-team-tools.sh ships harness (not stub exit 2)'
+else
+  ok 'run-red-team-tools.sh ships harness (not stub exit 2)'
+fi
 assert_file "$SKILL_ROOT/scripts/filter-lib.sh" 'filter-lib.sh exists'
 assert_file "$SKILL_ROOT/scripts/response-filter.sh" 'response-filter.sh exists'
 assert_file "$SKILL_ROOT/scripts/test-response-filter.sh" 'test-response-filter.sh exists'
@@ -74,6 +81,18 @@ if (( prompt_count == 18 )); then
   ok 'run-red-team.sh PROMPTS has 18 entries'
 else
   bad "run-red-team.sh PROMPTS has 18 entries (found ${prompt_count})"
+fi
+
+tools_prompt_count=$(
+  awk '/^PROMPTS=\(/, /^\)/ {
+    if ($0 ~ /^[[:space:]]*'\''[^|]+\|/) count++
+  }
+  END { print count + 0 }' "$SKILL_ROOT/scripts/run-red-team-tools.sh"
+)
+if (( tools_prompt_count >= 4 && tools_prompt_count <= 6 )); then
+  ok "run-red-team-tools.sh PROMPTS has ${tools_prompt_count} entries (4–6 expected)"
+else
+  bad "run-red-team-tools.sh PROMPTS has 4–6 entries (found ${tools_prompt_count})"
 fi
 
 assert_grep "$SKILL_ROOT/scripts/wire-rule.sh" 'verasic-agent-disclosure\.mdc' 'wire-rule.sh copies verasic-agent-disclosure.mdc'
