@@ -10,6 +10,22 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(next bundle)_
 
+## v0.1.10
+
+### Skills
+
+- **verasic-github-governance** (`0.1.1`) — bundle install pin `@v0.1.10`; closes `@v0.1.8` drift from fb74bef manifest/doc parity
+- **verasic-github-governance-init** (`0.1.1`) — bundle pin parity; qualified sibling-skill backtick paths; scanner-notes.md
+- **verasic-init** (`0.1.10`) — bundle bump for release gates that guard manifest.txt and governance UX pins
+
+### Infrastructure
+
+- `scripts/check-bundle-pins.sh` — governance SKILL.md + cursor rule `@vX.Y.Z` pins must match
+- `scripts/check-manifest-claims.sh` — SKILL.md manifest registration must match `manifest.txt` wiring
+- both gates wired into `test-all.sh`
+- **SECURITY.md** — `verasic-agent-disclosure` scan-signals row; governance-init scanner-notes link
+- knowledge-base nested skill copies synced from `skills/`
+
 ## v0.1.9
 
 ### Skills
@@ -36,6 +52,8 @@ _(next bundle)_
 - `check-references.sh` maps `/verasic-governance-factory` to governance-init skill root
 
 ## v0.1.7
+
+_Changelog-only release — no git tag shipped (skipped between v0.1.6 and v0.1.8)._
 
 ### Skills
 

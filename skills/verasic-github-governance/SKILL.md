@@ -50,7 +50,7 @@ Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://g
 
 The Cursor subagent (`.cursor/agents/verasic-github-governance.md`) is a thin pointer — never duplicate the spec elsewhere.
 
-Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.1.8`.
+Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.1.10`.
 
 ## Hard rules
 

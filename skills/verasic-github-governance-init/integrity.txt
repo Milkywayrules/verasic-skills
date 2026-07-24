@@ -2,5 +2,6 @@
 SKILL.md
 VERSION
 README.md
+references/scanner-notes.md
 scripts/factory.sh
 scripts/test-regression.sh

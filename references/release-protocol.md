@@ -31,7 +31,9 @@ section. `--check-updates` compares local `VERSION` to upstream per skill.
    ```bash
    bash scripts/check-versions.sh
    bash scripts/test-versions-regression.sh
-   bash scripts/test-all.sh   # full local router before tag
+   bash scripts/check-bundle-pins.sh
+   bash scripts/check-manifest-claims.sh
+   bash scripts/test-all.sh   # full local router before tag (includes gates above)
    ```
 
 6. Run affected skill exhaustive gates when the skill ships protocol tests.
@@ -69,5 +71,7 @@ After install, `bash .cursor/skills/verasic-init/scripts/init.sh --list` shows l
 ## CI enforcement
 
 `.github/workflows/verasic-versions.yml` runs on every push/PR touching `versions.lock`,
-`skills/**/VERSION`, `skills/**/integrity.sha256`, or version scripts. Failing
-`check-versions.sh` blocks merge.
+`skills/**/VERSION`, `skills/**/integrity.sha256`, or version scripts. It runs
+`check-versions.sh`, `test-versions-regression.sh`, and `check-references.sh`.
+Tag pushes run `verasic-release` → `test-all.sh` (bundle pins, manifest claims, skill regressions).
+Failing `check-versions.sh` blocks merge.
