@@ -10,6 +10,17 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(next bundle)_
 
+## v0.1.9
+
+### Skills
+
+- **verasic-init** (`0.1.9`) — init-protocol documents governance manifest verify + per-skill wiring rows; cursor governance rule aligned with manifest registration
+
+### Docs
+
+- **verasic-github-governance-init** — bundle install note (`@v0.1.9`) for parity with governance sibling
+- **SECURITY.md** — scan-signals row for governance-init
+
 ## v0.1.8
 
 ### Skills

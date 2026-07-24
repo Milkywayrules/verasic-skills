@@ -15,7 +15,7 @@ Source of truth for domain scripts: **verasic-github-governance** (`references/f
 - **verasic-github-env** installed (required for `--open-pr`)
 - **verasic-git-commits** recommended (commit-msg via wire-hooks)
 
-Registered in verasic-init manifest as skill-only (`-|-`); factory requires explicit `--yes`.
+Registered in verasic-init manifest as skill-only (`-|-`); factory requires explicit `--yes`. Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.1.9`.
 
 ## Workflow
 

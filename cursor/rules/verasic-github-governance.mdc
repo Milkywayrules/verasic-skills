@@ -38,4 +38,4 @@ Read-only `gh` (view, log, status) does not require loading this rule.
 bash .cursor/skills/verasic-github-governance/scripts/doctor.sh
 ```
 
-Install separately via the verasic-skills installer — not part of verasic-init manifest.
+Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.1.9`.

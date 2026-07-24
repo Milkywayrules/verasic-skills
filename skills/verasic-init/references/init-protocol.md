@@ -76,7 +76,7 @@ Bootstrap step lines (`bootstrap: step: ran|skipped|cannot …`) feed the report
 After a successful wire (exit 0), init may run the manifest verify script for that skill when `--verify` is passed. Verify scripts are listed in the fourth manifest column; `-` skips.
 
 - `verasic-github-env`: `scripts/check-gh.sh` — init orchestrates this on `--verify` even when bootstrap already verified on token presence.
-- Other skills: `-` today.
+- `verasic-github-governance`: `scripts/doctor.sh` — soft-governance readiness check after wire-hooks.
 
 If any manifest verify script fails, init reports `verify: failed` in actions, tallies verify failures, and exits 3 (after the full report). Broken installs and wire failures still exit 1 first.
 
@@ -85,7 +85,10 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 | Skill                 | Wire                   | Verify                 | What it does                                                                                                                                           |
 | --------------------- | ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `verasic-github-env`  | `scripts/bootstrap.sh` | `scripts/check-gh.sh`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; optional bootstrap verify on token; manifest verify with `--verify`            |
+| `verasic-github-governance` | `scripts/wire-hooks.sh` | `scripts/doctor.sh` | lefthook or `core.hooksPath` hook wiring; manifest verify with `--verify` runs doctor |
+| `verasic-github-governance-init` | — | — | skill-only factory orchestrator — run `factory.sh --yes` explicitly after plan review |
 | `verasic-git-commits` | `scripts/wire-hook.sh` | —                      | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
+| `verasic-agent-disclosure` | `scripts/wire-rule.sh` | — | copies disclosure rule asset into `.cursor/rules/`; removes legacy rule filename when present |
 | `verasic-bugbot`      | —                      | —                      | skill-only; nothing to wire                                                                                                                            |
 | `verasic-fusion`      | —                      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
 | `verasic-deep-research` | —                      | —                      | skill-only; ledger-backed research                                                                                                                     |

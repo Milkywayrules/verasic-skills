@@ -40,6 +40,7 @@ as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
 | **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
 | **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
 | **verasic-github-governance** | — | — | Critical (bundle) | Yes — git hooks, hook wiring, CI templates |
+| **verasic-github-governance-init** | — | — | Critical (bundle) | Yes — factory orchestrator; inherits governance + `gh` when `--open-pr` |
 
 Per-skill detail: `skills/<name>/references/scanner-notes.md` (linked in [Related](#related)).
 
