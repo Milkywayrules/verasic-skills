@@ -61,9 +61,9 @@ When you cherry-pick with `--skills` or install a subset via skills.sh, the init
 
 ### cursor
 
-- Slash commands: `/verasic-init`, `/verasic-review`, `/verasic-fusion`, `/verasic-deep-research`, `/verasic-audit-commits`, `/verasic-setup-github`
-- Always-on rules: commit convention + GitHub env (under `.cursor/rules/`)
-- Subagents: `verasic-bugbot`, `verasic-commit-auditor` (under `.cursor/agents/`)
+- Slash commands: `/verasic-init`, `/verasic-review`, `/verasic-fusion`, `/verasic-deep-research`, `/verasic-audit-commits`, `/verasic-setup-github`, `/verasic-governance-factory`
+- Always-on rules: commit convention + GitHub env + GitHub governance (under `.cursor/rules/`)
+- Subagents: `verasic-bugbot`, `verasic-commit-auditor`, `verasic-github-governance` (under `.cursor/agents/`)
 
 ### cursor-hybrid
 

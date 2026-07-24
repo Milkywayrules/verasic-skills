@@ -3,6 +3,8 @@
 # wire script "-" means the skill needs no repo wiring (skill-only)
 # verify script "-" means no post-wire verify step (init --verify skips)
 verasic-github-env|scripts/bootstrap.sh|scripts/check-gh.sh|GitHub CLI auth for local agent harnesses
+verasic-github-governance|scripts/wire-hooks.sh|scripts/doctor.sh|GitHub repo governance — hooks, CI bootstrap, doctor
+verasic-github-governance-init|-|-|plan-first governance factory — run factory.sh --yes explicitly
 verasic-git-commits|scripts/wire-hook.sh|-|commit convention + deterministic commit-msg hook
 verasic-agent-disclosure|scripts/wire-rule.sh|-|agent disclosure policy + red-team catalog
 verasic-bugbot|-|-|local bugbot-style code review (no repo wiring)

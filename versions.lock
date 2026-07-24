@@ -1,9 +1,11 @@
 # verasic-skills release manifest — must match skills/<name>/VERSION (enforced by scripts/check-versions.sh)
 # entry order must match skills/verasic-init/manifest.txt
 verasic-github-env=0.1.3
+verasic-github-governance=0.1.0
+verasic-github-governance-init=0.1.0
 verasic-git-commits=0.1.3
 verasic-agent-disclosure=0.1.8
 verasic-bugbot=0.1.3
 verasic-fusion=0.1.3
 verasic-deep-research=0.1.3
-verasic-init=0.1.7
+verasic-init=0.1.8

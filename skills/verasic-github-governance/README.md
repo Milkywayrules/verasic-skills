@@ -2,7 +2,7 @@
 
 Soft-first GitHub repo governance for Verasic: CI bootstrap, lefthook hooks, doctor checks, and plan-gated hard protection via OpenTofu.
 
-**Version:** 1.1.0
+**Version:** 0.1.0
 
 ## Parts
 

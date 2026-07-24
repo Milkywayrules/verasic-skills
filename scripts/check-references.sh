@@ -75,7 +75,8 @@ skill_root_for() {
       verasic-audit-commits|verasic-commit-auditor|verasic-git-commits) echo "$SKILLS_DIR/verasic-git-commits" ;;
       verasic-github-env) echo "$SKILLS_DIR/verasic-github-env" ;;
       verasic-agent-disclosure|verasic-disclosure-red-team) echo "$SKILLS_DIR/verasic-agent-disclosure" ;;
-      verasic-github-governance|verasic-governance-factory) echo "$SKILLS_DIR/verasic-github-governance" ;;
+      verasic-github-governance) echo "$SKILLS_DIR/verasic-github-governance" ;;
+      verasic-governance-factory) echo "$SKILLS_DIR/verasic-github-governance-init" ;;
     esac
   fi
 }

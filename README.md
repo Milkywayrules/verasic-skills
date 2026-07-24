@@ -22,6 +22,11 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 - **verasic-github-env** — GitHub CLI auth for local agent harnesses.
   Fine-grained PAT per repo in gitignored `.github-agent.local`, optional direnv,
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
+- **verasic-github-governance** — GitHub repo governance factory: CI bootstrap,
+  lefthook hooks, doctor checks, plan-gated hard protection. Soft-first for Free
+  private repos; OpenTofu hard path lives in dogfood registry repos only.
+- **verasic-github-governance-init** — plan-first orchestrator for governance
+  bootstrap (`/verasic-governance-factory`). Runs factory plan, then `--yes` to apply.
 - **verasic-init** — confirm-first repo setup for installed verasic skills: plan (profile, checklist, usage), then `--yes` to wire repo-level enforcement and optionally fetch Cursor UX from upstream. Built for skills.sh installs where `setup.sh` never runs.
 
 ## Install
@@ -81,6 +86,7 @@ Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/sk
 - `/verasic-disclosure-red-team` — run agent disclosure adversarial regression
 - `/verasic-init` — plan setup (profile + checklist + usage), then apply with `--yes` after you confirm
 - `/verasic-setup-github` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
+- `/verasic-governance-factory` — plan GitHub repo governance bootstrap, then apply with `--yes` after you confirm
 - Commit convention needs no invocation — the always-applied rule enforces it on every commit
 - GitHub env rule applies automatically before `gh` commands when installed
 
@@ -90,6 +96,8 @@ Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
 [skills/verasic-agent-disclosure/README.md](skills/verasic-agent-disclosure/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
+[skills/verasic-github-governance/README.md](skills/verasic-github-governance/README.md) ·
+[skills/verasic-github-governance-init/README.md](skills/verasic-github-governance-init/README.md) ·
 [skills/verasic-init/README.md](skills/verasic-init/README.md)
 
 ## Security

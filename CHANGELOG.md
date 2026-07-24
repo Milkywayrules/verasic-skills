@@ -8,9 +8,26 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
+_(next bundle)_
+
+## v0.1.8
+
 ### Skills
 
+- **verasic-github-governance** (`0.1.0`) — new: CI bootstrap, lefthook hooks, doctor, plan-gated hard protection; manifest + cursor UX
+- **verasic-github-governance-init** (`0.1.0`) — new: plan-first factory orchestrator (`/verasic-governance-factory`)
+- **verasic-init** (`0.1.8`) — manifest registers governance skills; cursor UX map + manifest entries for governance rule, agent, and factory command
 - **verasic-agent-disclosure** (`0.1.8`) — tools-mode harness (`run-red-team-tools.sh`, 6 prompts, 6/6 pass)
+
+### Infrastructure
+
+- governance skills run via manifest loop in `test-all.sh` (removed separate section)
+- `check-references.sh` maps `/verasic-governance-factory` to governance-init skill root
+
+## v0.1.7
+
+### Skills
+
 - **verasic-agent-disclosure** (`0.1.7`) — Tier 1 red-team 18/18; SaaS `response-filter.sh` + `test-response-filter.sh`; Tier 2 catalog 51 prompts; policy hardening for extraction-07/docleak
 - **verasic-init** (`0.1.7`) — manifest registers `verasic-agent-disclosure`; cursor UX map + manifest entries for disclosure rule and red-team command
 
