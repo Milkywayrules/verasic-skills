@@ -38,6 +38,7 @@ as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
 | **verasic-git-commits** | High | — | Critical (bundle) | Yes — hook + `core.hooksPath` |
 | **verasic-init** | — | 1 alert | Critical (bundle) | Yes — orchestrates hook/bootstrap + `curl` |
 | **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
+| **verasic-deep-research** | — | — | Critical (bundle) | Yes — bundle + subagent/fetch protocol keywords |
 | **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
 | **verasic-agent-disclosure** | — | — | Critical (bundle) | Yes — rule wiring + adversarial red-team catalog |
 | **verasic-github-governance** | — | — | Critical (bundle) | Yes — git hooks, hook wiring, CI templates |
@@ -98,6 +99,7 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 | **verasic-github-env** | `.envrc`, `.env.example` GH block, `.gitignore`, credential template | Via `gh` after you set `GH_TOKEN` | Does not create PATs or run `gh auth login` loops |
 | **verasic-git-commits** | Sets `git config core.hooksPath` to skill hooks (or prints lefthook snippet) | None | Hook strips attribution trailers pre-commit; audit is read-only |
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
+| **verasic-deep-research** | None (research only) | Readonly web fetch + model APIs when invoked | Ledger-backed citations; no file writes in ask mode |
 | **verasic-bugbot** | None (review only) | None | Reads git diffs and full files; reports bugs |
 | **verasic-agent-disclosure** | Copies disclosure rule to `.cursor/rules/` via `wire-rule.sh` | None (red-team may invoke Cursor Agent CLI) | Policy + red-team catalog; confirm-first |
 | **verasic-github-governance** | Bootstrap copies CI/hook templates; `wire-hooks.sh` sets hook paths | Via `gh` when doctor hints at plan or `--open-pr` factory path | Soft-first; OpenTofu hard path is plan-gated and not copied to product repos |

@@ -10,6 +10,19 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(next bundle)_
 
+## v0.1.11
+
+### Skills
+
+- **verasic-init** (`0.1.11`) — bundle bump for fusion-audit doc parity + cursor disclosure rule sync
+
+### Docs / UX
+
+- **README.md** — Security scanner-notes link for governance-init; hierarchy adds `check-bundle-pins.sh`, `check-manifest-claims.sh`, `verasic-bugbot.yml`, `skills/verasic-github-governance-init/references/scanner-notes.md`
+- **SECURITY.md** — `verasic-deep-research` rows in Expected scan signals and What each skill can do
+- **cursor/rules/verasic-agent-disclosure.mdc** — synced from skill asset (stale cursor copy)
+- **verasic-git-commits README** — AGENTS.md link uses skill-relative path with install-root note
+
 ## v0.1.10
 
 ### Skills

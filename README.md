@@ -113,7 +113,8 @@ Per-skill scanner notes:
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
 [verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
 [verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md) ·
-[verasic-github-governance](skills/verasic-github-governance/references/scanner-notes.md)
+[verasic-github-governance](skills/verasic-github-governance/references/scanner-notes.md) ·
+[verasic-github-governance-init](skills/verasic-github-governance-init/references/scanner-notes.md)
 
 ## Testing
 
@@ -151,6 +152,8 @@ verasic-skills/
 │ ├── check-versions.sh # lock ↔ VERSION ↔ integrity gate
 │ ├── check-references.sh # validate markdown internal path refs
 │ ├── check-cursor-ux-manifest.sh # cursor/ ↔ cursor-ux-manifest sync gate
+│ ├── check-bundle-pins.sh # governance SKILL.md + cursor rule @vX.Y.Z pins
+│ ├── check-manifest-claims.sh # SKILL.md manifest registration vs manifest.txt
 │ ├── refresh-integrity.sh # regenerate integrity.sha256 after bumps
 │ ├── test-all.sh # router: all regressions + version + protocol gates
 │ └── test-versions-regression.sh
@@ -165,6 +168,7 @@ verasic-skills/
 │ ├── verasic-deep-research.yml
 │ ├── verasic-init.yml
 │ ├── verasic-git-commits.yml
+│ ├── verasic-bugbot.yml
 │ ├── verasic-release.yml # full test-all on tag push
 │ └── verasic-versions.yml # version manifest on every main PR/push
 ├── skills/ # ← the units npx installs
@@ -287,6 +291,8 @@ verasic-skills/
 │ ├── verasic-github-governance-init/
 │ │ ├── SKILL.md
 │ │ ├── README.md
+│ │ ├── references/
+│ │ │ └── scanner-notes.md
 │ │ └── scripts/
 │ │     ├── factory.sh # plan-first orchestrator — `--yes` to apply
 │ │     └── test-regression.sh

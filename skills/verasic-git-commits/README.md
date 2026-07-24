@@ -71,7 +71,7 @@ Non-Cursor always-on enforcement: add one row to the repo's `AGENTS.md` (or
 `CLAUDE.md`):
 
 ```markdown
-| Git commits (style + no trailer) | [.cursor/skills/verasic-git-commits/references/commit-protocol.md](.cursor/skills/verasic-git-commits/references/commit-protocol.md) |
+| Git commits (style + no trailer) | [references/commit-protocol.md](references/commit-protocol.md) — prefix with your install root in AGENTS.md (e.g. `.cursor/skills/verasic-git-commits/` or `.agents/skills/verasic-git-commits/`) |
 ```
 
 ## Usage
