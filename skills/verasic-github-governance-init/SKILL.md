@@ -15,7 +15,7 @@ Source of truth for domain scripts: **verasic-github-governance** (`references/f
 - **verasic-github-env** installed (required for `--open-pr`)
 - **verasic-git-commits** recommended (commit-msg via wire-hooks)
 
-Not part of verasic-init manifest — install separately via `skills.sh`.
+Registered in verasic-init manifest as skill-only (`-|-`); factory requires explicit `--yes`.
 
 ## Workflow
 

@@ -112,7 +112,8 @@ Per-skill scanner notes:
 [verasic-agent-disclosure](skills/verasic-agent-disclosure/references/scanner-notes.md) ·
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
 [verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
-[verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md)
+[verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md) ·
+[verasic-github-governance](skills/verasic-github-governance/references/scanner-notes.md)
 
 ## Testing
 
@@ -259,7 +260,36 @@ verasic-skills/
 │ │ │ ├── .envrc
 │ │ │ └── github-agent.local.example
 │ │ └── references/
-│ │ └── setup-protocol.md # ← single source of truth
+│ │     └── setup-protocol.md # ← single source of truth
+│ ├── verasic-github-governance/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ ├── hooks/
+│ │ │ ├── pre-push # block direct push to default branch (soft layer)
+│ │ │ └── pre-commit # lightweight reminder on default-branch commits
+│ │ ├── scripts/
+│ │ │ ├── bootstrap-repo.sh # copy CI/CONTRIBUTING/lefthook/AGENTS templates
+│ │ │ ├── wire-hooks.sh # hook wiring used by verasic-init
+│ │ │ ├── doctor.sh # soft-governance readiness check
+│ │ │ └── test-regression.sh
+│ │ ├── templates/
+│ │ │ ├── lefthook.yml
+│ │ │ ├── CONTRIBUTING.md
+│ │ │ └── .github/workflows/
+│ │ │     ├── ci.yml
+│ │ │     └── ci-turborepo.yml
+│ │ └── references/
+│ │     ├── governance-protocol.md # ← single source of truth
+│ │     ├── factory-protocol.md
+│ │     ├── existing-repo-conflicts.md
+│ │     ├── plan-matrix.md
+│ │     └── scanner-notes.md
+│ ├── verasic-github-governance-init/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ └── scripts/
+│ │     ├── factory.sh # plan-first orchestrator — `--yes` to apply
+│ │     └── test-regression.sh
 │ └── verasic-init/
 │ ├── SKILL.md
 │ ├── README.md
@@ -277,7 +307,8 @@ verasic-skills/
 └── cursor/
     ├── agents/
     │ ├── verasic-bugbot.md # thin pointer to the review protocol
-    │ └── verasic-commit-auditor.md # thin pointer to the audit protocol
+    │ ├── verasic-commit-auditor.md # thin pointer to the audit protocol
+    │ └── verasic-github-governance.md # thin pointer to governance protocol
     ├── commands/
     │ ├── verasic-review.md
     │ ├── verasic-fusion.md
@@ -285,9 +316,11 @@ verasic-skills/
     │ ├── verasic-audit-commits.md
     │ ├── verasic-disclosure-red-team.md
     │ ├── verasic-setup-github.md
+    │ ├── verasic-governance-factory.md
     │ └── verasic-init.md
     └── rules/
         ├── verasic-git-commits.mdc # always-applied digest + pointer
         ├── verasic-agent-disclosure.mdc # always-applied disclosure policy
-        └── verasic-github-env.mdc
+        ├── verasic-github-env.mdc
+        └── verasic-github-governance.mdc
 ```

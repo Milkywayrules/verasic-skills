@@ -39,6 +39,7 @@ as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
 | **verasic-init** | — | 1 alert | Critical (bundle) | Yes — orchestrates hook/bootstrap + `curl` |
 | **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
 | **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
+| **verasic-github-governance** | — | — | Critical (bundle) | Yes — git hooks, hook wiring, CI templates |
 
 Per-skill detail: `skills/<name>/references/scanner-notes.md` (linked in [Related](#related)).
 
@@ -96,6 +97,8 @@ See `skills/verasic-github-env/references/setup-protocol.md` for the full tier t
 | **verasic-git-commits** | Sets `git config core.hooksPath` to skill hooks (or prints lefthook snippet) | None | Hook strips attribution trailers pre-commit; audit is read-only |
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
 | **verasic-bugbot** | None (review only) | None | Reads git diffs and full files; reports bugs |
+| **verasic-github-governance** | Bootstrap copies CI/hook templates; `wire-hooks.sh` sets hook paths | Via `gh` when doctor hints at plan or `--open-pr` factory path | Soft-first; OpenTofu hard path is plan-gated and not copied to product repos |
+| **verasic-github-governance-init** | Runs governance factory scripts with `--yes` only | Via `gh` when `--open-pr` | Plan-first orchestrator; never auto-applies without confirmation |
 
 ## Install paths
 
@@ -133,3 +136,4 @@ Include skill name, install path, command run, and redacted logs (never paste to
   - [skills/verasic-fusion/references/scanner-notes.md](skills/verasic-fusion/references/scanner-notes.md)
   - [skills/verasic-deep-research/references/scanner-notes.md](skills/verasic-deep-research/references/scanner-notes.md)
   - [skills/verasic-bugbot/references/scanner-notes.md](skills/verasic-bugbot/references/scanner-notes.md)
+  - [skills/verasic-github-governance/references/scanner-notes.md](skills/verasic-github-governance/references/scanner-notes.md)

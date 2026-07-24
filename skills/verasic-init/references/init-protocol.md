@@ -12,7 +12,7 @@ Single source of truth for how init plans and wires installed Verasic skills int
 - Each skill ships `integrity.txt` listing required relative paths and `integrity.sha256` with expected hashes for those files (excluding `integrity.sha256` itself).
 - Init runs `check_integrity` before wiring and again after wire scripts when applicable. By default, `check_hash_integrity` compares live hashes against `integrity.sha256` and reports `modified:` paths (detect only — no auto-restore). Pass `--no-strict-integrity` for presence-only checks (skip hash comparison).
 - Each skill ships a semver `VERSION` file (one line, like `.nvmrc`). The report always includes a **versions** section with local versions; `--check-updates` fetches upstream `VERSION` files read-only.
-- Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases. **`scripts/check-versions.sh` enforces lock ↔ VERSION sync in CI** — see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/scripts/release-protocol.md).
+- Root `versions.lock` in the verasic-skills repo pins expected skill versions for releases. **`scripts/check-versions.sh` enforces lock ↔ VERSION sync in CI** — see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/references/release-protocol.md).
 - `VERSION` is listed in each skill's `integrity.txt`; `integrity.sha256` hashes it. Bump `VERSION` → run `scripts/refresh-integrity.sh <skill>` before release.
 - Init never re-implements a skill's setup. Each skill owns its wiring script; init detects, plans, runs (with `--yes`), and reports.
 
@@ -128,7 +128,7 @@ Errors before the report (not a git repo, no repo-local verasic-init, broken man
 2. Add a one-line semver `VERSION` file.
 3. Give the skill an idempotent wiring script following the contract above (or use `-` for wire and verify columns).
 4. Add one line to `manifest.txt` (four-field preferred).
-5. Bump `versions.lock` when releasing; run `bash scripts/check-versions.sh` (see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/scripts/release-protocol.md)).
+5. Bump `versions.lock` when releasing; run `bash scripts/check-versions.sh` (see upstream [release-protocol.md](https://github.com/Milkywayrules/verasic-skills/blob/main/references/release-protocol.md)).
 6. Extend `scripts/test-regression.sh` with at least one assertion for it.
 
 ## Failure behavior
