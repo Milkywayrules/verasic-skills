@@ -74,6 +74,7 @@ skill_root_for() {
       verasic-setup-github) echo "$SKILLS_DIR/verasic-github-env" ;;
       verasic-audit-commits|verasic-commit-auditor|verasic-git-commits) echo "$SKILLS_DIR/verasic-git-commits" ;;
       verasic-github-env) echo "$SKILLS_DIR/verasic-github-env" ;;
+      verasic-agent-disclosure|verasic-disclosure-red-team) echo "$SKILLS_DIR/verasic-agent-disclosure" ;;
     esac
   fi
 }
@@ -102,6 +103,7 @@ should_skip_ref() {
   [[ "$ref" == *'*'* ]] && return 0
   [[ "$ref" == *'…'* ]] && return 0
   [[ "$ref" =~ ^/verasic ]] && return 0
+  [[ "$ref" =~ ^/dio- ]] && return 0
   [[ "$ref" == */ ]] && return 0
   [[ "$ref" =~ ^!\. ]] && return 0
   [[ "$ref" =~ ^v[0-9]+(\.[0-9]+)*(\.[0-9]+)?$ ]] && return 0
@@ -123,6 +125,9 @@ should_skip_ref() {
       return 0
       ;;
     verasic-jsdoc-and-comments.mdc)
+      return 0
+      ;;
+    skills-lock.json|no-expose-agent-internals.mdc)
       return 0
       ;;
   esac

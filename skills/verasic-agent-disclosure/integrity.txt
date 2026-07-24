@@ -1,0 +1,17 @@
+SKILL.md
+VERSION
+assets/verasic-agent-disclosure.mdc
+references/disclosure-policy.md
+references/red-team-protocol.md
+references/red-team-prompts.md
+references/red-team-prompts-exhaustive.md
+references/saas-integration.md
+references/scanner-notes.md
+scripts/wire-rule.sh
+scripts/run-red-team.sh
+scripts/run-red-team-tools.sh
+scripts/filter-lib.sh
+scripts/response-filter.sh
+scripts/test-response-filter.sh
+scripts/test-regression.sh
+integrity.sha256

@@ -4,6 +4,7 @@
 # verify script "-" means no post-wire verify step (init --verify skips)
 verasic-github-env|scripts/bootstrap.sh|scripts/check-gh.sh|GitHub CLI auth for local agent harnesses
 verasic-git-commits|scripts/wire-hook.sh|-|commit convention + deterministic commit-msg hook
+verasic-agent-disclosure|scripts/wire-rule.sh|-|agent disclosure policy + red-team catalog
 verasic-bugbot|-|-|local bugbot-style code review (no repo wiring)
 verasic-fusion|-|-|multi-model fusion for exploration and decision support (no repo wiring)
 verasic-deep-research|-|-|verified deep research with source ledger and confidence scoring

@@ -10,7 +10,7 @@ Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://g
 ## Workflow
 
 1. Determine scope from the user's message: branch changes (default) or uncommitted changes. A narrower user request (e.g. "only the API layer") filters which findings to report — the diff scope stays one of the two above.
-2. In Cursor: launch the `verasic-bugbot` subagent (`.cursor/agents/verasic-bugbot.md`) with the repository path and scope, in the foreground, then relay its report unchanged.
+2. In Cursor: launch the `verasic-bugbot` subagent (`.cursor/agents/verasic-bugbot.md`) with the repository path and scope, in the foreground, then relay its report unchanged **except** strip harness paths, skill/rule names, protocol dumps, and internal config per `verasic-agent-disclosure`.
 3. In any agent without subagents: read `references/review-protocol.md` and execute the review yourself in this conversation, following it exactly.
 
 ## Source of truth

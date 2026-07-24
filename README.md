@@ -16,6 +16,9 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 - **verasic-git-commits** — hard commit convention plus pre-push history
   audit. One message style for humans and agents, no co-authored/AI trailers,
   no AI-session language in messages.
+- **verasic-agent-disclosure** — block harness, skill, router, and protocol
+  leaks in user-facing responses. Always-on disclosure rule plus adversarial
+  red-team catalog for regression (~8 min on demand).
 - **verasic-github-env** — GitHub CLI auth for local agent harnesses.
   Fine-grained PAT per repo in gitignored `.github-agent.local`, optional direnv,
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
@@ -75,6 +78,7 @@ Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/sk
 - `/verasic-review` — review branch changes vs the default branch
 - `/verasic-review uncommitted` — review staged + unstaged only
 - `/verasic-audit-commits` — audit branch commit history before push/PR
+- `/verasic-disclosure-red-team` — run agent disclosure adversarial regression
 - `/verasic-init` — plan setup (profile + checklist + usage), then apply with `--yes` after you confirm
 - `/verasic-setup-github` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
 - Commit convention needs no invocation — the always-applied rule enforces it on every commit
@@ -84,6 +88,7 @@ Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-deep-research/README.md](skills/verasic-deep-research/README.md) ·
 [skills/verasic-bugbot/README.md](skills/verasic-bugbot/README.md) ·
 [skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
+[skills/verasic-agent-disclosure/README.md](skills/verasic-agent-disclosure/README.md) ·
 [skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
 [skills/verasic-init/README.md](skills/verasic-init/README.md)
 
@@ -96,6 +101,7 @@ Per-skill scanner notes:
 [verasic-init](skills/verasic-init/references/scanner-notes.md) ·
 [verasic-github-env](skills/verasic-github-env/references/scanner-notes.md) ·
 [verasic-git-commits](skills/verasic-git-commits/references/scanner-notes.md) ·
+[verasic-agent-disclosure](skills/verasic-agent-disclosure/references/scanner-notes.md) ·
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
 [verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
 [verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md)
@@ -217,6 +223,21 @@ verasic-skills/
 │ │ ├── conventions.md # ← single source of truth (the spec)
 │ │ ├── commit-protocol.md # write path: workflow, verify, escape hatch
 │ │ └── audit-protocol.md # read path: scope, checks, report
+│ ├── verasic-agent-disclosure/
+│ │ ├── SKILL.md
+│ │ ├── README.md
+│ │ ├── assets/
+│ │ │ └── verasic-agent-disclosure.mdc # rule asset copied by wire-rule.sh
+│ │ ├── scripts/
+│ │ │ ├── wire-rule.sh # rule wiring used by verasic-init
+│ │ │ ├── run-red-team.sh # Cursor Agent CLI regression
+│ │ │ └── test-regression.sh # structural regression
+│ │ └── references/
+│ │     ├── disclosure-policy.md # ← single source of truth
+│ │     ├── red-team-prompts.md
+│ │     ├── red-team-protocol.md
+│ │     ├── saas-integration.md
+│ │     └── scanner-notes.md
 │ ├── verasic-github-env/
 │ │ ├── SKILL.md
 │ │ ├── README.md
@@ -254,9 +275,11 @@ verasic-skills/
     │ ├── verasic-fusion.md
     │ ├── verasic-deep-research.md
     │ ├── verasic-audit-commits.md
+    │ ├── verasic-disclosure-red-team.md
     │ ├── verasic-setup-github.md
     │ └── verasic-init.md
     └── rules/
         ├── verasic-git-commits.mdc # always-applied digest + pointer
+        ├── verasic-agent-disclosure.mdc # always-applied disclosure policy
         └── verasic-github-env.mdc
 ```

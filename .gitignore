@@ -4,3 +4,6 @@ node_modules/
 # local agent harness secrets
 .env.local
 .github-agent.local
+
+# verasic-agent-disclosure red-team run artifacts
+.verasic-agent-disclosure-runs/

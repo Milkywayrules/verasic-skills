@@ -8,6 +8,11 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
+### Skills
+
+- **verasic-agent-disclosure** (`0.1.7`) — Tier 1 red-team 18/18; SaaS `response-filter.sh` + `test-response-filter.sh`; Tier 2 catalog 51 prompts; policy hardening for extraction-07/docleak
+- **verasic-init** (`0.1.7`) — manifest registers `verasic-agent-disclosure`; cursor UX map + manifest entries for disclosure rule and red-team command
+
 ## v0.1.6
 
 ### Skills

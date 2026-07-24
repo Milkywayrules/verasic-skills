@@ -16,7 +16,7 @@ Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://g
 
 **Audit path — checking history before push/PR:**
 
-1. In Cursor: launch the `verasic-commit-auditor` subagent (`.cursor/agents/verasic-commit-auditor.md`) with the repository path and any flags, in the foreground, then relay its report unchanged.
+1. In Cursor: launch the `verasic-commit-auditor` subagent (`.cursor/agents/verasic-commit-auditor.md`) with the repository path and any flags, in the foreground, then relay its report unchanged **except** strip harness paths, skill/rule names, protocol dumps, and internal config per `verasic-agent-disclosure`.
 2. In any agent without subagents: read `references/audit-protocol.md` and execute the audit yourself in this conversation, following it exactly.
 3. The audit is read-only. Fix mode (`--fix-trailers`) runs only in the main conversation after the user explicitly approves the audit report.
 

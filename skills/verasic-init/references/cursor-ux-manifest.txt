@@ -4,10 +4,12 @@
 agents/verasic-bugbot.md
 agents/verasic-commit-auditor.md
 commands/verasic-audit-commits.md
+commands/verasic-disclosure-red-team.md
 commands/verasic-deep-research.md
 commands/verasic-fusion.md
 commands/verasic-init.md
 commands/verasic-review.md
 commands/verasic-setup-github.md
 rules/verasic-git-commits.mdc
+rules/verasic-agent-disclosure.mdc
 rules/verasic-github-env.mdc

@@ -5,6 +5,8 @@ verasic-bugbot|commands/verasic-review.md|command
 verasic-git-commits|agents/verasic-commit-auditor.md|agent
 verasic-git-commits|commands/verasic-audit-commits.md|command
 verasic-git-commits|rules/verasic-git-commits.mdc|rule
+verasic-agent-disclosure|rules/verasic-agent-disclosure.mdc|rule
+verasic-agent-disclosure|commands/verasic-disclosure-red-team.md|command
 verasic-github-env|commands/verasic-setup-github.md|command
 verasic-github-env|rules/verasic-github-env.mdc|rule
 verasic-fusion|commands/verasic-fusion.md|command
