@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# verasic-github-governance — block direct push to default branch (soft layer).
+#
+# wiring (pick one):
+#   lefthook.yml:
+#     pre-push:
+#       commands:
+#         governance-pre-push:
+#           run: bash .github/verasic-governance/hooks/pre-push {1}
+#   raw git:
+#     call from .git/hooks/pre-push or core.hooksPath directory
+set -euo pipefail
+
+if [[ "${VERASIC_GOVERNANCE_BYPASS:-}" == "1" ]]; then
+  echo "verasic-github-governance: pre-push bypass active (VERASIC_GOVERNANCE_BYPASS=1)" >&2
+  exit 0
+fi
+
+remote="${1:-origin}"
+url="${2:-}"
+
+default_branch="$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || true)"
+if [[ -z "$default_branch" ]]; then
+  for candidate in main master; do
+    if git show-ref --verify --quiet "refs/heads/$candidate" 2>/dev/null; then
+      default_branch="$candidate"
+      break
+    fi
+  done
+fi
+if [[ -z "$default_branch" ]]; then
+  default_branch="main"
+fi
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [[ -z "${local_ref:-}" ]] && continue
+  # refs/heads/main -> main
+  target="${local_ref#refs/heads/}"
+  if [[ "$target" == "$default_branch" ]]; then
+    echo "verasic-github-governance: direct push to '$default_branch' blocked — open a PR instead" >&2
+    echo "verasic-github-governance: break-glass: VERASIC_GOVERNANCE_BYPASS=1 git push ..." >&2
+    exit 1
+  fi
+done
+
+exit 0

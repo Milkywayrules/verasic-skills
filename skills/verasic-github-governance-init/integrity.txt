@@ -1,0 +1,6 @@
+# required paths relative to skill dir
+SKILL.md
+VERSION
+README.md
+scripts/factory.sh
+scripts/test-regression.sh

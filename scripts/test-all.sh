@@ -42,6 +42,11 @@ while IFS= read -r skill; do
   run_if "$skill regression" "$REPO_ROOT/skills/$skill/scripts/test-regression.sh"
 done < <(manifest_skills)
 
+echo
+echo "== governance skills (separate install) =="
+run_if 'verasic-github-governance regression' "$REPO_ROOT/skills/verasic-github-governance/scripts/test-regression.sh"
+run_if 'verasic-github-governance-init regression' "$REPO_ROOT/skills/verasic-github-governance-init/scripts/test-regression.sh"
+
 run_if 'verasic-fusion protocol exhaustive' "$REPO_ROOT/skills/verasic-fusion/scripts/test-exhaustive-protocol.sh"
 run_if 'verasic-deep-research protocol exhaustive' "$REPO_ROOT/skills/verasic-deep-research/scripts/test-exhaustive-protocol.sh"
 

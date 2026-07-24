@@ -12,3 +12,6 @@ verasic-github-env|rules/verasic-github-env.mdc|rule
 verasic-fusion|commands/verasic-fusion.md|command
 verasic-deep-research|commands/verasic-deep-research.md|command
 verasic-init|commands/verasic-init.md|command
+verasic-github-governance|agents/verasic-github-governance.md|agent
+verasic-github-governance|rules/verasic-github-governance.mdc|rule
+verasic-github-governance-init|commands/verasic-governance-factory.md|command

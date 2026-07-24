@@ -1,0 +1,21 @@
+# required paths relative to skill dir
+SKILL.md
+VERSION
+README.md
+references/governance-protocol.md
+references/factory-protocol.md
+references/existing-repo-conflicts.md
+references/plan-matrix.md
+references/scanner-notes.md
+hooks/pre-push
+hooks/pre-commit
+scripts/bootstrap-repo.sh
+scripts/wire-hooks.sh
+scripts/doctor.sh
+scripts/test-regression.sh
+templates/AGENTS.md
+templates/CONTRIBUTING.md
+templates/.github/workflows/ci.yml
+templates/.github/workflows/ci-turborepo.yml
+templates/lefthook.yml
+templates/.github/pull_request_template.md

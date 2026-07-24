@@ -13,3 +13,6 @@ commands/verasic-setup-github.md
 rules/verasic-git-commits.mdc
 rules/verasic-agent-disclosure.mdc
 rules/verasic-github-env.mdc
+rules/verasic-github-governance.mdc
+agents/verasic-github-governance.md
+commands/verasic-governance-factory.md

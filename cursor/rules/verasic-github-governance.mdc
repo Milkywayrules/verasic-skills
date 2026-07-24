@@ -1,0 +1,41 @@
+---
+description: verasic-github-governance — mutation routing for GitHub repo governance; load before gh writes
+alwaysApply: true
+---
+
+# verasic-github-governance
+
+GitHub repo governance factory — soft hooks + CI bootstrap, plan-gated hard protection. Full spec:
+`.cursor/skills/verasic-github-governance/references/governance-protocol.md`
+
+## When this applies
+
+Load before **mutating** GitHub operations:
+
+- create repository, change visibility or merge settings
+- branch protection or rulesets
+- CI / governance bootstrap
+- transfer preparation
+
+Read-only `gh` (view, log, status) does not require loading this rule.
+
+## Before mutations
+
+1. Load **verasic-github-governance** skill (`SKILL.md`, `references/factory-protocol.md`)
+2. Ensure **verasic-github-env** auth before `gh` writes (`load-gh-env.sh`, `check-gh.sh`)
+3. Prefer factory orchestrator: `/verasic-governance-factory` or `verasic-github-governance-init/scripts/factory.sh`
+
+## Hard rules
+
+- Default **private + Free** → soft enforcement only (hooks + CI + doctor); no branch protection in UI
+- Required CI status check name: **`ci`**
+- OpenTofu hard apply only when plan allows and user confirms — **not copied to product repos**
+- Never commit tokens
+
+## Verify
+
+```bash
+bash .cursor/skills/verasic-github-governance/scripts/doctor.sh
+```
+
+Install separately via the verasic-skills installer — not part of verasic-init manifest.

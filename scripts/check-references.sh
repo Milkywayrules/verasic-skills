@@ -75,6 +75,7 @@ skill_root_for() {
       verasic-audit-commits|verasic-commit-auditor|verasic-git-commits) echo "$SKILLS_DIR/verasic-git-commits" ;;
       verasic-github-env) echo "$SKILLS_DIR/verasic-github-env" ;;
       verasic-agent-disclosure|verasic-disclosure-red-team) echo "$SKILLS_DIR/verasic-agent-disclosure" ;;
+      verasic-github-governance|verasic-governance-factory) echo "$SKILLS_DIR/verasic-github-governance" ;;
     esac
   fi
 }
@@ -148,7 +149,26 @@ should_skip_ref() {
 
   if [[ "$source_file" == */references/scanner-notes.md ]]; then
     case "$ref" in
-      bootstrap.sh|wire-hook.sh|check-gh.sh|load-gh-env.sh)
+      bootstrap.sh|wire-hook.sh|check-gh.sh|load-gh-env.sh|.github/workflows/ci.yml)
+        return 0
+        ;;
+    esac
+  fi
+
+  if [[ "$source_file" == */verasic-github-governance/* || "$source_file" == */verasic-github-governance-init/* ]]; then
+    case "$ref" in
+      turbo.json|skills.sh|chore/governance-bootstrap|feat/my-change)
+        return 0
+        ;;
+      .github/workflows/ci.yml|.github/pull_request_template.md|.github/verasic-governance/hooks/pre-push|.github/verasic-governance/hooks/pre-commit)
+        return 0
+        ;;
+    esac
+  fi
+
+  if [[ "$source_file" == */verasic-github-governance/templates/* ]]; then
+    case "$ref" in
+      feat/my-change)
         return 0
         ;;
     esac

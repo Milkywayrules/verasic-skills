@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# verasic-github-governance — lightweight pre-commit reminder on default branch.
+set -euo pipefail
+
+branch="$(git symbolic-ref --quiet HEAD 2>/dev/null | sed 's@^refs/heads/@@' || true)"
+[[ -z "$branch" ]] && exit 0
+
+default_branch="$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || true)"
+if [[ -z "$default_branch" ]]; then
+  for candidate in main master; do
+    if git show-ref --verify --quiet "refs/heads/$candidate" 2>/dev/null; then
+      default_branch="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ "$branch" == "${default_branch:-main}" || "$branch" == "main" || "$branch" == "master" ]]; then
+  echo "verasic-github-governance: committing on '$branch' — prefer feature branches + PR (see CONTRIBUTING.md)" >&2
+fi
+
+exit 0
