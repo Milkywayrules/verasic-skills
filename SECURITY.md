@@ -2,7 +2,7 @@
 
 **This file is the project security policy** for [Milkywayrules/verasic-skills](https://github.com/Milkywayrules/verasic-skills). Enable it as the GitHub Security Policy in repo settings if the Security tab is not yet wired.
 
-verasic-skills is an **agent harness** — markdown protocols, Cursor rules/commands, and
+verasic-skills is an **agent harness** — markdown protocols, Cursor rules/subagents, and
 small bash wiring scripts that help AI-assisted development workflows. It is **not** a
 runtime application, server, or npm package that executes in production.
 
@@ -16,8 +16,8 @@ Published on [skills.sh](https://skills.sh/milkywayrules/verasic-skills).
 
 | Pattern scanners see | Why it exists here |
 | -------------------- | ------------------ |
-| Secrets / credentials | `verasic-github-env` documents `.github-agent.local` and `GH_TOKEN` |
-| Git hook wiring | `verasic-git-commits` installs a `commit-msg` hook via `core.hooksPath` |
+| Secrets / credentials | `verasic-github-cli-init` documents `.github-agent.local` and `GH_TOKEN` |
+| Git hook wiring | `verasic-git-commits-convention` installs a `commit-msg` hook via `core.hooksPath` |
 | `git config` | Wire scripts set repo-local hook paths idempotently |
 | Network (`curl`) | `verasic-init --check-updates` fetches upstream `VERSION` files; `--yes` with cursor profiles fetches `cursor/` UX files read-only |
 | Shell execution | Bootstrap, verify, and regression scripts are bash |
@@ -34,14 +34,14 @@ as of mid-2026 — **expected harness noise**, not proof of a vulnerability.
 
 | Skill | Gen (typical) | Socket (typical) | Snyk (typical) | Expected? |
 | ----- | ------------- | ---------------- | -------------- | --------- |
-| **verasic-github-env** | High | — | Critical (bundle) | Yes — credential docs + env loader |
-| **verasic-git-commits** | High | — | Critical (bundle) | Yes — hook + `core.hooksPath` |
+| **verasic-github-cli-init** | High | — | Critical (bundle) | Yes — credential docs + env loader |
+| **verasic-git-commits-convention** | High | — | Critical (bundle) | Yes — hook + `core.hooksPath` |
+| **verasic-git-commits-audit** | — | — | — | Yes — read-only git history audit; thin skill (no scanner-notes file) |
 | **verasic-init** | — | 1 alert | Critical (bundle) | Yes — orchestrates hook/bootstrap + `curl` |
 | **verasic-fusion** | — | — | Critical (bundle) | Yes — bundle inheritance |
 | **verasic-deep-research** | — | — | Critical (bundle) | Yes — bundle + subagent/fetch protocol keywords |
 | **verasic-bugbot** | — | — | Critical (bundle) | Yes — bundle + security checklist keywords |
-| **verasic-security-review** | — | — | Critical (bundle) | Yes — bundle + STRIDE/scanner protocol keywords |
-| **verasic-config** | — | — | Critical (bundle) | Yes — bundle + config schema keywords |
+| **verasic-secbot** | — | — | Critical (bundle) | Yes — bundle + STRIDE/scanner protocol keywords |
 | **verasic-agent-disclosure** | — | — | Critical (bundle) | Yes — rule wiring + adversarial red-team catalog |
 | **verasic-github-governance** | — | — | Critical (bundle) | Yes — git hooks, hook wiring, CI templates |
 | **verasic-github-governance-init** | — | — | Critical (bundle) | Yes — factory orchestrator; inherits governance + `gh` when `--open-pr` |
@@ -91,28 +91,31 @@ Opt out of hash checks only when you intentionally fork a skill locally:
 | Loader safety | `load-gh-env.sh` parses `GH_*` lines; it does **not** `source` arbitrary shell |
 | Verify | `check-gh.sh` confirms token presence and `gh auth status` without logging values |
 
-See `skills/verasic-github-env/references/setup-protocol.md` for the full tier table.
+See `skills/verasic-github-cli-init/references/setup-protocol.md` for the full tier table.
 
 ## What each skill can do
 
 | Skill | Repo mutations | Network | Notes |
 | ----- | -------------- | ------- | ----- |
-| **verasic-init** | Runs wire scripts; with `--yes --profile cursor` or `cursor-hybrid` writes `.cursor/{commands,rules,agents}/` from upstream fetch | `--check-updates` curls upstream `VERSION`; cursor profiles curl upstream `cursor/` UX files | Orchestrator; confirm-first default |
-| **verasic-github-env** | `.envrc`, `.env.example` GH block, `.gitignore`, credential template | Via `gh` after you set `GH_TOKEN` | Does not create PATs or run `gh auth login` loops |
-| **verasic-git-commits** | Sets `git config core.hooksPath` to skill hooks (or prints lefthook snippet) | None | Hook strips attribution trailers pre-commit; audit is read-only |
+| **verasic-init** | Runs wire scripts; with `--yes --profile cursor` or `cursor-hybrid` writes `.cursor/{rules,agents}/` from upstream fetch | `--check-updates` curls upstream `VERSION`; cursor profiles curl upstream `cursor/` UX files | Orchestrator; confirm-first default |
+| **verasic-github-cli-init** | `.envrc`, `.env.example` GH block, `.gitignore`, credential template | Via `gh` after you set `GH_TOKEN` | Does not create PATs or run `gh auth login` loops |
+| **verasic-git-commits-convention** | Sets `git config core.hooksPath` to skill hooks (or prints lefthook snippet) | None | Hook strips attribution trailers pre-commit |
+| **verasic-git-commits-audit** | None (audit read-only by default) | None | Fix mode only after explicit approval |
 | **verasic-fusion** | None (decision support) | Subagent/model APIs only when you invoke fusion | No edits, commits, or deploys |
 | **verasic-deep-research** | None (research only) | Readonly web fetch + model APIs when invoked | Ledger-backed citations; no file writes in ask mode |
 | **verasic-bugbot** | None (review only) | None | Reads git diffs and full files; reports bugs |
-| **verasic-security-review** | Optional artifact dirs under `.verasic/` when config enables writes | Optional Semgrep/OpenGrep when installed and config enables scanner | STRIDE review on git diff; read-only by default |
-| **verasic-config** | Scaffolds `verasic.config.ts`, `verasic/`, `.verasic/`, `.gitignore` localDir entry | None | Shared config resolution for review/fusion skills |
+| **verasic-secbot** | Optional artifact dirs under `.verasic/` and `verasic/` when report writes enabled | Optional Semgrep/OpenGrep when installed and scanner enabled | STRIDE review on git diff; read-only by default; creates artifact dirs on first report write (no config file scaffold) |
 | **verasic-agent-disclosure** | Copies disclosure rule to `.cursor/rules/` via `wire-rule.sh` | None (red-team may invoke Cursor Agent CLI) | Policy + red-team catalog; confirm-first |
 | **verasic-github-governance** | Bootstrap copies CI/hook templates; `wire-hooks.sh` sets hook paths | Via `gh` when doctor hints at plan or `--open-pr` factory path | Soft-first; OpenTofu hard path is plan-gated and not copied to product repos |
 | **verasic-github-governance-init** | Runs governance factory scripts with `--yes` only | Via `gh` when `--open-pr` | Plan-first orchestrator; never auto-applies without confirmation |
 
+**Config kit:** centralized repo config (`verasic-config`) was removed in v0.2.0. Future package-oriented config tooling is **TBD — not built**. Secbot uses inlined defaults until then.
+
 ## Install paths
 
+- **`etc/cursor/agents/`** — maintainer-only standalone model-pinned subagent roster; not installed by `setup.sh` or skills.sh; markdown frontmatter only (no scripts, network, or executable content).
 - **Cursor full setup:** `curl …/setup.sh | bash` — clones this repo shallowly and copies
-  rules, commands, agents, and skills into `.cursor/`. Same trust model as
+  rules, agents, and skills into `.cursor/`. Same trust model as
   `npx skills add`: read `SKILL.md` and scripts first; prefer a pinned tag URL over
   `main` when piping remote shell; verify `integrity.sha256` after install.
 - **Skills only:** `npx skills add Milkywayrules/verasic-skills`.
@@ -140,13 +143,12 @@ Include skill name, install path, command run, and redacted logs (never paste to
 - Root [README.md](README.md) — install and usage overview
 - Per-skill scanner notes:
   - [skills/verasic-init/references/scanner-notes.md](skills/verasic-init/references/scanner-notes.md)
-  - [skills/verasic-github-env/references/scanner-notes.md](skills/verasic-github-env/references/scanner-notes.md)
-  - [skills/verasic-git-commits/references/scanner-notes.md](skills/verasic-git-commits/references/scanner-notes.md)
+  - [skills/verasic-github-cli-init/references/scanner-notes.md](skills/verasic-github-cli-init/references/scanner-notes.md)
+  - [skills/verasic-git-commits-convention/references/scanner-notes.md](skills/verasic-git-commits-convention/references/scanner-notes.md)
   - [skills/verasic-fusion/references/scanner-notes.md](skills/verasic-fusion/references/scanner-notes.md)
   - [skills/verasic-deep-research/references/scanner-notes.md](skills/verasic-deep-research/references/scanner-notes.md)
   - [skills/verasic-bugbot/references/scanner-notes.md](skills/verasic-bugbot/references/scanner-notes.md)
-  - [skills/verasic-security-review/references/scanner-notes.md](skills/verasic-security-review/references/scanner-notes.md)
-  - [skills/verasic-config/references/scanner-notes.md](skills/verasic-config/references/scanner-notes.md)
+  - [skills/verasic-secbot/references/scanner-notes.md](skills/verasic-secbot/references/scanner-notes.md)
   - [skills/verasic-agent-disclosure/references/scanner-notes.md](skills/verasic-agent-disclosure/references/scanner-notes.md)
   - [skills/verasic-github-governance/references/scanner-notes.md](skills/verasic-github-governance/references/scanner-notes.md)
   - [skills/verasic-github-governance-init/references/scanner-notes.md](skills/verasic-github-governance-init/references/scanner-notes.md)

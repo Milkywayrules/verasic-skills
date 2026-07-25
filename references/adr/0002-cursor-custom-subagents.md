@@ -13,7 +13,7 @@ Verasic **product** subagents live in `cursor/agents/` (`verasic-*`), wired by i
 ## Decision
 
 1. **Canonical source:** `etc/cursor/agents/subagent-<profile>.md` — tracked in repo.
-2. **Runtime:** `.cursor/agents/` — Cursor reads this for Task dispatch; maintainer copies manually (`cp etc/cursor/agents/*.md .cursor/agents/`). No gitignore or repo policy on `.cursor/agents/` beyond “act as Cursor’s folder.”
+2. **Runtime:** `.cursor/agents/` — Cursor reads this for Task dispatch; maintainer copies manually (`cp etc/cursor/agents/*.md .cursor/agents/`). `.cursor/` is **gitignored** (amended 2026-07-25): it is local runtime state, so the personal roster can never reach the product tree via `git add -A`, and repo gates never depend on whether a maintainer has copied yet.
 3. **Model frontmatter:** flat slug from `cursor agent --list-models` for Phase 1 roster; bracket syntax documented as advanced/future in Layer A only.
 4. **Spawn hints:** `description:` includes spawn constraints where empirical behavior differs; full matrix in [snapshot](../snapshots/cursor-custom-subagents-2026-07-25.md).
 5. **Gemini 3.6 Flash low/medium:** spawn via **`subagent_type` only** — Task inline `model` hard-rejects these slugs (observed T21/T42/T59).

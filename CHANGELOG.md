@@ -8,11 +8,62 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ## Unreleased
 
-### Skills
+_(none)_
 
-- **verasic-config** — scaffold honors `artifacts.indexLocal: false` from `.verasicrc` (not only `VERASIC_INDEX_LOCAL=false`)
-- **verasic-security-review** — regression asserts cursor command/agent; scanner docs clarify user-supplied rules until bundled packs ship; SKILL.md documents `.agents/cursor/` hybrid path
-- **verasic-bugbot** — `/verasic-review` command states bugbot-only scope; cross-tip to `/verasic-security-review`
+## v0.2.0
+
+**Bundle tag `v0.2.0`** — skills-first Cursor UX; all manifest skills **`0.2.0`**.
+
+### Breaking changes
+
+- **Deleted `cursor/commands/`** — nine command files merged into target `SKILL.md` files; slash = skill folder name.
+- **Deleted `verasic-config`** — no repo config skill; secbot uses inlined defaults in `skills/verasic-secbot/references/config-schema.md`. Centralized config kit is **TBD / not built** (may return as npm package, Verasic Kit, or Harness Kit).
+- **Renamed skills:** `verasic-security-review` → `verasic-secbot`; `verasic-github-env` → `verasic-github-cli-init`; `verasic-git-commits` → `verasic-git-commits-convention`; new `verasic-git-commits-audit`.
+- **Renamed subagents:** `verasic-bug-reviewer` → `verasic-bugbot-reviewer`; `verasic-security-reviewer` → `verasic-secbot-reviewer`; `verasic-commit-auditor` → `verasic-git-commit-auditor`; `verasic-github-governance` agent → `verasic-github-governor`.
+- **Renamed rules:** verasic-git-commits rule → verasic-git-commits-convention; verasic-github-env rule → verasic-github-cli-env (under cursor/rules/)
+- **`setup.sh` / init** — no commands fetch; cursor-hybrid documented in install profiles.
+
+### Retired slash names (use replacement)
+
+| Retired | Replacement |
+| --- | --- |
+| `/verasic-review` | `/verasic-bugbot` |
+| `/verasic-security-review` | `/verasic-secbot` |
+| `/verasic-audit-commits` | `/verasic-git-commits-audit` |
+| `/verasic-setup-github` | `/verasic-github-cli-init` |
+| `/verasic-governance-factory` | `/verasic-github-governance-init` |
+| `/verasic-disclosure-red-team` | `/verasic-agent-disclosure` |
+
+### Retired folder / product names
+
+- `verasic-config`, `verasic-security-review`, `verasic-github-env`, `verasic-git-commits` (monolith)
+
+### Skills (all `0.2.0`)
+
+- **verasic-secbot** — was security-review; inlined config defaults; spawn `verasic-secbot-reviewer`
+- **verasic-bugbot** — orchestration in SKILL; cross-tip `/verasic-secbot`
+- **verasic-git-commits-convention** + **verasic-git-commits-audit** — split write vs audit paths
+- **verasic-github-cli-init** — was github-env
+- **verasic-init** — manifest, skill-ux-map, profile fetch without commands or config
+- All other manifest skills — semver `0.2.0`, integrity refreshed
+
+### Docs
+
+- **AGENTS.md**, **references/cursor-skills-ux.md**, **references/verasic-naming.md**, **references/verasic-cursor-map.md** (canonical slash map), **references/adr/0001-cursor-ux-skills-first.md**
+- **README.md**, **SECURITY.md** — updated names; config removed; link references
+
+### Maintainer tooling (standalone model-pinned subagents)
+
+- **`etc/cursor/agents/`** — 16 generic `subagent-*.md` roster (source layer; manual copy to `.cursor/agents/`)
+- **references/cursor-custom-subagents.md**, **references/adr/0002-cursor-custom-subagents.md**, **references/snapshots/cursor-custom-subagents-2026-07-25.md**
+- Not product surface — not installed by `setup.sh` or skills.sh; no `verasic-init` manifest or integrity wiring
+- **scripts/check-etc-subagents.sh** — roster frontmatter, `name:`/filename parity, `model:` catalog validation
+
+### Infrastructure
+
+- `.github/workflows/verasic-secbot.yml` (renamed from verasic-security-review); deleted verasic-config workflow
+- `scripts/check-references.sh` — v0.2.0 basename mapping; no backward-compat aliases
+- `scripts/check-cursor-ux-manifest.sh` — expects 8 files under cursor/
 
 ## v0.1.12
 
@@ -25,9 +76,9 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 ### Infrastructure
 
-- **cursor/** — `verasic-bugbot.md` → `verasic-bug-reviewer.md`; add `verasic-security-reviewer.md` + `/verasic-security-review` command
-- `.github/workflows/verasic-config.yml` + `verasic-security-review.yml` — path-filtered CI regressions mirroring bugbot pattern
-- `.github/workflows/verasic-bugbot.yml` — path filter updated for `verasic-bug-reviewer.md`
+- **cursor/** — agent renames (superseded by v0.2.0 skills-first map); added secbot agent + security-review command (both retired in v0.2.0)
+- CI workflows for config + security-review skills (config workflow removed in v0.2.0; security-review renamed verasic-secbot.yml)
+- **verasic-bugbot.yml** — path filter updated for bug reviewer agent (renamed again in v0.2.0)
 - **README.md** + **SECURITY.md** — document config + security-review skills, usage, scan signals, capability table
 - **scripts/check-references.sh** — map `verasic-bug-reviewer`, `verasic-security-reviewer`, `verasic-config` cursor refs
 - `.gitignore` — ignore `knowledge-base-of-king-the-user/` symlink pollution

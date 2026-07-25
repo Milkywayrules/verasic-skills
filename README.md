@@ -6,11 +6,9 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
   agent, no Bugbot subscription needed. Reviews git diffs for real bugs
   (logic, security, races, perf) with an aggressive low-noise filter. Style
   nitpicks are never reported.
-- **verasic-security-review** — STRIDE-focused security review on git diff with
+- **verasic-secbot** — STRIDE-focused security review on git diff with
   optional Semgrep/OpenGrep scanner pass, confidence scoring, and artifact output.
   Complements bugbot — depth on auth, crypto, webhooks, and input validation.
-- **verasic-config** — repo config hub for Verasic skills: `verasic.config.ts` /
-  `.verasicrc` schema, artifact dir scaffold, and shared path resolution.
 - **verasic-fusion** — multi-model fusion for exploration and decision support.
   Run the same question across models you name, with optional templates
   (board-verdict, rfc-review, tradeoff-matrix, and more). Main agent orchestrates;
@@ -18,25 +16,28 @@ Agent skills by Verasic Labs, built for AI-assisted development workflows.
 - **verasic-deep-research** — verified deep research with source ledger,
   verify-before-cite, 5-axis confidence scoring, and optional drill rounds.
   T2 workers (Hunter, Practitioner, Skeptic, Arbiter) plus optional T3 fetch.
-- **verasic-git-commits** — hard commit convention plus pre-push history
-  audit. One message style for humans and agents, no co-authored/AI trailers,
+- **verasic-git-commits-convention** — hard commit convention plus deterministic
+  commit-msg hook. One message style for humans and agents, no co-authored/AI trailers,
   no AI-session language in messages.
+- **verasic-git-commits-audit** — pre-push commit history audit (spawn auditor subagent).
 - **verasic-agent-disclosure** — block harness, skill, router, and protocol
   leaks in user-facing responses. Always-on disclosure rule plus adversarial
   red-team catalog for regression (~8 min on demand).
-- **verasic-github-env** — GitHub CLI auth for local agent harnesses.
+- **verasic-github-cli-init** — GitHub CLI auth for local agent harnesses.
   Fine-grained PAT per repo in gitignored `.github-agent.local`, optional direnv,
   bootstrap + verify scripts. Separate tiers for CI and production secrets.
 - **verasic-github-governance** — GitHub repo governance factory: CI bootstrap,
   lefthook hooks, doctor checks, plan-gated hard protection. Soft-first for Free
   private repos; OpenTofu hard path lives in dogfood registry repos only.
 - **verasic-github-governance-init** — plan-first orchestrator for governance
-  bootstrap (`/verasic-governance-factory`). Runs factory plan, then `--yes` to apply.
+  bootstrap (`/verasic-github-governance-init`). Runs factory plan, then `--yes` to apply.
 - **verasic-init** — confirm-first repo setup for installed verasic skills: plan (profile, checklist, usage), then `--yes` to wire repo-level enforcement and optionally fetch Cursor UX from upstream. Built for skills.sh installs where `setup.sh` never runs.
+
+**Slash map (canonical):** [references/verasic-cursor-map.md](references/verasic-cursor-map.md)
 
 ## Install
 
-**Cursor (full setup: rules + subagents + slash commands + skills)** — from your project root:
+**Cursor (full setup: rules + subagents + skills)** — from your project root:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main/setup.sh | bash
@@ -57,18 +58,16 @@ npx skills add Milkywayrules/verasic-skills
 bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid   # fetches Cursor UX from upstream
 ```
 
-Manual copy (optional — same result as hybrid fetch):
+Manual copy (optional — same result as hybrid fetch for agents + rules):
 
 ```bash
 git clone --depth 1 https://github.com/Milkywayrules/verasic-skills /tmp/verasic-skills
-mkdir -p .cursor/agents .cursor/commands .cursor/rules
-cp -r /tmp/verasic-skills/cursor/agents/.   .cursor/agents/
-cp -r /tmp/verasic-skills/cursor/commands/. .cursor/commands/
+mkdir -p .cursor/agents .cursor/rules
+cp -r /tmp/verasic-skills/cursor/agents/. .cursor/agents/
 cp -r /tmp/verasic-skills/cursor/rules/.    .cursor/rules/
 ```
 
-Slash commands reference `.cursor/skills/…` by default; when skills live under
-`.agents/skills/`, the agent adjusts the path prefix (stated in each command file).
+Skills-first v0.2.0: orchestration is in each skill's `SKILL.md`; there is no `cursor/commands/` directory.
 
 **Then set up the repo (all install paths):** run `/verasic-init` in Cursor — it shows a **plan first** (profile, checklist, usage), then apply with `--yes` after you confirm. Or directly:
 
@@ -83,30 +82,35 @@ Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/sk
 
 ## Usage
 
+Primary slash entries (see [references/verasic-cursor-map.md](references/verasic-cursor-map.md) for subagents and rules):
+
+- `/verasic-bugbot` — review branch changes vs the default branch (add "uncommitted" for staged + unstaged only)
+- `/verasic-secbot` — STRIDE security review on branch or uncommitted diff
+- `/verasic-git-commits-audit` — audit branch commit history before push/PR
 - `/verasic-fusion` — multi-model fusion (requires `mode`, `models`, question)
 - `/verasic-deep-research` — ledger-backed research (requires `depth`, `output`, `source-boundary`, question)
-- `/verasic-review` — review branch changes vs the default branch
-- `/verasic-review uncommitted` — review staged + unstaged only
-- `/verasic-security-review` — STRIDE security review on branch or uncommitted diff
-- `/verasic-audit-commits` — audit branch commit history before push/PR
-- `/verasic-disclosure-red-team` — run agent disclosure adversarial regression
+- `/verasic-agent-disclosure` — run agent disclosure adversarial regression
 - `/verasic-init` — plan setup (profile + checklist + usage), then apply with `--yes` after you confirm
-- `/verasic-setup-github` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
-- `/verasic-governance-factory` — plan GitHub repo governance bootstrap, then apply with `--yes` after you confirm
+- `/verasic-github-cli-init` — bootstrap GitHub CLI auth for local agents (`.envrc`, `.env.example`, verify)
+- `/verasic-github-governance-init` — plan GitHub repo governance bootstrap, then apply with `--yes` after you confirm
 - Commit convention needs no invocation — the always-applied rule enforces it on every commit
 - GitHub env rule applies automatically before `gh` commands when installed
 
 Full docs: [skills/verasic-fusion/README.md](skills/verasic-fusion/README.md) ·
 [skills/verasic-deep-research/README.md](skills/verasic-deep-research/README.md) ·
 [skills/verasic-bugbot/README.md](skills/verasic-bugbot/README.md) ·
-[skills/verasic-security-review/README.md](skills/verasic-security-review/README.md) ·
-[skills/verasic-config/README.md](skills/verasic-config/README.md) ·
-[skills/verasic-git-commits/README.md](skills/verasic-git-commits/README.md) ·
+[skills/verasic-secbot/README.md](skills/verasic-secbot/README.md) ·
+[skills/verasic-git-commits-convention/README.md](skills/verasic-git-commits-convention/README.md) ·
+[skills/verasic-git-commits-audit/README.md](skills/verasic-git-commits-audit/README.md) ·
 [skills/verasic-agent-disclosure/README.md](skills/verasic-agent-disclosure/README.md) ·
-[skills/verasic-github-env/README.md](skills/verasic-github-env/README.md) ·
+[skills/verasic-github-cli-init/README.md](skills/verasic-github-cli-init/README.md) ·
 [skills/verasic-github-governance/README.md](skills/verasic-github-governance/README.md) ·
 [skills/verasic-github-governance-init/README.md](skills/verasic-github-governance-init/README.md) ·
 [skills/verasic-init/README.md](skills/verasic-init/README.md)
+
+Reference docs: [references/cursor-skills-ux.md](references/cursor-skills-ux.md) ·
+[references/verasic-naming.md](references/verasic-naming.md) ·
+[AGENTS.md](AGENTS.md) (maintainers)
 
 ## Security
 
@@ -115,14 +119,13 @@ often flag harness skills for expected reasons — git hooks, credential docs, `
 See [SECURITY.md](SECURITY.md) for the trust model, expected scan signals, and credential handling.
 Per-skill scanner notes:
 [verasic-init](skills/verasic-init/references/scanner-notes.md) ·
-[verasic-github-env](skills/verasic-github-env/references/scanner-notes.md) ·
-[verasic-git-commits](skills/verasic-git-commits/references/scanner-notes.md) ·
+[verasic-github-cli-init](skills/verasic-github-cli-init/references/scanner-notes.md) ·
+[verasic-git-commits-convention](skills/verasic-git-commits-convention/references/scanner-notes.md) ·
 [verasic-agent-disclosure](skills/verasic-agent-disclosure/references/scanner-notes.md) ·
 [verasic-fusion](skills/verasic-fusion/references/scanner-notes.md) ·
 [verasic-deep-research](skills/verasic-deep-research/references/scanner-notes.md) ·
 [verasic-bugbot](skills/verasic-bugbot/references/scanner-notes.md) ·
-[verasic-security-review](skills/verasic-security-review/references/scanner-notes.md) ·
-[verasic-config](skills/verasic-config/references/scanner-notes.md) ·
+[verasic-secbot](skills/verasic-secbot/references/scanner-notes.md) ·
 [verasic-github-governance](skills/verasic-github-governance/references/scanner-notes.md) ·
 [verasic-github-governance-init](skills/verasic-github-governance-init/references/scanner-notes.md)
 
@@ -155,207 +158,40 @@ hashes `VERSION` in `integrity.sha256` — tamper or stale bump fails as `broken
 
 ```markdown
 verasic-skills/
-├── README.md # root: short pitch + install commands
-├── SECURITY.md # trust model, scanner signals, credential handling
-├── versions.lock # release manifest — must match skills/*/VERSION (CI enforced)
+├── README.md
+├── AGENTS.md                         # maintainer / agent editing guide
+├── SECURITY.md
+├── CHANGELOG.md
+├── versions.lock
 ├── scripts/
-│ ├── check-versions.sh # lock ↔ VERSION ↔ integrity gate
-│ ├── check-references.sh # validate markdown internal path refs
-│ ├── check-cursor-ux-manifest.sh # cursor/ ↔ cursor-ux-manifest sync gate
-│ ├── check-bundle-pins.sh # governance SKILL.md + cursor rule @vX.Y.Z pins
-│ ├── check-manifest-claims.sh # SKILL.md manifest registration vs manifest.txt
-│ ├── refresh-integrity.sh # regenerate integrity.sha256 after bumps
-│ ├── test-all.sh # router: all regressions + version + protocol gates
-│ └── test-versions-regression.sh
+│   ├── check-versions.sh
+│   ├── check-references.sh
+│   ├── check-cursor-ux-manifest.sh
+│   ├── check-bundle-pins.sh
+│   ├── check-manifest-claims.sh
+│   ├── check-etc-subagents.sh
+│   ├── refresh-integrity.sh
+│   ├── test-all.sh
+│   └── test-versions-regression.sh
 ├── references/
-│ ├── release-protocol.md # release checklist (version + integrity)
-│ ├── release-notes-template.md # GitHub Release body template
-│ └── repo-meta.md # branch protection + maintainer settings
-├── CHANGELOG.md # bundle release summary
+│   ├── verasic-cursor-map.md         # canonical slash map
+│   ├── cursor-skills-ux.md
+│   ├── verasic-naming.md
+│   ├── cursor-custom-subagents.md    # standalone model-pinned subagents (observed)
+│   ├── adr/0001-cursor-ux-skills-first.md
+│   ├── adr/0002-cursor-custom-subagents.md
+│   ├── snapshots/                    # frozen PoC tables (e.g. model catalog)
+│   ├── release-protocol.md
+│   ├── release-notes-template.md
+│   └── repo-meta.md
+├── etc/
+│   └── cursor/agents/                # standalone model-pinned subagents (maintainer; not product)
 ├── setup.sh
-├── .github/workflows/
-│ ├── verasic-fusion.yml
-│ ├── verasic-deep-research.yml
-│ ├── verasic-init.yml
-│ ├── verasic-git-commits.yml
-│ ├── verasic-bugbot.yml
-│ ├── verasic-config.yml
-│ ├── verasic-security-review.yml
-│ ├── verasic-release.yml # full test-all on tag push
-│ └── verasic-versions.yml # version manifest on every main PR/push
-├── skills/ # ← the units npx installs
-│ ├── verasic-bugbot/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── references/
-│ │ │ └── review-protocol.md # ← single source of truth
-│ │ └── checklists/
-│ │ ├── correctness.md
-│ │ ├── security.md
-│ │ ├── performance.md
-│ │ └── infra.md
-│ ├── verasic-security-review/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── references/
-│ │ │ └── security-review-protocol.md # ← single source of truth
-│ │ └── checklists/
-│ │     └── security.md
-│ ├── verasic-config/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── schema/
-│ │ │ └── verasic.config.ts
-│ │ └── scripts/
-│ │     ├── scaffold-artifacts.sh # wire repo: artifact dirs + config scaffold
-│ │     └── test-regression.sh
-│ ├── verasic-fusion/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── references/
-│ │ │ ├── fusion-protocol.md # ← single source of truth
-│ │ │ ├── helper.md
-│ │ │ ├── models.md
-│ │ │ └── use-cases.md
-│ │ ├── templates/
-│ │ │ ├── board-verdict.md
-│ │ │ ├── rfc-review.md
-│ │ │ ├── tradeoff-matrix.md
-│ │ │ ├── brief-research.md
-│ │ │ ├── risk-register.md
-│ │ │ ├── devils-advocate.md
-│ │ │ ├── premortem.md
-│ │ │ ├── stakeholder-lens.md
-│ │ │ └── compare-to-status-quo.md
-│ │ └── scripts/
-│ │ ├── test-regression.sh
-│ │ ├── test-exhaustive-protocol.sh
-│ │ └── test-exhaustive.sh # local full gate (includes init regression in source tree)
-│ ├── verasic-deep-research/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── references/
-│ │ │ ├── research-protocol.md # ← single source of truth
-│ │ │ ├── helper.md
-│ │ │ ├── citation-protocol.md
-│ │ │ ├── confidence-rubric.md
-│ │ │ ├── drill-protocol.md
-│ │ │ ├── source-tiers.md
-│ │ │ ├── fusion-handoff.md
-│ │ │ └── scanner-notes.md
-│ │ ├── templates/
-│ │ │ ├── deep-research-brief.md
-│ │ │ └── source-ledger.yaml
-│ │ └── workflows/
-│ │     ├── quick-scan.md
-│ │     ├── standard-research.md
-│ │     ├── adversarial-deep.md
-│ │     └── custom.md
-│ ├── verasic-git-commits/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── hooks/
-│ │ │ └── commit-msg # deterministic layer: strip trailers, reject style breaks
-│ │ ├── scripts/
-│ │ │ ├── wire-hook.sh # hook wiring used by verasic-init
-│ │ │ └── test-regression.sh # disposable regression tests
-│ │ └── references/
-│ │ ├── conventions.md # ← single source of truth (the spec)
-│ │ ├── commit-protocol.md # write path: workflow, verify, escape hatch
-│ │ └── audit-protocol.md # read path: scope, checks, report
-│ ├── verasic-agent-disclosure/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── assets/
-│ │ │ └── verasic-agent-disclosure.mdc # rule asset copied by wire-rule.sh
-│ │ ├── scripts/
-│ │ │ ├── wire-rule.sh # rule wiring used by verasic-init
-│ │ │ ├── run-red-team.sh # Cursor Agent CLI regression
-│ │ │ └── test-regression.sh # structural regression
-│ │ └── references/
-│ │     ├── disclosure-policy.md # ← single source of truth
-│ │     ├── red-team-prompts.md
-│ │     ├── red-team-protocol.md
-│ │     ├── saas-integration.md
-│ │     └── scanner-notes.md
-│ ├── verasic-github-env/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── scripts/
-│ │ │ ├── bootstrap.sh # wire repo: .envrc, templates, .gitignore
-│ │ │ ├── check-gh.sh # verify GH_TOKEN + gh auth
-│ │ │ ├── load-gh-env.sh # safe GH var loader
-│ │ │ ├── parse-gh-repo.sh # owner/repo from git remote URL
-│ │ │ └── test-regression.sh # disposable regression tests
-│ │ ├── templates/
-│ │ │ ├── .envrc
-│ │ │ └── github-agent.local.example
-│ │ └── references/
-│ │     └── setup-protocol.md # ← single source of truth
-│ ├── verasic-github-governance/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── hooks/
-│ │ │ ├── pre-push # block direct push to default branch (soft layer)
-│ │ │ └── pre-commit # lightweight reminder on default-branch commits
-│ │ ├── scripts/
-│ │ │ ├── bootstrap-repo.sh # copy CI/CONTRIBUTING/lefthook/AGENTS templates
-│ │ │ ├── wire-hooks.sh # hook wiring used by verasic-init
-│ │ │ ├── doctor.sh # soft-governance readiness check
-│ │ │ └── test-regression.sh
-│ │ ├── templates/
-│ │ │ ├── lefthook.yml
-│ │ │ ├── CONTRIBUTING.md
-│ │ │ └── .github/workflows/
-│ │ │     ├── ci.yml
-│ │ │     └── ci-turborepo.yml
-│ │ └── references/
-│ │     ├── governance-protocol.md # ← single source of truth
-│ │     ├── factory-protocol.md
-│ │     ├── existing-repo-conflicts.md
-│ │     ├── plan-matrix.md
-│ │     └── scanner-notes.md
-│ ├── verasic-github-governance-init/
-│ │ ├── SKILL.md
-│ │ ├── README.md
-│ │ ├── references/
-│ │ │ └── scanner-notes.md
-│ │ └── scripts/
-│ │     ├── factory.sh # plan-first orchestrator — `--yes` to apply
-│ │     └── test-regression.sh
-│ └── verasic-init/
-│ ├── SKILL.md
-│ ├── README.md
-│ ├── manifest.txt # registry: skill → wire → verify → description
-│ ├── VERSION
-│ ├── integrity.sha256
-│ ├── scripts/
-│ │ ├── init.sh # plan + wire + report
-│ │ ├── profile.sh # profile detect, upstream UX fetch
-│ │ └── test-regression.sh
-│ └── references/
-│ ├── init-protocol.md # ← single source of truth
-│ ├── install-profiles.md
-│ └── cursor-ux-manifest.txt
-└── cursor/
+├── .github/workflows/                # path-filtered per skill
+├── skills/                           # ← the units npx installs (11 skills, all 0.2.0)
+└── cursor/                           # 4 agents + 4 rules (no commands/)
     ├── agents/
-    │ ├── verasic-bug-reviewer.md # thin pointer to the review protocol
-    │ ├── verasic-security-reviewer.md # thin pointer to security-review protocol
-    │ ├── verasic-commit-auditor.md # thin pointer to the audit protocol
-    │ └── verasic-github-governance.md # thin pointer to governance protocol
-    ├── commands/
-    │ ├── verasic-review.md
-    │ ├── verasic-security-review.md
-    │ ├── verasic-fusion.md
-    │ ├── verasic-deep-research.md
-    │ ├── verasic-audit-commits.md
-    │ ├── verasic-disclosure-red-team.md
-    │ ├── verasic-setup-github.md
-    │ ├── verasic-governance-factory.md
-    │ └── verasic-init.md
     └── rules/
-        ├── verasic-git-commits.mdc # always-applied digest + pointer
-        ├── verasic-agent-disclosure.mdc # always-applied disclosure policy
-        ├── verasic-github-env.mdc
-        └── verasic-github-governance.mdc
 ```
+
+See [references/verasic-cursor-map.md](references/verasic-cursor-map.md) for the full skill list and slash table.

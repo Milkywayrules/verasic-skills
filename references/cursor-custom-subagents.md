@@ -42,7 +42,7 @@ Not in skills.sh product. No verasic-init wiring in v1.
 | Task `model` flat override | ✓ when slug on inline allowlist (see snapshot) |
 | `gemini-3.6-flash-low` / `-medium` inline | ✗ hard reject — use dedicated subagent file |
 | Bracket in Task `model` | ✗ hard reject |
-| `composer-2.5` (non-fast) inline | ✓ reject |
+| `composer-2.5` (non-fast) inline | ✗ hard reject |
 | Fuzzy labels (“grok high”) | ✗ |
 | `model: subagent-*` (name as model) | Unreliable — do not use |
 
@@ -73,6 +73,8 @@ Gemini low/medium: add to `description:` — `Spawn via subagent_type only; Task
 Official docs support parametric frontmatter, e.g. `claude-opus-5[effort=high,context=300k]`. Use when no flat slug matches the desired config. **Never** in Task inline `model`. Phase 1 roster uses flat slugs only (all validated on account 2026-07-25).
 
 ## PoC transcript index
+
+Short IDs in the table are Cursor chat-transcript handles (resolvable in Cursor only), not repo paths.
 
 | ID | Proved |
 | --- | --- |

@@ -2,8 +2,8 @@
 
 **Date:** 2026-07-25  
 **Cursor:** 3.12.29 (`cd1c87ff…`)  
-**Account catalog:** `cursor agent --list-models` → **192** slugs  
-**Evidence:** orchestrator [bc578ce3](bc578ce3-28bb-405e-aded-85fb66dfd954) T01–T70
+**Account catalog:** `cursor agent --list-models` → **190** slugs (raw output includes 2 non-slug lines: title + tip)  
+**Evidence:** orchestrator [bc578ce3](bc578ce3-28bb-405e-aded-85fb66dfd954) T01–T70 — short IDs are Cursor chat-transcript handles, not repo paths
 
 See [cursor-custom-subagents.md](../cursor-custom-subagents.md) and [ADR 0002](../adr/0002-cursor-custom-subagents.md).
 
