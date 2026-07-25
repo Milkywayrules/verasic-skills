@@ -9,7 +9,7 @@ unset GH_TOKEN GH_REPO GITHUB_TOKEN 2>/dev/null || true
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_SRC="$(cd "$SCRIPT_DIR/../.." && pwd)"
 INIT_VERSION="$(tr -d '[:space:]' < "$SKILLS_SRC/verasic-init/VERSION")"
-BUNDLE_TAG="$(tr -d '[:space:]' < "$SKILLS_SRC/verasic-init/references/bundle-tag.txt")"
+MAIN_UPSTREAM="https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -69,7 +69,13 @@ grep -q 'install profile' <<<"$out0" && ok "plan shows install profile" || bad "
 grep -q 'profile checklist' <<<"$out0" && ok "plan shows profile checklist" || bad "plan shows profile checklist"
 grep -q 'pass --yes to apply' <<<"$out0" && ok "plan asks for confirmation" || bad "plan asks for confirmation"
 grep -qE 'would fetch [0-9]+ Cursor UX file\(s\) for scope' <<<"$out0" && ok "plan mentions scoped upstream fetch" || bad "plan mentions scoped upstream fetch"
-grep -q 'ux upstream' <<<"$out0" && grep -q "$BUNDLE_TAG" <<<"$out0" && ok "plan pins ux upstream to bundle tag" || bad "plan pins ux upstream to bundle tag"
+grep -q 'ux upstream' <<<"$out0" && grep -q "$MAIN_UPSTREAM" <<<"$out0" && ok "plan defaults ux upstream to main" || bad "plan defaults ux upstream to main"
+
+# --- VERASIC_INIT_BUNDLE_TAG pins ux upstream ---
+R0b="$TMP/plan-bundle-tag"
+make_repo "$R0b" verasic-init verasic-github-cli-init
+out0b="$(cd "$R0b" && VERASIC_INIT_BUNDLE_TAG=v9.9.9 bash "$INIT_REL")"
+grep -q 'ux upstream' <<<"$out0b" && grep -q 'v9.9.9' <<<"$out0b" && ok "VERASIC_INIT_BUNDLE_TAG pins ux upstream" || bad "VERASIC_INIT_BUNDLE_TAG pins ux upstream"
 grep -q ' scope' <<<"$out0" && grep -q 'source:' <<<"$out0" && ok "plan shows scope section" || bad "plan shows scope section"
 [[ ! -f "$R0/.envrc" ]] && ok "plan does not wire .envrc" || bad "plan does not wire .envrc"
 

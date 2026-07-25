@@ -9,7 +9,7 @@ is the strict release manifest. `integrity.sha256` hashes `VERSION` — they mov
 | ----- | -------- | ---- |
 | Per-skill semver | `skills/<name>/VERSION` | What changed in that skill |
 | Release manifest | `versions.lock` | Must match every manifest skill `VERSION` |
-| Repo tag | `vX.Y.Z` on GitHub | Bundle snapshot (install pin) |
+| Bundle tag | root `bundle.tag` + git tag `vX.Y.Z` | Canonical bundle version; drives generated `@vX.Y.Z` pins |
 
 Users verify installs with `verasic-init` (integrity hash check) and read the **versions**
 section. `--check-updates` compares local `VERSION` to upstream per skill.
@@ -37,7 +37,13 @@ section. `--check-updates` compares local `VERSION` to upstream per skill.
    ```
 
 6. Run affected skill exhaustive gates when the skill ships protocol tests.
-7. Update [CHANGELOG.md](../CHANGELOG.md); draft GitHub Release from [release-notes-template.md](release-notes-template.md). Update `skills/verasic-init/references/bundle-tag.txt` and governance `@vX.Y.Z` pins to match the new bundle tag.
+7. Update [CHANGELOG.md](../CHANGELOG.md); draft GitHub Release from [release-notes-template.md](release-notes-template.md). Bump bundle version:
+
+   ```bash
+   bash scripts/release-bump.sh vX.Y.Z
+   ```
+
+   This sets root `bundle.tag`, runs `sync-bundle-tag.sh` (governance `@vX.Y.Z` pins), and runs `check-bundle-pins.sh`.
 8. Commit, push `main`, tag `vX.Y.Z`, push tag — **`verasic-release` CI runs `test-all.sh`**.
 9. Apply [repo-meta.md](repo-meta.md) (branch protection, GitHub Release).
 

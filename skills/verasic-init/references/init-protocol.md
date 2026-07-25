@@ -22,7 +22,7 @@ Profiles select the skills root and optional Cursor UX install. Spec: `reference
 
 | Profile | `--yes` installs | Skills root for wiring |
 | ------- | ---------------- | ---------------------- |
-| `cursor` | `.cursor/{rules,agents}/` fetched from upstream `cursor/` at bundle tag `v<bundle-tag>` from `references/bundle-tag.txt` (fallback `main`), filtered to effective scope | `.cursor/skills/` |
+| `cursor` | `.cursor/{rules,agents}/` fetched from upstream `cursor/` at **`main`** (or `VERASIC_INIT_BUNDLE_TAG` / `VERASIC_INIT_REMOTE_REPO_BASE`), filtered to effective scope | `.cursor/skills/` |
 | `agent` | nothing (skills.sh, Claude Code, Codex, Kiro, …) | `.agents/skills/` |
 | `cursor-hybrid` | same scoped Cursor UX fetch as `cursor` | `.agents/skills/` |
 

@@ -10,13 +10,31 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(none)_
 
+## v0.2.4
+
+**Bundle tag `v0.2.4`** — canonical root `bundle.tag`; init defaults to **`main`** for Cursor UX fetch; **`verasic-init` `0.2.2`**, other manifest skills unchanged at **`0.2.0`**.
+
+### Changed
+
+- **Bundle version** — root bundle.tag is the single source of truth (replaces the retired per-init bundle-tag reference file). Maintainers run `scripts/release-bump.sh vX.Y.Z` and `scripts/sync-bundle-tag.sh` to propagate `@vX.Y.Z` pins in governance UX files.
+- **verasic-init** — Cursor UX fetch defaults to upstream **`main`**. Optional `VERASIC_INIT_BUNDLE_TAG` pins fetch to a released tag; plan report shows both **ux upstream** and informational **latest bundle** (from upstream bundle.tag on main).
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
+
+See [v0.2.1](#v021) for breaking changes and migration notes.
+
 ## v0.2.3
 
 **Bundle tag `v0.2.3`** — init upstream fetch fix; **`verasic-init` `0.2.1`**, other manifest skills unchanged at **`0.2.0`**.
 
 ### Fix
 
-- **verasic-init** — Cursor UX fetch uses `references/bundle-tag.txt` (git bundle tag, e.g. `v0.2.3`) instead of per-skill `VERSION` (`0.2.0`). Fixes 404 spam when the semver tag does not exist on GitHub (e.g. burned `v0.2.0`). Probes tag once before fetch; falls back to `main` quietly.
+- **verasic-init** — Cursor UX fetch uses a shipped bundle git tag (e.g. `v0.2.3`) instead of per-skill `VERSION` (`0.2.0`). Fixes 404 spam when the semver tag does not exist on GitHub (e.g. burned `v0.2.0`). Probes tag once before fetch; falls back to `main` quietly.
 
 ### Install
 

@@ -96,20 +96,21 @@ verasic_profile_main_repo_base() {
   printf '%s' "https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main"
 }
 
-# Git bundle tag for upstream cursor/ fetch — not the per-skill VERSION semver.
-verasic_profile_bundle_git_tag() {
-  local skill_root="${1:-}"
-  local tag=""
+# Latest released bundle tag from upstream main/bundle.tag (informational; warn-only on failure).
+verasic_profile_upstream_bundle_tag() {
+  local url tag
 
-  if [[ -n "$skill_root" && -f "$skill_root/references/bundle-tag.txt" ]]; then
-    tag="$(tr -d '[:space:]' < "$skill_root/references/bundle-tag.txt")"
-    [[ -n "$tag" && "$tag" != v* ]] && tag="v${tag}"
+  url="$(verasic_profile_main_repo_base)/bundle.tag"
+  if ! tag="$(curl -fsSL --connect-timeout 5 --max-time 10 "$url" 2>/dev/null)"; then
+    return 1
   fi
+  tag="$(tr -d '[:space:]' <<<"$tag")"
+  [[ -n "$tag" ]] || return 1
+  [[ "$tag" != v* ]] && tag="v${tag}"
   printf '%s' "$tag"
 }
 
 verasic_profile_remote_repo_base() {
-  local skill_root="${1:-}"
   local bundle_tag=""
 
   if [[ -n "${VERASIC_INIT_REMOTE_REPO_BASE:-}" ]]; then
@@ -122,12 +123,13 @@ verasic_profile_remote_repo_base() {
     printf '%s' "${base%/}"
     return
   fi
-  bundle_tag="$(verasic_profile_bundle_git_tag "$skill_root")"
-  if [[ -n "$bundle_tag" ]]; then
+  if [[ -n "${VERASIC_INIT_BUNDLE_TAG:-}" ]]; then
+    bundle_tag="${VERASIC_INIT_BUNDLE_TAG//[[:space:]]/}"
+    [[ "$bundle_tag" != v* ]] && bundle_tag="v${bundle_tag}"
     printf '%s' "https://raw.githubusercontent.com/Milkywayrules/verasic-skills/${bundle_tag}"
-  else
-    verasic_profile_main_repo_base
+    return
   fi
+  verasic_profile_main_repo_base
 }
 
 verasic_profile_probe_cursor_base() {
@@ -145,30 +147,15 @@ verasic_profile_probe_cursor_base() {
 
 verasic_profile_resolve_cursor_fetch_base() {
   local skill_root="$1" sample_relpath="$2"
-  local base main_base
+  local base
 
   base="$(verasic_profile_remote_repo_base "$skill_root")"
-  main_base="$(verasic_profile_main_repo_base)"
-
-  if [[ -n "${VERASIC_INIT_REMOTE_REPO_BASE:-}" ]]; then
-    printf '%s' "$base"
-    return 0
-  fi
-
   if verasic_profile_probe_cursor_base "$base" "$sample_relpath"; then
     printf '%s' "$base"
     return 0
   fi
 
-  if [[ "$base" != "$main_base" ]]; then
-    echo "profile: bundle tag base unavailable — using main" >&2
-    if verasic_profile_probe_cursor_base "$main_base" "$sample_relpath"; then
-      printf '%s' "$main_base"
-      return 0
-    fi
-  fi
-
-  printf '%s' "$base"
+  echo "profile: ux upstream unreachable: $base/cursor/$sample_relpath" >&2
   return 1
 }
 
@@ -314,7 +301,7 @@ verasic_profile_install_cursor_ux() {
   mkdir -p "$REPO_ROOT/.cursor/agents" "$REPO_ROOT/.cursor/rules"
 
   base="$(verasic_profile_resolve_cursor_fetch_base "$skill_root" "${paths[0]}")" || {
-    echo "profile: Cursor UX install failed — bundle tag and main unreachable; set VERASIC_INIT_REMOTE_REPO_BASE"
+    echo "profile: Cursor UX install failed — upstream unreachable; set VERASIC_INIT_REMOTE_REPO_BASE or VERASIC_INIT_BUNDLE_TAG"
     return 1
   }
   if verasic_profile_fetch_cursor_from_base "$base" "${paths[@]}"; then
@@ -450,8 +437,9 @@ verasic_profile_print_section() {
   local profile="$1" skills_root="$2" apply="$3" scope_csv="$4" scope_source="$5"
   local rel_root="${skills_root#"$REPO_ROOT"/}"
   local init_skill="$skills_root/verasic-init"
-  local remote_base ux_count=0
+  local remote_base latest_bundle="" ux_count=0
   remote_base="$(verasic_profile_remote_repo_base "$init_skill")"
+  latest_bundle="$(verasic_profile_upstream_bundle_tag 2>/dev/null || true)"
   scope_csv="$(verasic_profile_scope_csv "$scope_csv")"
   ux_count="$(verasic_profile_count_scoped_ux_paths "$init_skill" "$scope_csv")"
   local cs=false as=false ux=false
@@ -481,6 +469,11 @@ verasic_profile_print_section() {
   printf ' %-18s %s\n' "skills root" "$rel_root"
   if [[ "$profile" == cursor || "$profile" == cursor-hybrid ]]; then
     printf ' %-18s %s\n' "ux upstream" "$remote_base/cursor/"
+    if [[ -n "$latest_bundle" ]]; then
+      printf ' %-18s %s (from upstream bundle.tag)\n' "latest bundle" "$latest_bundle"
+    else
+      printf ' %-18s %s\n' "latest bundle" "(unavailable)"
+    fi
   fi
   echo
 
