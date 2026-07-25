@@ -80,8 +80,8 @@ Agents must load **verasic-github-governance** before any **mutating** GitHub op
 
 | Skill | When |
 | --- | --- |
-| **verasic-github-env** | Before any `gh` command needing auth |
-| **verasic-git-commits** | Commit-msg hook chained in lefthook template |
+| **verasic-github-cli-init** | Before any `gh` command needing auth |
+| **verasic-git-commits-convention** | Commit-msg hook chained in lefthook template |
 | **verasic-init** | One-shot wiring via manifest |
 
 ## Doctor exit codes

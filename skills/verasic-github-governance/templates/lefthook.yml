@@ -1,6 +1,6 @@
 # Verasic governance — lefthook standard for new repos
 # Hooks are copied to .github/verasic-governance/hooks/ by bootstrap-repo.sh
-# commit-msg: run wire-hooks.sh after verasic-git-commits is installed (verasic-init)
+# commit-msg: run wire-hooks.sh after verasic-git-commits-convention is installed (verasic-init)
 
 pre-commit:
   commands:
@@ -12,6 +12,6 @@ pre-push:
     governance-pre-push:
       run: bash .github/verasic-governance/hooks/pre-push {1}
 
-# commit-msg wired by wire-hooks.sh when verasic-git-commits is present:
-#   .agents/skills/verasic-git-commits/hooks/commit-msg (preferred)
-#   .cursor/skills/verasic-git-commits/hooks/commit-msg
+# commit-msg wired by wire-hooks.sh when verasic-git-commits-convention is present:
+#   .agents/skills/verasic-git-commits-convention/hooks/commit-msg (preferred)
+#   .cursor/skills/verasic-git-commits-convention/hooks/commit-msg

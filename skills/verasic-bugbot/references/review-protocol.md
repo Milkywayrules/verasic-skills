@@ -74,4 +74,4 @@ After the summary: if the diff's dominant stack (e.g. Laravel, Flutter, Go, Next
 
 ### Cross-tip (orchestrator may append)
 
-If the diff touches auth, crypto, webhooks, or user-input validation, the orchestrator may add ONE line: `Tip: auth/crypto/webhook/input changes — run /verasic-security-review for STRIDE depth.` Never more than one line, never a finding, never auto-chain.
+If the diff touches auth, crypto, webhooks, or user-input validation, the orchestrator may add ONE line: `Tip: auth/crypto/webhook/input changes — run /verasic-secbot for STRIDE depth.` Never more than one line, never a finding, never auto-chain.

@@ -23,8 +23,8 @@ done
 
 find_git_commits_hook() {
   local roots=(
-    "$REPO_ROOT/.agents/skills/verasic-git-commits/hooks/commit-msg"
-    "$REPO_ROOT/.cursor/skills/verasic-git-commits/hooks/commit-msg"
+    "$REPO_ROOT/.agents/skills/verasic-git-commits-convention/hooks/commit-msg"
+    "$REPO_ROOT/.cursor/skills/verasic-git-commits-convention/hooks/commit-msg"
   )
   local p
   for p in "${roots[@]}"; do
@@ -47,8 +47,8 @@ ensure_commit_msg_in_lefthook() {
   local hook_rel="$2"
   local run_cmd="      run: bash ${hook_rel} {1}"
 
-  if grep -q 'verasic-git-commits/hooks/commit-msg' "$lefthook_file"; then
-    sed -i "s|run: bash .*verasic-git-commits/hooks/commit-msg {1}|run: bash ${hook_rel} {1}|g" "$lefthook_file"
+  if grep -qE 'run: bash .*verasic-git-commits(-convention)?/hooks/commit-msg' "$lefthook_file"; then
+    sed -i "s|run: bash .*verasic-git-commits\(-convention\)\?/hooks/commit-msg {1}|run: bash ${hook_rel} {1}|g" "$lefthook_file"
     echo "wire-hooks: updated commit-msg path in $lefthook_file"
     return 0
   fi
@@ -107,7 +107,7 @@ EOF
     chmod +x "$commit_hook" 2>/dev/null || true
     ensure_commit_msg_in_lefthook "$lefthook_file" "$commit_rel"
   else
-    echo "wire-hooks: verasic-git-commits not in repo — commit-msg skipped (install skill + re-run wire-hooks.sh)"
+    echo "wire-hooks: verasic-git-commits-convention not in repo — commit-msg skipped (install skill + re-run wire-hooks.sh)"
   fi
 
   echo "wire-hooks: lefthook uses repo-local governance hooks ($lefthook_file)"

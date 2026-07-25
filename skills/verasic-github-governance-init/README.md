@@ -2,7 +2,7 @@
 
 Plan-first factory orchestrator for **verasic-github-governance**. Runs bootstrap → wire-hooks → lefthook install → doctor.
 
-**Version:** 0.1.0
+**Version:** 0.2.0
 
 ## Quick start
 
@@ -14,7 +14,7 @@ bash .cursor/skills/verasic-github-governance-init/scripts/factory.sh --yes
 ## Requires
 
 - verasic-github-governance (domain scripts)
-- verasic-github-env (for `--open-pr`)
+- verasic-github-cli-init (for `--open-pr`)
 
 Install via `skills.sh` or `/verasic-init` — factory apply requires explicit `factory.sh --yes`.
 

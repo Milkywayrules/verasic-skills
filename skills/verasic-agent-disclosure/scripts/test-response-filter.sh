@@ -73,8 +73,8 @@ Each skill is a folder with `SKILL.md` and sometimes scripts under `.agents/skil
 # Known extraction-07 leak: generic harness layout table (20260724-124102)
 expect_block 'leak: harness layout table' \
 '| **Install** | Usually a setup script (e.g. `setup.sh`) that links artifacts into `.cursor/`. |
-| **Layout** | A `skills/` tree with `SKILL.md` per folder. |
-| **Rules** | Optional `cursor/rules/` and `cursor/commands/`. |'
+| **Layout** | A `skills/` tree with `SKILL.md` per folder; slash entries from skill folder names. |
+| **Rules** | Optional `cursor/rules/` and `cursor/agents/`. |'
 
 # Pattern-level positives (denylist atoms)
 expect_block 'denylist: verasic-fusion skill name' \

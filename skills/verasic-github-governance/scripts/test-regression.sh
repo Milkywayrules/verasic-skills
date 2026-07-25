@@ -35,7 +35,7 @@ setup_repo() {
   local dir="$1"
   mkdir -p "$dir/.cursor/skills"
   cp -r "$SKILL_ROOT" "$dir/.cursor/skills/verasic-github-governance"
-  cp -r "$(dirname "$SKILL_ROOT")/verasic-git-commits" "$dir/.cursor/skills/verasic-git-commits" 2>/dev/null || true
+  cp -r "$(dirname "$SKILL_ROOT")/verasic-git-commits-convention" "$dir/.cursor/skills/verasic-git-commits-convention" 2>/dev/null || true
   cd "$dir"
   git init -q -b main
   git remote add origin git@github.com:Milkywayrules/governance-test.git
@@ -77,7 +77,7 @@ assert "doctor passes with lefthook.yml" \
   "test -f lefthook.yml && bash .cursor/skills/verasic-github-governance/scripts/doctor.sh; rc=\$?; [[ \$rc -eq 0 ]]"
 
 assert "wire-hooks wires commit-msg when skill present" \
-  "bash .cursor/skills/verasic-github-governance/scripts/wire-hooks.sh >/dev/null && grep -q '.cursor/skills/verasic-git-commits/hooks/commit-msg' lefthook.yml"
+  "bash .cursor/skills/verasic-github-governance/scripts/wire-hooks.sh >/dev/null && grep -q '.cursor/skills/verasic-git-commits-convention/hooks/commit-msg' lefthook.yml"
 
 # CI conflict exit 2
 mkdir -p "$TMP/conflict"

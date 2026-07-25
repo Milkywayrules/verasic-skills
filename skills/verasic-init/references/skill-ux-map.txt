@@ -1,19 +1,10 @@
 # skill-name|cursor-relpath|kind  (relpath relative to repo-root .cursor/)
-# kind: rule | command | agent
-verasic-bugbot|agents/verasic-bug-reviewer.md|agent
-verasic-bugbot|commands/verasic-review.md|command
-verasic-security-review|agents/verasic-security-reviewer.md|agent
-verasic-security-review|commands/verasic-security-review.md|command
-verasic-git-commits|agents/verasic-commit-auditor.md|agent
-verasic-git-commits|commands/verasic-audit-commits.md|command
-verasic-git-commits|rules/verasic-git-commits.mdc|rule
+# kind: rule | agent  (commands retired v0.2.0 — orchestration in SKILL.md)
+verasic-bugbot|agents/verasic-bugbot-reviewer.md|agent
+verasic-secbot|agents/verasic-secbot-reviewer.md|agent
+verasic-git-commits-audit|agents/verasic-git-commit-auditor.md|agent
+verasic-git-commits-convention|rules/verasic-git-commits-convention.mdc|rule
 verasic-agent-disclosure|rules/verasic-agent-disclosure.mdc|rule
-verasic-agent-disclosure|commands/verasic-disclosure-red-team.md|command
-verasic-github-env|commands/verasic-setup-github.md|command
-verasic-github-env|rules/verasic-github-env.mdc|rule
-verasic-fusion|commands/verasic-fusion.md|command
-verasic-deep-research|commands/verasic-deep-research.md|command
-verasic-init|commands/verasic-init.md|command
-verasic-github-governance|agents/verasic-github-governance.md|agent
+verasic-github-cli-init|rules/verasic-github-cli-env.mdc|rule
+verasic-github-governance|agents/verasic-github-governor.md|agent
 verasic-github-governance|rules/verasic-github-governance.mdc|rule
-verasic-github-governance-init|commands/verasic-governance-factory.md|command

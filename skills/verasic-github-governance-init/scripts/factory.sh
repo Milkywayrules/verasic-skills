@@ -23,7 +23,7 @@ Options:
   --open-pr             after apply: branch, commit, push, gh pr create
   -h, --help
 
-Requires installed skills: verasic-github-governance, verasic-github-env (for --open-pr).
+Requires installed skills: verasic-github-governance, verasic-github-cli-init (for --open-pr).
 EOF
 }
 
@@ -83,9 +83,9 @@ if [[ -z "$GOV_ROOT" ]]; then
   exit 1
 fi
 
-ENV_ROOT="$(find_skill_root verasic-github-env || true)"
+ENV_ROOT="$(find_skill_root verasic-github-cli-init || true)"
 if [[ -z "$ENV_ROOT" ]]; then
-  echo "factory: WARN — verasic-github-env not installed (--open-pr needs it)" >&2
+  echo "factory: WARN — verasic-github-cli-init not installed (--open-pr needs it)" >&2
 fi
 
 bootstrap_args=()
@@ -99,7 +99,7 @@ plan_line() {
 echo "governance factory plan"
 echo "repo: $REPO_ROOT"
 echo "governance skill: $GOV_ROOT"
-[[ -n "$ENV_ROOT" ]] && echo "github-env skill: $ENV_ROOT"
+[[ -n "$ENV_ROOT" ]] && echo "github-cli-init skill: $ENV_ROOT"
 echo
 echo " steps:"
 plan_line "bootstrap-repo.sh ${bootstrap_args[*]:-(default)}"
@@ -145,7 +145,7 @@ fi
 
 if [[ "$OPEN_PR" -eq 1 ]]; then
   if [[ -z "$ENV_ROOT" ]]; then
-    echo "factory: --open-pr requires verasic-github-env" >&2
+    echo "factory: --open-pr requires verasic-github-cli-init" >&2
     exit 1
   fi
   if [[ -f "$ENV_ROOT/scripts/load-gh-env.sh" ]]; then

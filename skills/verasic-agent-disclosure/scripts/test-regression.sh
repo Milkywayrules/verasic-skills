@@ -6,7 +6,7 @@ set -euo pipefail
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_ROOT="$(cd "$SKILL_ROOT/../.." && pwd)"
 IS_SOURCE_TREE=false
-if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/commands" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
+if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/agents" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
   IS_SOURCE_TREE=true
 fi
 
@@ -29,11 +29,6 @@ assert_grep() {
 RULE_FILE=""
 if [[ -f "$INSTALL_ROOT/cursor/rules/verasic-agent-disclosure.mdc" ]]; then
   RULE_FILE="$INSTALL_ROOT/cursor/rules/verasic-agent-disclosure.mdc"
-fi
-
-COMMAND_FILE=""
-if [[ -f "$INSTALL_ROOT/cursor/commands/verasic-disclosure-red-team.md" ]]; then
-  COMMAND_FILE="$INSTALL_ROOT/cursor/commands/verasic-disclosure-red-team.md"
 fi
 
 assert_grep "$SKILL_ROOT/SKILL.md" '^name: verasic-agent-disclosure' 'SKILL.md name frontmatter'
@@ -124,12 +119,10 @@ else
   bad 'cursor rule verasic-agent-disclosure.mdc (not found in source tree)'
 fi
 
-if [[ -n "$COMMAND_FILE" ]]; then
-  assert_file "$COMMAND_FILE" 'cursor command verasic-disclosure-red-team.md'
-  assert_grep "$COMMAND_FILE" 'run-red-team\.sh' 'command runs red-team script'
-else
-  bad 'cursor command verasic-disclosure-red-team.md (not found in source tree)'
-fi
+assert_grep "$SKILL_ROOT/SKILL.md" '## Orchestration \(Cursor\)' 'SKILL.md orchestration section'
+assert_grep "$SKILL_ROOT/SKILL.md" 'run-red-team\.sh' 'SKILL.md runs red-team script'
+assert_grep "$SKILL_ROOT/SKILL.md" 'relay its summary output verbatim' 'SKILL.md relay FAIL rows verbatim'
+assert_grep "$SKILL_ROOT/SKILL.md" 'disable-model-invocation: true' 'SKILL.md disable-model-invocation frontmatter'
 
 if $IS_SOURCE_TREE; then
   MANIFEST="$INSTALL_ROOT/skills/verasic-init/manifest.txt"

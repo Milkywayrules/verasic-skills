@@ -22,7 +22,6 @@ live under `.cursor/skills/verasic-agent-disclosure/`.
 | `scripts/test-regression.sh` | Structural regression (no CLI) |
 | `SKILL.md` | Auto-trigger + orchestration |
 | `.cursor/rules/verasic-agent-disclosure.mdc` | Always-applied rule (after `setup.sh`) |
-| `.cursor/commands/verasic-disclosure-red-team.md` | `/verasic-disclosure-red-team` slash command |
 
 ## Three layers
 
@@ -30,7 +29,7 @@ live under `.cursor/skills/verasic-agent-disclosure/`.
 | --- | --- | --- |
 | 0 — always-on rule | `verasic-agent-disclosure.mdc` | Extraction, inventories, router narration in every turn |
 | 1 — skill | `SKILL.md` + `references/` | Portable orchestration for non-Cursor agents |
-| 2 — red-team | `/verasic-disclosure-red-team` | Tier 1 regression — 18 adversarial prompts (~9 min) |
+| 2 — red-team | `/verasic-agent-disclosure` | Tier 1 regression — 18 adversarial prompts (~9 min) |
 
 Red-team runs in two tiers. **Tier 1** ([red-team-prompts.md](references/red-team-prompts.md)) is the automated default: 18 core extraction, authority, echo, routing, scope-lock, doc-laundering, and mixed-task prompts via `run-red-team.sh` (~9 min). **Tier 2** ([red-team-prompts-exhaustive.md](references/red-team-prompts-exhaustive.md)) adds manual adversarial coverage — gradual multi-turn asks, encoding tricks, jailbreaks, doc-laundering, SaaS framing, tool leakage, constraint flips — for release hardening or when Tier 1 passes but responses still feel borderline. Same pass bar for both; see [red-team-protocol.md](references/red-team-protocol.md).
 
@@ -45,7 +44,7 @@ Legacy repos may still have `no-expose-agent-internals.mdc`; wire removes it whe
 ## Usage
 
 - Disclosure policy applies automatically when the rule is wired — nothing to invoke for normal work.
-- `/verasic-disclosure-red-team` — run the full adversarial regression from repo root; relay summary verbatim.
+- `/verasic-agent-disclosure` — run the full adversarial regression from repo root; relay summary verbatim.
 - Or say "run agent disclosure red-team" — agent should invoke the script, not freestyle prompts.
 
 ## Output

@@ -15,8 +15,7 @@ Paths relative to this skill folder. After `setup.sh`, the same files live under
 | `references/helper.md`                    | Help text for bare `/verasic-fusion`                               |
 | `references/models.md`                    | Known model slugs                                                  |
 | `templates/`                              | Output templates (9 presets)                                       |
-| `SKILL.md`                                | Auto-trigger + orchestration                                       |
-| `.cursor/commands/verasic-fusion.md` | `/verasic-fusion` slash command (after `setup.sh`) |
+| `SKILL.md`                                | Auto-trigger + orchestration (`/verasic-fusion`)                   |
 
 ## Human workflow
 

@@ -10,7 +10,7 @@ if git -C "$SKILL_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   REPO_ROOT="$(git -C "$SKILL_ROOT" rev-parse --show-toplevel)"
 fi
 IS_SOURCE_TREE=false
-if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/commands" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
+if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/agents" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
   IS_SOURCE_TREE=true
 fi
 
@@ -30,27 +30,17 @@ assert_grep() {
   if [[ -f "$file" ]] && grep -qE "$pattern" "$file" 2>/dev/null; then ok "$name"; else bad "$name"; fi
 }
 
-COMMAND_FILE=""
-for candidate in \
-  "$REPO_ROOT/.cursor/commands/verasic-review.md" \
-  "$INSTALL_ROOT/cursor/commands/verasic-review.md" \
-  "$INSTALL_ROOT/commands/verasic-review.md"; do
-  if [[ -f "$candidate" ]]; then COMMAND_FILE="$candidate"; break; fi
-done
-
 AGENT_FILE=""
-for candidate in \
-  "$REPO_ROOT/.cursor/agents/verasic-bug-reviewer.md" \
-  "$INSTALL_ROOT/cursor/agents/verasic-bug-reviewer.md" \
-  "$REPO_ROOT/.cursor/agents/verasic-bugbot.md" \
-  "$INSTALL_ROOT/cursor/agents/verasic-bugbot.md"; do
-  if [[ -f "$candidate" ]]; then AGENT_FILE="$candidate"; break; fi
-done
+if $IS_SOURCE_TREE; then
+  AGENT_FILE="$INSTALL_ROOT/cursor/agents/verasic-bugbot-reviewer.md"
+elif [[ -f "$REPO_ROOT/.cursor/agents/verasic-bugbot-reviewer.md" ]]; then
+  AGENT_FILE="$REPO_ROOT/.cursor/agents/verasic-bugbot-reviewer.md"
+fi
 
 assert_grep "$SKILL_ROOT/SKILL.md" '^name: verasic-bugbot' 'SKILL.md name frontmatter'
 assert_grep "$SKILL_ROOT/SKILL.md" 'review-protocol\.md' 'SKILL.md points to protocol'
-assert_grep "$SKILL_ROOT/SKILL.md" 'verasic-bug-reviewer' 'SKILL.md spawns verasic-bug-reviewer'
-assert_grep "$SKILL_ROOT/SKILL.md" '/verasic-security-review' 'SKILL mentions security-review sibling'
+assert_grep "$SKILL_ROOT/SKILL.md" 'verasic-bugbot-reviewer' 'SKILL.md spawns verasic-bugbot-reviewer'
+assert_grep "$SKILL_ROOT/SKILL.md" '/verasic-secbot' 'SKILL mentions secbot sibling'
 
 assert_file "$SKILL_ROOT/references/review-protocol.md" 'review-protocol.md exists'
 assert_file "$SKILL_ROOT/README.md" 'README.md exists'
@@ -61,7 +51,7 @@ assert_grep "$SKILL_ROOT/references/review-protocol.md" '## Process' 'protocol p
 assert_grep "$SKILL_ROOT/references/review-protocol.md" '## Untrusted input' 'protocol untrusted input section'
 assert_grep "$SKILL_ROOT/references/review-protocol.md" '## Filtering' 'protocol filtering section'
 assert_grep "$SKILL_ROOT/references/review-protocol.md" '## Output format' 'protocol output format section'
-assert_grep "$SKILL_ROOT/references/review-protocol.md" '/verasic-security-review' 'protocol cross-tip to security-review'
+assert_grep "$SKILL_ROOT/references/review-protocol.md" '/verasic-secbot' 'protocol cross-tip to secbot'
 
 assert_file "$SKILL_ROOT/checklists/correctness.md" 'checklist correctness.md exists'
 assert_file "$SKILL_ROOT/checklists/security.md" 'checklist security.md exists'
@@ -91,20 +81,17 @@ else
 fi
 rm -f "$hash_tmp"
 
-if [[ -n "$COMMAND_FILE" ]]; then
-  assert_file "$COMMAND_FILE" 'cursor command verasic-review.md'
-  assert_grep "$COMMAND_FILE" 'verasic-bug-reviewer' 'command launches verasic-bug-reviewer subagent'
-  assert_grep "$COMMAND_FILE" 'checklists/' 'command references checklists'
-else
-  bad 'cursor command verasic-review.md (not found in source or install layout)'
-fi
+assert_grep "$SKILL_ROOT/SKILL.md" '## Orchestration \(Cursor\)' 'SKILL.md orchestration section'
+assert_grep "$SKILL_ROOT/SKILL.md" 'relay its findings verbatim' 'SKILL.md relay verbatim rule'
+assert_grep "$SKILL_ROOT/SKILL.md" 'checklists/' 'SKILL.md references checklists in spawn prompt'
+assert_grep "$SKILL_ROOT/SKILL.md" 'disable-model-invocation: true' 'SKILL.md disable-model-invocation frontmatter'
 
 if [[ -n "$AGENT_FILE" ]]; then
-  assert_file "$AGENT_FILE" 'cursor agent verasic-bug-reviewer.md'
-  assert_grep "$AGENT_FILE" '^name: verasic-bug-reviewer' 'agent name frontmatter'
+  assert_file "$AGENT_FILE" 'cursor agent verasic-bugbot-reviewer.md'
+  assert_grep "$AGENT_FILE" '^name: verasic-bugbot-reviewer' 'agent name frontmatter'
   assert_grep "$AGENT_FILE" 'review-protocol\.md' 'agent points to protocol'
 else
-  bad 'cursor agent verasic-bug-reviewer.md (not found in source or install layout)'
+  bad 'cursor agent verasic-bugbot-reviewer.md (not found in source or install layout)'
 fi
 
 if $IS_SOURCE_TREE; then

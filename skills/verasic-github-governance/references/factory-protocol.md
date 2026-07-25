@@ -1,6 +1,6 @@
 # Factory protocol — new Verasic GitHub repo
 
-Step-by-step bootstrap. Assumes **verasic-github-env** is wired when using `gh`.
+Step-by-step bootstrap. Assumes **verasic-github-cli-init** is wired when using `gh`.
 
 Recommended entry: **verasic-github-governance-init** (`scripts/factory.sh`) — plan-first orchestrator that calls the steps below.
 
@@ -9,7 +9,7 @@ Recommended entry: **verasic-github-governance-init** (`scripts/factory.sh`) —
 - [ ] Target org/account decided (Milkywayrules vs verasic-lab)
 - [ ] Repo name + visibility: **private** (default)
 - [ ] `gh` authenticated (`check-gh.sh` green)
-- [ ] Skills installed: **verasic-github-governance**, **verasic-github-env**, **verasic-git-commits** (recommended)
+- [ ] Skills installed: **verasic-github-governance**, **verasic-github-cli-init**, **verasic-git-commits-convention** (recommended)
 
 ## Step 1 — Create private repo
 
@@ -48,7 +48,7 @@ Expected artifacts:
 - `AGENTS.md` — governance block merged via markers
 - `CONTRIBUTING.md`
 - `.github/verasic-governance/hooks/pre-push` + `pre-commit`
-- `lefthook.yml` — references repo-local governance hooks; `wire-hooks.sh` adds `commit-msg` when verasic-git-commits is installed
+- `lefthook.yml` — references repo-local governance hooks; `wire-hooks.sh` adds `commit-msg` when verasic-git-commits-convention is installed
 - `.github/pull_request_template.md` (optional brief)
 
 ## Step 3 — Initial commit + push (feature branch)

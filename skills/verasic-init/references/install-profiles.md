@@ -61,19 +61,19 @@ When you cherry-pick with `--skills` or install a subset via skills.sh, the init
 
 ### cursor
 
-- Slash commands: `/verasic-init`, `/verasic-review`, `/verasic-security-review`, `/verasic-fusion`, `/verasic-deep-research`, `/verasic-audit-commits`, `/verasic-setup-github`, `/verasic-governance-factory`, `/verasic-disclosure-red-team`
-- Always-on rules: commit convention + GitHub env + GitHub governance + agent disclosure (under `.cursor/rules/`)
-- Subagents: `verasic-bug-reviewer`, `verasic-security-reviewer`, `verasic-commit-auditor`, `verasic-github-governance` (under `.cursor/agents/`)
+- Skills-first slash: `/verasic-init`, `/verasic-bugbot`, `/verasic-secbot`, `/verasic-fusion`, `/verasic-deep-research`, `/verasic-git-commits-audit`, `/verasic-github-cli-init`, `/verasic-github-governance-init`, `/verasic-agent-disclosure`
+- Always-on rules: commit convention + GitHub CLI env + GitHub governance + agent disclosure (under `.cursor/rules/`)
+- Subagents: `verasic-bugbot-reviewer`, `verasic-secbot-reviewer`, `verasic-git-commit-auditor`, `verasic-github-governor` (under `.cursor/agents/`)
 
 ### cursor-hybrid
 
-- Same slash commands and rules as `cursor`
-- Skills live under `.agents/skills/` — command files say to adjust the `.cursor/skills/` path prefix when needed
+- Same skills-first slash list and rules/subagents as `cursor`
+- Skills live under `.agents/skills/` — SKILL.md and spawn blocks reference `.agents/skills/` paths
 - Wiring (hooks, `.envrc`, credentials) uses `.agents/skills/`
 
 ### agent
 
-- No slash commands or Cursor rules — invoke by skill name or attach `SKILL.md`
+- No slash UX or Cursor rules — invoke by skill name or attach `SKILL.md`
 - Read each skill's `references/` for protocols; paths use your install root (e.g. `.agents/skills/verasic-bugbot/`)
 - Repo wiring (commit hook, GitHub env files) still applies after `--yes`
 

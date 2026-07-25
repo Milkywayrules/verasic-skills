@@ -22,11 +22,21 @@ verasic_profile_pref_roots() {
   esac
 }
 
+verasic_profile_has_cursor_ux() {
+  local f
+  for f in \
+    "$REPO_ROOT/.cursor/agents/verasic-bugbot-reviewer.md" \
+    "$REPO_ROOT/.cursor/rules/verasic-agent-disclosure.mdc"; do
+    [[ -f "$f" ]] && return 0
+  done
+  return 1
+}
+
 verasic_profile_detect() {
   local cs=false as=false ux=false
   [[ -d "$REPO_ROOT/.cursor/skills/verasic-init" ]] && cs=true
   [[ -d "$REPO_ROOT/.agents/skills/verasic-init" ]] && as=true
-  [[ -f "$REPO_ROOT/.cursor/commands/verasic-init.md" ]] && ux=true
+  verasic_profile_has_cursor_ux && ux=true
 
   if $cs && $ux; then
     echo cursor
@@ -249,7 +259,7 @@ verasic_profile_install_cursor_ux() {
     return 0
   fi
 
-  mkdir -p "$REPO_ROOT/.cursor/agents" "$REPO_ROOT/.cursor/commands" "$REPO_ROOT/.cursor/rules"
+  mkdir -p "$REPO_ROOT/.cursor/agents" "$REPO_ROOT/.cursor/rules"
 
   base="$(verasic_profile_remote_repo_base "$skill_root")"
   main_base="$(verasic_profile_main_repo_base)"
@@ -315,7 +325,6 @@ verasic_profile_print_checklist_ux() {
     verasic_profile_scope_contains "$skill" "$scope_csv" || continue
     case "$kind" in
       rule) label="rules" ;;
-      command) label="slash commands" ;;
       agent) label="subagents" ;;
       *) label="$kind" ;;
     esac
@@ -325,51 +334,58 @@ verasic_profile_print_checklist_ux() {
 
 verasic_profile_print_usage_scoped() {
   local profile="$1" scope_csv="$2"
-  local has_cmd=false has_rule=false has_agent=false
+  local has_skill=false has_rule=false has_agent=false
 
-  verasic_profile_scope_contains verasic-init "$scope_csv" && has_cmd=true
-  verasic_profile_scope_contains verasic-bugbot "$scope_csv" && { has_cmd=true; has_agent=true; }
-  verasic_profile_scope_contains verasic-security-review "$scope_csv" && { has_cmd=true; has_agent=true; }
-  verasic_profile_scope_contains verasic-git-commits "$scope_csv" && { has_cmd=true; has_rule=true; has_agent=true; }
-  verasic_profile_scope_contains verasic-github-env "$scope_csv" && { has_cmd=true; has_rule=true; }
-  verasic_profile_scope_contains verasic-fusion "$scope_csv" && has_cmd=true
-  verasic_profile_scope_contains verasic-deep-research "$scope_csv" && has_cmd=true
+  verasic_profile_scope_contains verasic-init "$scope_csv" && has_skill=true
+  verasic_profile_scope_contains verasic-bugbot "$scope_csv" && { has_skill=true; has_agent=true; }
+  verasic_profile_scope_contains verasic-secbot "$scope_csv" && { has_skill=true; has_agent=true; }
+  verasic_profile_scope_contains verasic-git-commits-convention "$scope_csv" && { has_skill=true; has_rule=true; }
+  verasic_profile_scope_contains verasic-git-commits-audit "$scope_csv" && { has_skill=true; has_agent=true; }
+  verasic_profile_scope_contains verasic-github-cli-init "$scope_csv" && { has_skill=true; has_rule=true; }
+  verasic_profile_scope_contains verasic-github-governance-init "$scope_csv" && has_skill=true
+  verasic_profile_scope_contains verasic-agent-disclosure "$scope_csv" && { has_skill=true; has_rule=true; }
+  verasic_profile_scope_contains verasic-fusion "$scope_csv" && has_skill=true
+  verasic_profile_scope_contains verasic-deep-research "$scope_csv" && has_skill=true
 
   if [[ "$profile" == agent ]]; then
-    echo "   • Invoke by skill name for skills in scope — no /verasic-* commands unless you add Cursor UX"
+    echo "   • Invoke by skill name for skills in scope — no /verasic-* slash UX unless you add Cursor agents/rules"
     verasic_profile_scope_contains verasic-bugbot "$scope_csv" && echo "   • verasic-bugbot — local bugbot-style code review (read SKILL.md)"
-    verasic_profile_scope_contains verasic-security-review "$scope_csv" && echo "   • verasic-security-review — STRIDE security review on git diff (read SKILL.md)"
+    verasic_profile_scope_contains verasic-secbot "$scope_csv" && echo "   • verasic-secbot — STRIDE security review on git diff (read SKILL.md)"
     verasic_profile_scope_contains verasic-fusion "$scope_csv" && echo "   • verasic-fusion — multi-model fusion for exploration and decision support"
     verasic_profile_scope_contains verasic-deep-research "$scope_csv" && echo "   • verasic-deep-research — ledger-backed research with confidence scoring"
-    verasic_profile_scope_contains verasic-git-commits "$scope_csv" && echo "   • verasic-git-commits — commit convention + deterministic commit-msg hook"
-    verasic_profile_scope_contains verasic-github-env "$scope_csv" && echo "   • verasic-github-env — GitHub CLI auth for local agent harnesses"
+    verasic_profile_scope_contains verasic-git-commits-convention "$scope_csv" && echo "   • verasic-git-commits-convention — commit convention + deterministic commit-msg hook"
+    verasic_profile_scope_contains verasic-git-commits-audit "$scope_csv" && echo "   • verasic-git-commits-audit — commit history audit (read SKILL.md)"
+    verasic_profile_scope_contains verasic-github-cli-init "$scope_csv" && echo "   • verasic-github-cli-init — GitHub CLI auth for local agent harnesses"
     verasic_profile_scope_contains verasic-init "$scope_csv" && echo "   • verasic-init — re-run this setup orchestrator"
     echo "   • Works with Claude Code, Codex, Kiro, Windsurf, skills.sh, and other agents that load project skills"
   else
-    local cmds=()
-    verasic_profile_scope_contains verasic-init "$scope_csv" && cmds+=("/verasic-init")
-    verasic_profile_scope_contains verasic-bugbot "$scope_csv" && cmds+=("/verasic-review")
-    verasic_profile_scope_contains verasic-security-review "$scope_csv" && cmds+=("/verasic-security-review")
-    verasic_profile_scope_contains verasic-fusion "$scope_csv" && cmds+=("/verasic-fusion")
-    verasic_profile_scope_contains verasic-deep-research "$scope_csv" && cmds+=("/verasic-deep-research")
-    verasic_profile_scope_contains verasic-git-commits "$scope_csv" && cmds+=("/verasic-audit-commits")
-    verasic_profile_scope_contains verasic-github-env "$scope_csv" && cmds+=("/verasic-setup-github")
-    if ((${#cmds[@]} > 0)); then
-      local joined="${cmds[0]}"
+    local slashed=()
+    verasic_profile_scope_contains verasic-init "$scope_csv" && slashed+=("/verasic-init")
+    verasic_profile_scope_contains verasic-bugbot "$scope_csv" && slashed+=("/verasic-bugbot")
+    verasic_profile_scope_contains verasic-secbot "$scope_csv" && slashed+=("/verasic-secbot")
+    verasic_profile_scope_contains verasic-fusion "$scope_csv" && slashed+=("/verasic-fusion")
+    verasic_profile_scope_contains verasic-deep-research "$scope_csv" && slashed+=("/verasic-deep-research")
+    verasic_profile_scope_contains verasic-git-commits-audit "$scope_csv" && slashed+=("/verasic-git-commits-audit")
+    verasic_profile_scope_contains verasic-github-cli-init "$scope_csv" && slashed+=("/verasic-github-cli-init")
+    verasic_profile_scope_contains verasic-github-governance-init "$scope_csv" && slashed+=("/verasic-github-governance-init")
+    verasic_profile_scope_contains verasic-agent-disclosure "$scope_csv" && slashed+=("/verasic-agent-disclosure")
+    if ((${#slashed[@]} > 0)); then
+      local joined="${slashed[0]}"
       local c
-      for c in "${cmds[@]:1}"; do joined+=", $c"; done
-      echo "   • Slash commands (scope): $joined"
+      for c in "${slashed[@]:1}"; do joined+=", $c"; done
+      echo "   • Skills-first slash (scope): $joined"
     else
-      echo "   • No slash commands in effective scope"
+      echo "   • No skill slash entries in effective scope"
     fi
     if $has_rule; then
       echo "   • Always-on rules in scope under .cursor/rules/"
     fi
     if $has_agent; then
       local agents=()
-      verasic_profile_scope_contains verasic-bugbot "$scope_csv" && agents+=("verasic-bug-reviewer")
-      verasic_profile_scope_contains verasic-security-review "$scope_csv" && agents+=("verasic-security-reviewer")
-      verasic_profile_scope_contains verasic-git-commits "$scope_csv" && agents+=("verasic-commit-auditor")
+      verasic_profile_scope_contains verasic-bugbot "$scope_csv" && agents+=("verasic-bugbot-reviewer")
+      verasic_profile_scope_contains verasic-secbot "$scope_csv" && agents+=("verasic-secbot-reviewer")
+      verasic_profile_scope_contains verasic-git-commits-audit "$scope_csv" && agents+=("verasic-git-commit-auditor")
+      verasic_profile_scope_contains verasic-github-governance "$scope_csv" && agents+=("verasic-github-governor")
       if ((${#agents[@]} > 0)); then
         local ajoined="${agents[0]}"
         local a
@@ -378,7 +394,7 @@ verasic_profile_print_usage_scoped() {
       fi
     fi
     if [[ "$profile" == cursor-hybrid ]]; then
-      echo "   • Skills live under .agents/skills/ — adjust path prefix in commands when needed"
+      echo "   • Skills live under .agents/skills/ — SKILL.md paths use .agents/skills/ not .cursor/skills/"
       echo "   • Repo wiring (hooks, .envrc, credentials) uses .agents/skills/"
     fi
   fi
@@ -395,7 +411,7 @@ verasic_profile_print_section() {
   local cs=false as=false ux=false
   [[ -d "$REPO_ROOT/.cursor/skills/verasic-init" ]] && cs=true
   [[ -d "$REPO_ROOT/.agents/skills/verasic-init" ]] && as=true
-  [[ -f "$REPO_ROOT/.cursor/commands/verasic-init.md" ]] && ux=true
+  verasic_profile_has_cursor_ux && ux=true
 
   echo " install profile"
   echo " ---------------"

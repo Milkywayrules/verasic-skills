@@ -6,7 +6,7 @@ set -euo pipefail
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_ROOT="$(cd "$SKILL_ROOT/../.." && pwd)"
 IS_SOURCE_TREE=false
-if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/commands" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
+if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/agents" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
   IS_SOURCE_TREE=true
 fi
 
@@ -30,13 +30,6 @@ assert_yaml_field() {
   local file="$1" field="$2" name="$3"
   if [[ -f "$file" ]] && grep -qE "^${field}:" "$file" 2>/dev/null; then ok "$name"; else bad "$name"; fi
 }
-
-COMMAND_FILE=""
-if [[ -f "$INSTALL_ROOT/cursor/commands/verasic-deep-research.md" ]]; then
-  COMMAND_FILE="$INSTALL_ROOT/cursor/commands/verasic-deep-research.md"
-elif [[ -f "$INSTALL_ROOT/commands/verasic-deep-research.md" ]]; then
-  COMMAND_FILE="$INSTALL_ROOT/commands/verasic-deep-research.md"
-fi
 
 EXPECTED_DOMAIN_PACKS=(
   technical
@@ -230,16 +223,13 @@ assert_grep "$SKILL_ROOT/references/use-cases.md" 'UC-7' 'use-cases UC-7 degrade
 assert_grep "$SKILL_ROOT/references/use-cases.md" 'Publish gate' 'use-cases publish gate checklist'
 
 
-# --- Cursor command ---
-if [[ -n "$COMMAND_FILE" ]]; then
-  assert_file "$COMMAND_FILE" 'cursor command verasic-deep-research.md'
-  assert_grep "$COMMAND_FILE" 'research-protocol\.md' 'command points to protocol'
-  assert_grep "$COMMAND_FILE" 'helper\.md' 'command points to helper'
-  assert_grep "$COMMAND_FILE" 'Pre-flight' 'command pre-flight rules'
-  assert_grep "$COMMAND_FILE" 'Ask mode' 'command ask mode rule'
-else
-  bad 'cursor command verasic-deep-research.md (not found in source or install layout)'
-fi
+# --- Cursor orchestration (skills-only) ---
+assert_grep "$SKILL_ROOT/SKILL.md" '## Orchestration \(Cursor\)' 'SKILL.md orchestration section'
+assert_grep "$SKILL_ROOT/SKILL.md" 'Pre-flight' 'SKILL.md pre-flight rules'
+assert_grep "$SKILL_ROOT/SKILL.md" 'Ask mode' 'SKILL.md ask mode rule'
+assert_grep "$SKILL_ROOT/SKILL.md" 'Dispatch T2 workers' 'SKILL.md T2 dispatch'
+assert_grep "$SKILL_ROOT/SKILL.md" 'verify-one-claim' 'SKILL.md T3 verify-one-claim job'
+assert_grep "$SKILL_ROOT/SKILL.md" 'disable-model-invocation: true' 'SKILL.md disable-model-invocation frontmatter'
 
 # --- Manifest (source tree) ---
 if $IS_SOURCE_TREE; then

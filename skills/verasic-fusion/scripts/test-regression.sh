@@ -6,7 +6,7 @@ set -euo pipefail
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_ROOT="$(cd "$SKILL_ROOT/../.." && pwd)"
 IS_SOURCE_TREE=false
-if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/commands" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
+if [[ -f "$INSTALL_ROOT/README.md" && -d "$INSTALL_ROOT/cursor/agents" && -d "$INSTALL_ROOT/skills/verasic-init" ]]; then
   IS_SOURCE_TREE=true
 fi
 
@@ -25,13 +25,6 @@ assert_grep() {
   local file="$1" pattern="$2" name="$3"
   if [[ -f "$file" ]] && grep -qE "$pattern" "$file" 2>/dev/null; then ok "$name"; else bad "$name"; fi
 }
-
-COMMAND_FILE=""
-if [[ -f "$INSTALL_ROOT/cursor/commands/verasic-fusion.md" ]]; then
-  COMMAND_FILE="$INSTALL_ROOT/cursor/commands/verasic-fusion.md"
-elif [[ -f "$INSTALL_ROOT/commands/verasic-fusion.md" ]]; then
-  COMMAND_FILE="$INSTALL_ROOT/commands/verasic-fusion.md"
-fi
 
 EXPECTED_TEMPLATES=(
   board-verdict
@@ -84,15 +77,11 @@ for slug in "${EXPECTED_TEMPLATES[@]}"; do
   fi
 done
 
-if [[ -n "$COMMAND_FILE" ]]; then
-  assert_file "$COMMAND_FILE" 'cursor command verasic-fusion.md'
-  assert_grep "$COMMAND_FILE" 'fusion-protocol\.md' 'command points to protocol'
-  assert_grep "$COMMAND_FILE" 'No default models' 'command no default models'
-  assert_grep "$COMMAND_FILE" 'must read' 'command subagent must read template'
-  assert_grep "$COMMAND_FILE" 'paste the full template inline' 'command no inline template'
-else
-  bad 'cursor command verasic-fusion.md (not found in source or install layout)'
-fi
+assert_grep "$SKILL_ROOT/SKILL.md" '## Orchestration \(Cursor\)' 'SKILL.md orchestration section'
+assert_grep "$SKILL_ROOT/SKILL.md" 'No default models' 'SKILL.md no default models'
+assert_grep "$SKILL_ROOT/SKILL.md" 'must read' 'SKILL.md subagent must read template'
+assert_grep "$SKILL_ROOT/SKILL.md" 'paste the full template inline' 'SKILL.md no inline template'
+assert_grep "$SKILL_ROOT/SKILL.md" 'disable-model-invocation: true' 'SKILL.md disable-model-invocation frontmatter'
 
 if $IS_SOURCE_TREE; then
   MANIFEST="$INSTALL_ROOT/skills/verasic-init/manifest.txt"

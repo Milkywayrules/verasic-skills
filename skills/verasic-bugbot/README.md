@@ -14,38 +14,28 @@ live under `.cursor/skills/verasic-bugbot/`.
 | `references/review-protocol.md`           | The brain — single source of truth               |
 | `checklists/`                             | Modular bug-hunting checklists                   |
 | `SKILL.md`                                | Auto-trigger + orchestration                     |
-| `.cursor/agents/verasic-bug-reviewer.md` | Cursor subagent (after init fetch or manual) |
-| `.cursor/commands/verasic-review.md` | `/verasic-review` slash command    |
+| `.cursor/agents/verasic-bugbot-reviewer.md` | Cursor subagent (after init fetch or manual) |
 
 ## Human workflow (which slash entry do I use?)
 
-Typing `/verasic` in Cursor chat shows three entries — they are different types
-sharing one system:
+Typing `/verasic` in Cursor chat shows skill and agent entries:
 
-- **`/verasic-review`** (command) — the one you normally use. Kicks off a review
-  of your branch changes. Add "uncommitted" to review staged + unstaged only.
-- **`/verasic-bugbot`** (skill) — attaches the orchestration instructions to your
-  message and runs in your current conversation. Useful when phrasing a custom
-  request, e.g. "/verasic-bugbot review only the API layer".
-- **`/verasic-bug-reviewer`** (agent) — talks to the review subagent directly. It runs
-  in its own isolated context, so the (long) review work doesn't clutter your
-  chat — only the report comes back. Rarely needed; the command and skill both
-  launch it for you.
+- **`/verasic-bugbot`** (skill) — primary entry. Reviews branch changes (default) or
+  uncommitted when you say so. Orchestration spawns the reviewer subagent.
+- **`/verasic-bugbot-reviewer`** (agent) — talks to the review subagent directly in
+  isolated context. Rarely needed; the skill launches it for you.
 
-Naming rationale: the skill keeps the name `verasic-bugbot`; the subagent is
-`verasic-bug-reviewer` so it is distinct from the security reviewer. The command
-is a verb (`verasic-review`) because it is the action a human runs — and it keeps
-the slash menu unambiguous.
+Canonical map: [references/verasic-cursor-map.md](../../references/verasic-cursor-map.md).
 
 Day-to-day loop:
 
 1. Finish a feature/fix.
-2. Run `/verasic-review` (or just say "bugbot review my changes").
+2. Run `/verasic-bugbot` (or say "bugbot review my changes").
 3. Fix CRITICAL/HIGH findings, re-run until `✅ No issues found`.
 4. Commit / open PR.
 
 For auth, crypto, webhooks, or input-validation changes, the orchestrator may tip
-`/verasic-security-review` for STRIDE depth — never auto-chained.
+`/verasic-secbot` for STRIDE depth — never auto-chained.
 
 ## Output
 

@@ -22,7 +22,7 @@ Profiles select the skills root and optional Cursor UX install. Spec: `reference
 
 | Profile | `--yes` installs | Skills root for wiring |
 | ------- | ---------------- | ---------------------- |
-| `cursor` | `.cursor/{commands,rules,agents}/` fetched from upstream `cursor/` at skill tag `v<VERSION>` (fallback `main`), filtered to effective scope | `.cursor/skills/` |
+| `cursor` | `.cursor/{rules,agents}/` fetched from upstream `cursor/` at skill tag `v<VERSION>` (fallback `main`), filtered to effective scope | `.cursor/skills/` |
 | `agent` | nothing (skills.sh, Claude Code, Codex, Kiro, …) | `.agents/skills/` |
 | `cursor-hybrid` | same scoped Cursor UX fetch as `cursor` | `.agents/skills/` |
 
@@ -62,7 +62,7 @@ Used in `--list` mode and before/after wiring. Hash checks run by default; hash 
 
 Scripts must be idempotent, must run correctly from the repo root (init `cd`s there), and must never print secret values.
 
-`verasic-github-env` bootstrap may print machine-readable verify lines:
+`verasic-github-cli-init` bootstrap may print machine-readable verify lines:
 
 - `bootstrap: verify: ok` → init status `verified`
 - `bootstrap: verify: skipped (no token)` → `wired`
@@ -75,7 +75,7 @@ Bootstrap step lines (`bootstrap: step: ran|skipped|cannot …`) feed the report
 
 After a successful wire (exit 0), init may run the manifest verify script for that skill when `--verify` is passed. Verify scripts are listed in the fourth manifest column; `-` skips.
 
-- `verasic-github-env`: `scripts/check-gh.sh` — init orchestrates this on `--verify` even when bootstrap already verified on token presence.
+- `verasic-github-cli-init`: `scripts/check-gh.sh` — init orchestrates this on `--verify` even when bootstrap already verified on token presence.
 - `verasic-github-governance`: `scripts/doctor.sh` — soft-governance readiness check after wire-hooks.
 
 If any manifest verify script fails, init reports `verify: failed` in actions, tallies verify failures, and exits 3 (after the full report). Broken installs and wire failures still exit 1 first.
@@ -84,14 +84,14 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 
 | Skill                 | Wire                   | Verify                 | What it does                                                                                                                                           |
 | --------------------- | ---------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `verasic-github-env`  | `scripts/bootstrap.sh` | `scripts/check-gh.sh`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; optional bootstrap verify on token; manifest verify with `--verify`            |
+| `verasic-github-cli-init`  | `scripts/bootstrap.sh` | `scripts/check-gh.sh`  | `.envrc`, `.env.example` GH block, `.gitignore`, credential template; optional bootstrap verify on token; manifest verify with `--verify`            |
 | `verasic-github-governance` | `scripts/wire-hooks.sh` | `scripts/doctor.sh` | lefthook or `core.hooksPath` hook wiring; manifest verify with `--verify` runs doctor |
 | `verasic-github-governance-init` | — | — | skill-only factory orchestrator — run `factory.sh --yes` explicitly after plan review |
-| `verasic-git-commits` | `scripts/wire-hook.sh` | —                      | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
+| `verasic-git-commits-convention` | `scripts/wire-hook.sh` | —                      | sets `core.hooksPath` to the skill's hooks dir; prints a lefthook snippet or chaining instructions instead of clobbering existing hook setups (exit 3) |
+| `verasic-git-commits-audit` | — | — | skill-only; commit history audit via `verasic-git-commit-auditor` subagent |
 | `verasic-agent-disclosure` | `scripts/wire-rule.sh` | — | copies disclosure rule asset into `.cursor/rules/`; removes legacy rule filename when present |
-| `verasic-bugbot`      | —                      | —                      | skill-only; Cursor UX via init fetch (`verasic-bug-reviewer`, `/verasic-review`)                                                                       |
-| `verasic-security-review` | —                  | —                      | skill-only; Cursor UX via init fetch (`verasic-security-reviewer`, `/verasic-security-review`)                                                         |
-| `verasic-config`      | `scripts/scaffold-artifacts.sh` | —               | artifact dirs (`verasic/`, `.verasic/`), optional `verasic.config.ts`, `.gitignore` for localDir                                                      |
+| `verasic-bugbot`      | —                      | —                      | skill-only; Cursor UX via init fetch (`verasic-bugbot-reviewer`, `/verasic-bugbot`)                                                                       |
+| `verasic-secbot` | —                  | —                      | skill-only; Cursor UX via init fetch (`verasic-secbot-reviewer`, `/verasic-secbot`)                                                         |
 | `verasic-fusion`      | —                      | —                      | skill-only; multi-model fusion orchestration                                                                                                           |
 | `verasic-deep-research` | —                      | —                      | skill-only; ledger-backed research                                                                                                                     |
 | `verasic-init`        | —                      | —                      | this orchestrator; running it is the wiring                                                                                                            |
@@ -100,7 +100,7 @@ If any manifest verify script fails, init reports `verify: failed` in actions, t
 
 | Status          | Meaning                                                                 |
 | --------------- | ----------------------------------------------------------------------- |
-| `verified`      | wired + `check-gh.sh` passed (`verasic-github-env` only in slice A)     |
+| `verified`      | wired + `check-gh.sh` passed (`verasic-github-cli-init` only in slice A)     |
 | `wired`         | wiring script succeeded; integrity ok; verify skipped (no token)        |
 | `degraded`      | wire ran but integrity incomplete, hash mismatch (default hash checks), or verify skipped (check-gh missing) |
 | `ready`         | installed skill-only skill; integrity ok                                |

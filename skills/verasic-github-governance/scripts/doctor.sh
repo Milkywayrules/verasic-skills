@@ -84,7 +84,7 @@ if command -v gh >/dev/null 2>&1; then
   remote="$(git remote get-url origin 2>/dev/null || true)"
   if [[ -n "$remote" ]]; then
     repo=""
-    parse_script="$(dirname "$SKILL_ROOT")/verasic-github-env/scripts/parse-gh-repo.sh"
+    parse_script="$(dirname "$SKILL_ROOT")/verasic-github-cli-init/scripts/parse-gh-repo.sh"
     if [[ -f "$parse_script" ]]; then
       # shellcheck source=/dev/null
       source "$parse_script"

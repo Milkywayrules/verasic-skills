@@ -20,8 +20,7 @@ Paths relative to this skill folder. After `setup.sh`, the same files live under
 | `references/fusion-handoff.md`            | Manual chain to verasic-fusion            |
 | `templates/deep-research-brief.md`        | Deliver template sections                 |
 | `workflows/quick-scan.md` (etc.)          | Tier checklists per depth                 |
-| `SKILL.md`                                | Auto-trigger + orchestration                |
-| `.cursor/commands/verasic-deep-research.md` | Slash command (after `setup.sh`)        |
+| `SKILL.md`                                | Auto-trigger + orchestration (`/verasic-deep-research`)                |
 
 ## Human workflow
 

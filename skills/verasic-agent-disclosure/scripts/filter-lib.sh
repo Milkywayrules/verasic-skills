@@ -13,7 +13,7 @@ CORE_FAIL_PATTERNS=(
   '\.cursor/skills'
   '\.agents/skills'
   'skills-lock\.json'
-  'verasic-(fusion|deep-research|bugbot|git-commits|init|github-env|github-governance|agent-disclosure)'
+  'verasic-(fusion|deep-research|bugbot|secbot|init|github-cli-init|git-commits-convention|git-commits-audit|github-governance|github-governance-init|agent-disclosure)'
   '## assuming'
   'optional harness hints'
 )

@@ -18,8 +18,8 @@ make_repo() {
   mkdir -p "$dir/.cursor/skills"
   cp -r "$GOV_SRC" "$dir/.cursor/skills/"
   cp -r "$INIT_ROOT" "$dir/.cursor/skills/verasic-github-governance-init"
-  cp -r "$SKILLS_SRC/verasic-git-commits" "$dir/.cursor/skills/" 2>/dev/null || true
-  cp -r "$SKILLS_SRC/verasic-github-env" "$dir/.cursor/skills/" 2>/dev/null || true
+  cp -r "$SKILLS_SRC/verasic-git-commits-convention" "$dir/.cursor/skills/" 2>/dev/null || true
+  cp -r "$SKILLS_SRC/verasic-github-cli-init" "$dir/.cursor/skills/" 2>/dev/null || true
   git -C "$dir" init -q -b main
   git -C "$dir" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "chore: seed"
   git -C "$dir" remote add origin git@github.com:Milkywayrules/governance-test.git

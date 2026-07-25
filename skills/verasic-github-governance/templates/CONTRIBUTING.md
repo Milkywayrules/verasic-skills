@@ -5,7 +5,7 @@ Verasic repos use **feature branches + pull requests**. Do not push directly to 
 ## Workflow
 
 1. Branch from `main`: `git checkout -b feat/my-change`
-2. Commit with [Conventional Commits](https://www.conventionalcommits.org/) style (see verasic-git-commits skill)
+2. Commit with [Conventional Commits](https://www.conventionalcommits.org/) style (see verasic-git-commits-convention skill)
 3. Push the branch and open a PR
 4. Wait for the **`ci`** check to pass
 5. Merge after review

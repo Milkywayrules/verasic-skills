@@ -9,7 +9,7 @@
 ## Mitigations
 
 - **Confirm-first default** — Without `--yes`, factory prints a plan only; no repo mutations.
-- **No secrets in skill** — Tokens load via **verasic-github-env** at runtime; not embedded in scripts.
+- **No secrets in skill** — Tokens load via **verasic-github-cli-init** at runtime; not embedded in scripts.
 - **Sibling source of truth** — Domain protocols live in **verasic-github-governance**; this skill orchestrates only.
 - **Explicit `--open-pr`** — GitHub writes require env auth and user confirmation.
 

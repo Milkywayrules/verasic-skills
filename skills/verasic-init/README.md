@@ -34,7 +34,7 @@ bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
 
 # Inspect / cherry-pick
 bash .cursor/skills/verasic-init/scripts/init.sh --list
-bash .cursor/skills/verasic-init/scripts/init.sh --yes --skills verasic-bugbot,verasic-git-commits
+bash .cursor/skills/verasic-init/scripts/init.sh --yes --skills verasic-bugbot,verasic-git-commits-convention
 bash .cursor/skills/verasic-init/scripts/init.sh --yes --verify --profile cursor
 ```
 
@@ -54,11 +54,10 @@ Full spec: [references/install-profiles.md](references/install-profiles.md)
 
 | Skill                      | Wiring                                                                                                          |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `verasic-github-env`       | `.envrc`, `.env.example` GH block, `.gitignore`, credential template                                            |
-| `verasic-git-commits`      | `core.hooksPath` → commit-msg hook (or manual snippet if lefthook/husky exists)                                 |
-| `verasic-config`           | `verasic.config.ts` scaffold, `verasic/` + `.verasic/` dirs, `.gitignore` for localDir                          |
+| `verasic-github-cli-init`       | `.envrc`, `.env.example` GH block, `.gitignore`, credential template                                            |
+| `verasic-git-commits-convention`      | `core.hooksPath` → commit-msg hook (or manual snippet if lefthook/husky exists)                                 |
 | `verasic-bugbot`           | nothing — skill-only; UX via init fetch                                                                         |
-| `verasic-security-review`  | nothing — skill-only; UX via init fetch                                                                         |
+| `verasic-secbot`  | nothing — skill-only; UX via init fetch                                                                         |
 | `verasic-fusion`           | nothing — skill-only                                                                                            |
 | `verasic-deep-research`    | nothing — skill-only                                                                                            |
 | `verasic-agent-disclosure` | disclosure rule via `wire-rule.sh`                                                                              |

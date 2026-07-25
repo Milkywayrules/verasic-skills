@@ -3,8 +3,8 @@
 <!-- verasic-governance:start -->
 ## GitHub agent harness
 
-- Load `GH_TOKEN` before any `gh` mutation: `source .cursor/skills/verasic-github-env/scripts/load-gh-env.sh` (or `.agents/skills/` equivalent).
-- Verify with `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh` — never bare `gh auth status` in chat.
+- Load `GH_TOKEN` before any `gh` mutation: `source .cursor/skills/verasic-github-cli-init/scripts/load-gh-env.sh` (or `.agents/skills/` equivalent).
+- Verify with `bash .cursor/skills/verasic-github-cli-init/scripts/check-gh.sh` — never bare `gh auth status` in chat.
 - Prefer HTTPS remotes with PAT for agent pushes when SSH is unavailable.
 
 ## Governance routing

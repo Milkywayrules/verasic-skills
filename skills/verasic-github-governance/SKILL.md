@@ -1,6 +1,7 @@
 ---
 name: verasic-github-governance
 description: GitHub repo governance factory — soft hooks + CI bootstrap, plan-gated hard protection via OpenTofu. Use when creating GitHub repos, wiring branch governance, bootstrapping CI/hooks, applying branch protection, or preparing repo transfers for Verasic Labs / Milkywayrules.
+disable-model-invocation: true
 ---
 
 Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://github.com/Milkywayrules/verasic-skills/blob/main/SECURITY.md) for expected scanner signals and trust model.
@@ -48,9 +49,9 @@ Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://g
 | `scripts/doctor.sh` | Soft-governance readiness (`0`) vs gaps (`2`) |
 | Dogfood registry `infra/github-governance/` | OpenTofu scaffold for hard rules when plan allows — **not copied to product repos** |
 
-The Cursor subagent (`.cursor/agents/verasic-github-governance.md`) is a thin pointer — never duplicate the spec elsewhere.
+The Cursor subagent (`.cursor/agents/verasic-github-governor.md`) is a thin pointer — never duplicate the spec elsewhere.
 
-Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.1.10`.
+Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.2.0`.
 
 ## Hard rules
 
