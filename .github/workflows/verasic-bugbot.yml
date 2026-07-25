@@ -4,14 +4,12 @@ on:
   push:
     paths:
       - 'skills/verasic-bugbot/**'
-      - 'cursor/commands/verasic-review.md'
-      - 'cursor/agents/verasic-bug-reviewer.md'
+      - 'cursor/agents/verasic-bugbot-reviewer.md'
       - '.github/workflows/verasic-bugbot.yml'
   pull_request:
     paths:
       - 'skills/verasic-bugbot/**'
-      - 'cursor/commands/verasic-review.md'
-      - 'cursor/agents/verasic-bug-reviewer.md'
+      - 'cursor/agents/verasic-bugbot-reviewer.md'
       - '.github/workflows/verasic-bugbot.yml'
 
 jobs:

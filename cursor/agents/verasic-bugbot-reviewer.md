@@ -1,5 +1,5 @@
 ---
-name: verasic-bug-reviewer
+name: verasic-bugbot-reviewer
 description: Bugbot-like local code review specialist. Reviews git diffs (branch changes or uncommitted changes) for real bugs — logic errors, security issues, race conditions, edge cases. Use proactively after writing or modifying code, or when the user asks for a "bugbot review", "review my changes", or "check my diff".
 ---
 

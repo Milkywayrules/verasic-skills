@@ -4,12 +4,10 @@ on:
   push:
     paths:
       - 'skills/verasic-deep-research/**'
-      - 'cursor/commands/verasic-deep-research.md'
       - '.github/workflows/verasic-deep-research.yml'
   pull_request:
     paths:
       - 'skills/verasic-deep-research/**'
-      - 'cursor/commands/verasic-deep-research.md'
       - '.github/workflows/verasic-deep-research.yml'
 
 jobs:

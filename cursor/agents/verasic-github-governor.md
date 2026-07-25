@@ -1,4 +1,9 @@
-# Verasic GitHub Governance — Cursor subagent
+---
+name: verasic-github-governor
+description: GitHub governance specialist for mutating gh operations — repo create, settings, branch protection, CI bootstrap, transfer prep.
+---
+
+# Verasic GitHub Governor — Cursor subagent
 
 Thin pointer. **Do not duplicate the spec here.**
 
@@ -18,7 +23,7 @@ Read-only `gh` (view, log, status) does not require this subagent.
 
 1. Load skill **verasic-github-governance** (`.agents/skills/verasic-github-governance/SKILL.md`)
 2. Read `references/governance-protocol.md` and route via `references/factory-protocol.md` or plan-matrix as needed
-3. Ensure **verasic-github-env** auth before `gh` mutations
+3. Ensure **verasic-github-cli-init** auth before `gh` mutations
 4. Prefer **verasic-github-governance-init** `factory.sh` for repo bootstrap
 
 ## Deliverables

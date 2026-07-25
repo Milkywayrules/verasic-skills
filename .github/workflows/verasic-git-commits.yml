@@ -3,15 +3,17 @@ name: verasic-git-commits
 on:
   push:
     paths:
-      - 'skills/verasic-git-commits/**'
-      - 'cursor/commands/verasic-audit-commits.md'
-      - 'cursor/rules/verasic-git-commits.mdc'
+      - 'skills/verasic-git-commits-convention/**'
+      - 'skills/verasic-git-commits-audit/**'
+      - 'cursor/rules/verasic-git-commits-convention.mdc'
+      - 'cursor/agents/verasic-git-commit-auditor.md'
       - '.github/workflows/verasic-git-commits.yml'
   pull_request:
     paths:
-      - 'skills/verasic-git-commits/**'
-      - 'cursor/commands/verasic-audit-commits.md'
-      - 'cursor/rules/verasic-git-commits.mdc'
+      - 'skills/verasic-git-commits-convention/**'
+      - 'skills/verasic-git-commits-audit/**'
+      - 'cursor/rules/verasic-git-commits-convention.mdc'
+      - 'cursor/agents/verasic-git-commit-auditor.md'
       - '.github/workflows/verasic-git-commits.yml'
 
 jobs:
@@ -19,5 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: git-commits regression
-        run: bash skills/verasic-git-commits/scripts/test-regression.sh
+      - name: git-commits-convention regression
+        run: bash skills/verasic-git-commits-convention/scripts/test-regression.sh
+      - name: git-commits-audit regression
+        run: bash skills/verasic-git-commits-audit/scripts/test-regression.sh

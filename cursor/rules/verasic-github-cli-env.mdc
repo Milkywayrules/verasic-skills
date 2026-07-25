@@ -1,12 +1,12 @@
 ---
-description: verasic-github-env — load GH_TOKEN via load-gh-env.sh for gh; secrets tiers local/CI/production
+description: verasic-github-cli-init — load GH_TOKEN via load-gh-env.sh for gh; secrets tiers local/CI/production
 alwaysApply: true
 ---
 
-# verasic-github-env
+# verasic-github-cli-init
 
 Local GitHub CLI auth for AI agent harnesses. Full spec:
-`.cursor/skills/verasic-github-env/references/setup-protocol.md`
+`.cursor/skills/verasic-github-cli-init/references/setup-protocol.md`
 
 ## Secrets tiers (never mix)
 
@@ -19,10 +19,10 @@ Local GitHub CLI auth for AI agent harnesses. Full spec:
 If `GH_TOKEN` is unset, load credentials without executing env files:
 
 ```bash
-source .cursor/skills/verasic-github-env/scripts/load-gh-env.sh
+source .cursor/skills/verasic-github-cli-init/scripts/load-gh-env.sh
 ```
 
-Verify with `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh` — not bare `gh auth status` (can leak a token prefix).
+Verify with `bash .cursor/skills/verasic-github-cli-init/scripts/check-gh.sh` — not bare `gh auth status` (can leak a token prefix).
 
 ## Usage
 
@@ -33,5 +33,5 @@ Verify with `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh` — not
 
 ## Verify / bootstrap
 
-- verify: `bash .cursor/skills/verasic-github-env/scripts/check-gh.sh`
-- wire new repo: `/verasic-setup-github` or `.cursor/skills/verasic-github-env/scripts/bootstrap.sh`
+- verify: `bash .cursor/skills/verasic-github-cli-init/scripts/check-gh.sh`
+- wire new repo: `/verasic-github-cli-init` or `.cursor/skills/verasic-github-cli-init/scripts/bootstrap.sh`

@@ -4,12 +4,10 @@ on:
   push:
     paths:
       - 'skills/verasic-fusion/**'
-      - 'cursor/commands/verasic-fusion.md'
       - '.github/workflows/verasic-fusion.yml'
   pull_request:
     paths:
       - 'skills/verasic-fusion/**'
-      - 'cursor/commands/verasic-fusion.md'
       - '.github/workflows/verasic-fusion.yml'
 
 jobs:
