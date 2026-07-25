@@ -32,7 +32,7 @@ A repo config skill (`verasic-config`) scaffolded shared paths but added install
 ### Negative / deferred
 
 - **No user config file** until a future kit ships (npm package / Verasic Kit / Harness Kit — **TBD, not built**).
-- Breaking change for every retired slash (see CHANGELOG v0.2.1).
+- Breaking change for every retired slash (see CHANGELOG v0.2.2).
 - Runtime Cursor slash menu behavior is not CI-testable; regressions cover file parity only.
 
 ## Retired names (reference only)
@@ -51,4 +51,4 @@ A repo config skill (`verasic-config`) scaffolded shared paths but added install
 
 - [cursor-skills-ux.md](../cursor-skills-ux.md)
 - [verasic-naming.md](../verasic-naming.md)
-- [CHANGELOG.md](../../CHANGELOG.md) v0.2.1
+- [CHANGELOG.md](../../CHANGELOG.md) v0.2.2

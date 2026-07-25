@@ -10,6 +10,23 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(none)_
 
+## v0.2.2
+
+**Bundle tag `v0.2.2`** — alignment release; per-skill versions unchanged at **`0.2.0`**.
+
+- **CHANGELOG / docs** — canonical `v0.2.1` release section; install pin `@v0.2.2`
+- **Governance bundle pins** — `cursor/rules/verasic-github-governance.mdc` and governance skills aligned to `@v0.2.2`
+- **Integrity** — refreshed `verasic-github-governance` and `verasic-github-governance-init` hashes
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills@v0.2.2 --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
+
+See [v0.2.1](#v021) for breaking changes and migration notes.
+
 ## v0.2.1
 
 **Bundle tag `v0.2.1`** — skills-first Cursor UX; all manifest skills **`0.2.0`**.

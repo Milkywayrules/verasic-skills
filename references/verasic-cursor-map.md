@@ -3,7 +3,7 @@
 **Single source of truth** for slash entries, skill folders, subagents, and always-applied rules.
 README and skill docs link here — they do not duplicate this table.
 
-Bundle **v0.2.1** — skills-first; no `cursor/commands/`.
+Bundle **v0.2.2** — skills-first; no `cursor/commands/`.
 
 ## Skills (slash = folder name)
 
@@ -61,4 +61,4 @@ See [cursor-skills-ux.md](cursor-skills-ux.md) and [skills/verasic-init/referenc
 | `/verasic-governance-factory` | `/verasic-github-governance-init` |
 | `/verasic-disclosure-red-team` | `/verasic-agent-disclosure` (orchestration in SKILL) |
 
-Full migration notes: [CHANGELOG.md](../CHANGELOG.md) v0.2.1.
+Full migration notes: [CHANGELOG.md](../CHANGELOG.md) v0.2.2.
