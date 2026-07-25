@@ -12,35 +12,7 @@ _(none)_
 
 ## v0.2.1
 
-**Bundle re-tag only** — same skills-first `0.2.0` bundle as [v0.2.0](#v020); per-skill
-`VERSION` files unchanged.
-
-### Why this tag exists
-
-- **`v0.2.0` is unavailable** — that GitHub release used non-compliant commit messages
-  (`Co-authored-by:` trailers); history on `main` was rewritten with clean messages.
-- **GitHub immutable releases** — after the `v0.2.0` release was deleted, the tag name
-  cannot be recreated on this repository. Use **`@v0.2.1`** for installs.
-
-### Changes since the retracted `v0.2.0` tag
-
-- `.gitignore` — ignore `.cursor/`, `.agents/`, and root `skills-lock.json`
-
-### Install
-
-```bash
-npx skills add Milkywayrules/verasic-skills@v0.2.1 --skill '*' -y
-bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
-```
-
-See [v0.2.0](#v020) for breaking changes and migration notes.
-
-## v0.2.0
-
-**Bundle tag `v0.2.0`** — skills-first Cursor UX; all manifest skills **`0.2.0`**.
-
-> **Retracted on GitHub** — do not pin `@v0.2.0`. The git tag was removed; use
-> [`@v0.2.1`](#v021) instead. Content below documents the `0.2.0` skill bundle.
+**Bundle tag `v0.2.1`** — skills-first Cursor UX; all manifest skills **`0.2.0`**.
 
 ### Breaking changes
 
@@ -92,6 +64,14 @@ See [v0.2.0](#v020) for breaking changes and migration notes.
 - `.github/workflows/verasic-secbot.yml` (renamed from verasic-security-review); deleted verasic-config workflow
 - `scripts/check-references.sh` — v0.2.0 basename mapping; no backward-compat aliases
 - `scripts/check-cursor-ux-manifest.sh` — expects 8 files under cursor/
+- `.gitignore` — ignore `.cursor/`, `.agents/`, and root `skills-lock.json`
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills@v0.2.1 --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
 
 ## v0.1.12
 
