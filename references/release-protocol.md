@@ -37,7 +37,7 @@ section. `--check-updates` compares local `VERSION` to upstream per skill.
    ```
 
 6. Run affected skill exhaustive gates when the skill ships protocol tests.
-7. Update [CHANGELOG.md](../CHANGELOG.md); draft GitHub Release from [release-notes-template.md](release-notes-template.md).
+7. Update [CHANGELOG.md](../CHANGELOG.md); draft GitHub Release from [release-notes-template.md](release-notes-template.md). Update `skills/verasic-init/references/bundle-tag.txt` and governance `@vX.Y.Z` pins to match the new bundle tag.
 8. Commit, push `main`, tag `vX.Y.Z`, push tag — **`verasic-release` CI runs `test-all.sh`**.
 9. Apply [repo-meta.md](repo-meta.md) (branch protection, GitHub Release).
 

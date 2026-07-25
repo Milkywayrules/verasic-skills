@@ -10,6 +10,23 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(none)_
 
+## v0.2.3
+
+**Bundle tag `v0.2.3`** — init upstream fetch fix; **`verasic-init` `0.2.1`**, other manifest skills unchanged at **`0.2.0`**.
+
+### Fix
+
+- **verasic-init** — Cursor UX fetch uses `references/bundle-tag.txt` (git bundle tag, e.g. `v0.2.3`) instead of per-skill `VERSION` (`0.2.0`). Fixes 404 spam when the semver tag does not exist on GitHub (e.g. burned `v0.2.0`). Probes tag once before fetch; falls back to `main` quietly.
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills@v0.2.3 --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
+
+See [v0.2.1](#v021) for breaking changes and migration notes.
+
 ## v0.2.2
 
 **Bundle tag `v0.2.2`** — alignment release; per-skill versions unchanged at **`0.2.0`**.

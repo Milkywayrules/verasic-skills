@@ -32,7 +32,7 @@ Guidance for AI agents and maintainers working in this repository.
 1. Run regressions for touched skills: `bash skills/<name>/scripts/test-regression.sh`
 2. Refresh integrity after `VERSION` or `integrity.txt` edits: `bash scripts/refresh-integrity.sh <name>` or `--all`
 3. Run repo gates: `bash scripts/test-all.sh`
-4. Grep retired names (see CHANGELOG v0.2.2) — zero hits outside CHANGELOG / ADR retired lists
+4. Grep retired names (see CHANGELOG v0.2.3) — zero hits outside CHANGELOG / ADR retired lists
 
 ## Reference docs
 

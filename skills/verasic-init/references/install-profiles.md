@@ -37,14 +37,15 @@ On `--yes`, init downloads files from `references/skill-ux-map.txt` filtered to 
 - With `--skills a,b`: scope is exactly those skills.
 - Without `--skills`: scope is manifest skills physically installed in the repo.
 
-Files are fetched from the installed skill's release tag by default:
+Files are fetched from the monorepo **bundle git tag** by default:
 
 ```text
-https://raw.githubusercontent.com/Milkywayrules/verasic-skills/v<VERSION>/cursor/<path>
+https://raw.githubusercontent.com/Milkywayrules/verasic-skills/v<bundle-tag>/cursor/<path>
 ```
 
-(`<VERSION>` comes from `skills/.../verasic-init/VERSION`.) If the tag is not yet on GitHub,
-init retries once from `main`. Override for tests or mirrors:
+(`<bundle-tag>` comes from `skills/.../verasic-init/references/bundle-tag.txt`, e.g. `v0.2.3` —
+not the per-skill `VERSION` file.) Init probes the tag once; if unavailable, it uses `main`.
+Override for tests or mirrors:
 
 ```bash
 export VERASIC_INIT_REMOTE_REPO_BASE=https://raw.githubusercontent.com/Milkywayrules/verasic-skills/main
