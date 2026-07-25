@@ -80,6 +80,17 @@ bash .cursor/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid  
 
 Adjust the skills path prefix if your agent installs elsewhere (e.g. `.agents/skills/`). Profile spec ships in the skill: `references/install-profiles.md`. Cursor/hybrid profiles fetch UX from upstream on `--yes` (network required).
 
+**Install pin vs live upstream (v0.2.4+):**
+
+| Goal | Command / behavior |
+| ---- | ------------------ |
+| Latest skills (default) | `npx skills add Milkywayrules/verasic-skills` — floating `main` |
+| Frozen bundle snapshot | `npx skills add Milkywayrules/verasic-skills@vX.Y.Z` |
+| Init Cursor UX fetch | Defaults to upstream **`main/cursor/`** on `--yes` |
+| Pin init UX to a tag | `VERASIC_INIT_BUNDLE_TAG=vX.Y.Z bash …/init.sh --yes …` |
+
+Init plan report shows **ux upstream** (where fetch goes) and **latest bundle** (informational, from upstream bundle.tag on main). Details: [skills/verasic-init/references/install-profiles.md](skills/verasic-init/references/install-profiles.md).
+
 ## Usage
 
 Primary slash entries (see [references/verasic-cursor-map.md](references/verasic-cursor-map.md) for subagents and rules):

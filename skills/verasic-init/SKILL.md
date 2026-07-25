@@ -73,6 +73,8 @@ Relay that report verbatim too.
 
 Aliases: `--cursor`, `--agent`, `--cursor-hybrid`. Default auto-detects from repo layout.
 
+**Upstream Cursor UX (v0.2.4+):** on `--yes`, `cursor` / `cursor-hybrid` fetch from upstream **`main/cursor/`** unless the user set `VERASIC_INIT_BUNDLE_TAG` or `VERASIC_INIT_REMOTE_REPO_BASE`. Plan report **ux upstream** is the fetch base; **latest bundle** is informational only (not the fetch default). Do not treat a missing or old bundle tag as a fetch failure by itself.
+
 ## Inspect and cherry-pick
 
 ```bash

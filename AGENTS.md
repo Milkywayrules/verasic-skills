@@ -32,7 +32,27 @@ Guidance for AI agents and maintainers working in this repository.
 1. Run regressions for touched skills: `bash skills/<name>/scripts/test-regression.sh`
 2. Refresh integrity after `VERSION` or `integrity.txt` edits: `bash scripts/refresh-integrity.sh <name>` or `--all`
 3. Run repo gates: `bash scripts/test-all.sh`
-4. Grep retired names (see CHANGELOG v0.2.3) — zero hits outside CHANGELOG / ADR retired lists
+4. Grep retired names (see CHANGELOG v0.2.0) — zero hits outside CHANGELOG / ADR retired lists
+
+## Bundle releases (v0.2.4+)
+
+Three version layers — do not conflate them:
+
+| Layer | Location | Role |
+| ----- | -------- | ---- |
+| Per-skill semver | `skills/<name>/VERSION` + `versions.lock` | What changed inside that skill |
+| Bundle tag | root `bundle.tag` = git tag `vX.Y.Z` | Install/release snapshot; drives generated `@vX.Y.Z` pins |
+
+**Maintainer bump (before tag):**
+
+```bash
+bash scripts/release-bump.sh vX.Y.Z   # sets bundle.tag, syncs pins, runs check-bundle-pins.sh
+bash scripts/test-all.sh
+```
+
+Pin propagation only — edit root `bundle.tag`, then `bash scripts/sync-bundle-tag.sh` (or use `release-bump.sh` which runs both). Never hand-edit `@vX.Y.Z` literals in governance UX files.
+
+**Consumer default:** floating `main` for skills install and init Cursor UX fetch. Optional frozen UX: `VERASIC_INIT_BUNDLE_TAG`. See [references/release-protocol.md](references/release-protocol.md).
 
 ## Reference docs
 
