@@ -13,3 +13,5 @@ knowledge-base-of-king-the-user/
 
 # Cursor runtime folder — agents are copied here from etc/cursor/agents and cursor/agents
 .cursor/
+.agents/
+skills-lock.json
