@@ -10,3 +10,6 @@ node_modules/
 
 # local symlink pollution (dogfood workspace)
 knowledge-base-of-king-the-user/
+
+# Cursor runtime folder — agents are copied here from etc/cursor/agents and cursor/agents
+.cursor/

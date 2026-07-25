@@ -43,9 +43,7 @@ map_install_path() {
   case "$ref" in
     .cursor/skills/*) echo "skills/${ref#.cursor/skills/}" ;;
     .agents/skills/*) echo "skills/${ref#.agents/skills/}" ;;
-    .agents/cursor/agents/*) echo "cursor/agents/${ref#.agents/cursor/agents/}" ;;
     .cursor/agents/*) echo "cursor/agents/${ref#.cursor/agents/}" ;;
-    .cursor/commands/*) echo "cursor/commands/${ref#.cursor/commands/}" ;;
     .cursor/rules/*) echo "cursor/rules/${ref#.cursor/rules/}" ;;
     verasic-init/scripts/*) echo "skills/verasic-init/${ref#verasic-init/}" ;;
     verasic-*/scripts/*|verasic-*/references/*|verasic-*/templates/*|verasic-*/checklists/*)
@@ -68,18 +66,17 @@ skill_root_for() {
     base="${base%.md}"
     base="${base%.mdc}"
     case "$base" in
-      verasic-bugbot|verasic-review|verasic-bug-reviewer) echo "$SKILLS_DIR/verasic-bugbot" ;;
-      verasic-security-review|verasic-security-reviewer) echo "$SKILLS_DIR/verasic-security-review" ;;
-      verasic-config) echo "$SKILLS_DIR/verasic-config" ;;
+      verasic-bugbot|verasic-bugbot-reviewer) echo "$SKILLS_DIR/verasic-bugbot" ;;
+      verasic-secbot|verasic-secbot-reviewer) echo "$SKILLS_DIR/verasic-secbot" ;;
       verasic-fusion) echo "$SKILLS_DIR/verasic-fusion" ;;
       verasic-deep-research) echo "$SKILLS_DIR/verasic-deep-research" ;;
       verasic-init) echo "$SKILLS_DIR/verasic-init" ;;
-      verasic-setup-github) echo "$SKILLS_DIR/verasic-github-env" ;;
-      verasic-audit-commits|verasic-commit-auditor|verasic-git-commits) echo "$SKILLS_DIR/verasic-git-commits" ;;
-      verasic-github-env) echo "$SKILLS_DIR/verasic-github-env" ;;
-      verasic-agent-disclosure|verasic-disclosure-red-team) echo "$SKILLS_DIR/verasic-agent-disclosure" ;;
-      verasic-github-governance) echo "$SKILLS_DIR/verasic-github-governance" ;;
-      verasic-governance-factory) echo "$SKILLS_DIR/verasic-github-governance-init" ;;
+      verasic-github-cli-init|verasic-github-cli-env) echo "$SKILLS_DIR/verasic-github-cli-init" ;;
+      verasic-git-commits-convention) echo "$SKILLS_DIR/verasic-git-commits-convention" ;;
+      verasic-git-commits-audit|verasic-git-commit-auditor) echo "$SKILLS_DIR/verasic-git-commits-audit" ;;
+      verasic-agent-disclosure) echo "$SKILLS_DIR/verasic-agent-disclosure" ;;
+      verasic-github-governance|verasic-github-governor) echo "$SKILLS_DIR/verasic-github-governance" ;;
+      verasic-github-governance-init) echo "$SKILLS_DIR/verasic-github-governance-init" ;;
     esac
   fi
 }
@@ -116,22 +113,16 @@ should_skip_ref() {
   [[ "$ref" =~ \([0-9]+/[0-9]+\) ]] && return 0
 
   case "$ref" in
-    .cursor/skills|.cursor/skills/|.agents/skills|.agents/skills/|.agents/cursor/agents|.agents/cursor/agents/|skills/|skills)
+    .cursor/skills|.cursor/skills/|.agents/skills|.agents/skills/|skills/|skills)
       return 0
       ;;
     AGENTS.md|CLAUDE.md|.envrc|.env.example|.gitignore|.github-agent.local)
       return 0
       ;;
-    .verasicrc.json|.verasicrc.jsonc|verasic.config.ts)
-      return 0
-      ;;
-    verasic/.gitkeep|verasic/security-reviews/.gitkeep|.verasic/security-reviews/.gitkeep)
-      return 0
-      ;;
     auth/crypto/webhook/input|p/default)
       return 0
       ;;
-    verasic-bugbot.md|verasic-bug-reviewer.md|verasic-security-reviewer.md)
+    verasic-bugbot.md|verasic-bugbot-reviewer.md|verasic-secbot-reviewer.md|verasic-git-commit-auditor.md|verasic-github-governor.md)
       return 0
       ;;
     blob/main|Milkywayrules/verasic-skills|actions/checkout)
@@ -243,6 +234,9 @@ resolve_ref() {
   if [[ "$ref" != */* && "$ref" == *.* ]]; then
     candidates+=("$src_dir/$ref")
   fi
+  if [[ "$ref" == */* && "$ref" != ../* && "$ref" != */../* && "$ref" != ./* ]]; then
+    candidates+=("$src_dir/$ref")
+  fi
   if [[ "$ref" == ./* ]]; then
     candidates+=("$(cd "$src_dir" && cd "$(dirname "$ref")" && pwd)/$(basename "$ref")")
   fi
@@ -328,6 +322,13 @@ validate_file() {
 
     resolved="$(resolve_ref "$ref" "$file")"
     if [[ -f "$resolved" ]]; then
+      if [[ "$kind" == "link" ]]; then
+        local ref_path="${ref%%#*}"
+        if [[ ! -f "$(dirname "$file")/$ref_path" ]]; then
+          bad "$rel:$line_no (link-render) target does not exist next to its own file: $ref → $(dirname "$rel")/$ref_path (resolved only via repo-root fallback: $resolved)"
+          continue
+        fi
+      fi
       ok "$rel:$line_no ($kind) $ref"
     else
       bad "$rel:$line_no ($kind) missing: $ref → $resolved"
@@ -341,7 +342,7 @@ echo
 
 mapfile -t MD_FILES < <(
   find "$REPO_ROOT" -type f \( -name '*.md' -o -name '*.mdc' \) \
-    ! -path '*/.git/*' | sort
+    ! -path '*/.git/*' ! -path '*/.cursor/*' | sort  # .cursor/ is local runtime state, not product sources
 )
 
 for file in "${MD_FILES[@]}"; do

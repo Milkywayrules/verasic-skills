@@ -38,6 +38,7 @@ run_if 'version manifest gate' "$REPO_ROOT/scripts/check-versions.sh"
 run_if 'version regression' "$REPO_ROOT/scripts/test-versions-regression.sh"
 run_if 'bundle pin gate' "$REPO_ROOT/scripts/check-bundle-pins.sh"
 run_if 'manifest claim gate' "$REPO_ROOT/scripts/check-manifest-claims.sh"
+run_if 'etc subagents gate' "$REPO_ROOT/scripts/check-etc-subagents.sh"
 run_if 'internal reference check' "$REPO_ROOT/scripts/check-references.sh"
 
 while IFS= read -r skill; do

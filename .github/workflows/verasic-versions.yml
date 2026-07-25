@@ -13,6 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: cursor UX manifest gate
+        run: bash scripts/check-cursor-ux-manifest.sh
+      - name: bundle pin gate
+        run: bash scripts/check-bundle-pins.sh
+      - name: manifest claim gate
+        run: bash scripts/check-manifest-claims.sh
+      - name: etc subagents gate
+        run: bash scripts/check-etc-subagents.sh
       - name: version manifest gate
         run: bash scripts/check-versions.sh
       - name: version regression

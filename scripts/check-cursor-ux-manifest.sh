@@ -19,8 +19,18 @@ mapfile -t actual < <(find "$CURSOR_ROOT" -type f | sed "s|^$CURSOR_ROOT/||" | s
 
 if [[ "${#listed[@]}" -eq 0 ]]; then
   bad "manifest lists no files"
+elif [[ "${#listed[@]}" -eq 8 ]]; then
+  ok "manifest lists exactly 8 cursor UX files"
 else
-  ok "manifest lists ${#listed[@]} files"
+  bad "manifest must list exactly 8 cursor UX files (got ${#listed[@]})"
+fi
+
+if [[ -d "$CURSOR_ROOT" ]]; then
+  if [[ "${#actual[@]}" -eq 8 ]]; then
+    ok "cursor/ contains exactly 8 files"
+  else
+    bad "cursor/ must contain exactly 8 files (got ${#actual[@]})"
+  fi
 fi
 
 missing=()

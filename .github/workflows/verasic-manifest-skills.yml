@@ -1,0 +1,40 @@
+name: verasic-manifest-skills
+
+on:
+  push:
+    paths:
+      - 'skills/verasic-agent-disclosure/**'
+      - 'skills/verasic-github-governance/**'
+      - 'skills/verasic-github-governance-init/**'
+      - 'skills/verasic-github-cli-init/**'
+      - 'cursor/agents/verasic-github-governor.md'
+      - 'cursor/rules/verasic-agent-disclosure.mdc'
+      - 'cursor/rules/verasic-github-cli-env.mdc'
+      - 'cursor/rules/verasic-github-governance.mdc'
+      - '.github/workflows/verasic-manifest-skills.yml'
+  pull_request:
+    paths:
+      - 'skills/verasic-agent-disclosure/**'
+      - 'skills/verasic-github-governance/**'
+      - 'skills/verasic-github-governance-init/**'
+      - 'skills/verasic-github-cli-init/**'
+      - 'cursor/agents/verasic-github-governor.md'
+      - 'cursor/rules/verasic-agent-disclosure.mdc'
+      - 'cursor/rules/verasic-github-cli-env.mdc'
+      - 'cursor/rules/verasic-github-governance.mdc'
+      - '.github/workflows/verasic-manifest-skills.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        skill:
+          - verasic-agent-disclosure
+          - verasic-github-governance
+          - verasic-github-governance-init
+          - verasic-github-cli-init
+    steps:
+      - uses: actions/checkout@v4
+      - name: ${{ matrix.skill }} regression
+        run: bash skills/${{ matrix.skill }}/scripts/test-regression.sh
