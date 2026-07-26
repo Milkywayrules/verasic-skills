@@ -13,39 +13,39 @@ Grammar for skill folders, Cursor UX files, and slash entries. Locked for v0.2.0
 
 ### Bugbot vs secbot
 
-| Name | Kind | Why |
-| --- | --- | --- |
-| `verasic-bugbot` | skill | Product name; general bug hunting |
-| `verasic-bugbot-reviewer` | subagent | Isolated review context |
-| `verasic-secbot` | skill | Security depth (STRIDE); shorter than `security-review` |
-| `verasic-secbot-reviewer` | subagent | Paired with secbot, not bugbot |
+| Name                      | Kind     | Why                                                     |
+| ------------------------- | -------- | ------------------------------------------------------- |
+| `verasic-bugbot`          | skill    | Product name; general bug hunting                       |
+| `verasic-bugbot-reviewer` | subagent | Isolated review context                                 |
+| `verasic-secbot`          | skill    | Security depth (STRIDE); shorter than `security-review` |
+| `verasic-secbot-reviewer` | subagent | Paired with secbot, not bugbot                          |
 
 Cross-tip: bugbot may suggest `/verasic-secbot` for auth/crypto/webhook/input diffs; secbot may suggest `/verasic-bugbot` when no security surface.
 
 ### Git commits: convention vs audit
 
-| Name | Kind | Why |
-| --- | --- | --- |
-| `verasic-git-commits-convention` | skill + rule | Write path: message style + hook |
-| `verasic-git-commits-audit` | skill | Read path: history audit before push/PR |
-| `verasic-git-commit-auditor` | subagent | Spawn target for audit skill |
+| Name                             | Kind         | Why                                     |
+| -------------------------------- | ------------ | --------------------------------------- |
+| `verasic-git-commits-convention` | skill + rule | Write path: message style + hook        |
+| `verasic-git-commits-audit`      | skill        | Read path: history audit before push/PR |
+| `verasic-git-commit-auditor`     | subagent     | Spawn target for audit skill            |
 
 The convention skill keeps protocols (`conventions.md`, `commit-protocol.md`, `audit-protocol.md`). The audit skill is thin orchestration only.
 
 ### GitHub: cli-init vs governance vs governor
 
-| Name | Kind | Why |
-| --- | --- | --- |
-| `verasic-github-cli-init` | skill | Bootstrap `gh` auth (was `verasic-github-env`) |
-| `verasic-github-cli-env` | rule | Always-applied digest before `gh` mutations |
-| `verasic-github-governance` | skill | CI, hooks, doctor, protocols |
-| `verasic-github-governance-init` | skill | Plan-first factory orchestrator |
-| `verasic-github-governor` | subagent | Governance mutations via subagent |
+| Name                             | Kind     | Why                                            |
+| -------------------------------- | -------- | ---------------------------------------------- |
+| `verasic-github-cli-init`        | skill    | Bootstrap `gh` auth (was `verasic-github-env`) |
+| `verasic-github-cli-env`         | rule     | Always-applied digest before `gh` mutations    |
+| `verasic-github-governance`      | skill    | CI, hooks, doctor, protocols                   |
+| `verasic-github-governance-init` | skill    | Plan-first factory orchestrator                |
+| `verasic-github-governor`        | subagent | Governance mutations via subagent              |
 
 ### Init
 
-| Name | Kind | Why |
-| --- | --- | --- |
+| Name           | Kind  | Why                                            |
+| -------------- | ----- | ---------------------------------------------- |
 | `verasic-init` | skill | Repo wiring orchestrator; slash matches folder |
 
 ## File naming under `cursor/`
@@ -71,11 +71,11 @@ Documented exception: `subagent-inherit` (`model: inherit`) has no family or spe
 
 ## Retired folder names (v0.2.0)
 
-| Old | New |
-| --- | --- |
-| `verasic-security-review` | `verasic-secbot` |
-| `verasic-github-env` | `verasic-github-cli-init` |
-| `verasic-git-commits` | `verasic-git-commits-convention` (+ audit split) |
-| `verasic-config` | removed — inlined secbot defaults |
+| Old                       | New                                              |
+| ------------------------- | ------------------------------------------------ |
+| `verasic-security-review` | `verasic-secbot`                                 |
+| `verasic-github-env`      | `verasic-github-cli-init`                        |
+| `verasic-git-commits`     | `verasic-git-commits-convention` (+ audit split) |
+| `verasic-config`          | removed — inlined secbot defaults                |
 
 See [verasic-cursor-map.md](verasic-cursor-map.md) for slash mapping.

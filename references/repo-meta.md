@@ -6,10 +6,10 @@ Settings and conventions that live outside the codebase. Apply in GitHub repo se
 
 Recommended required status checks before merge:
 
-| Check | Workflow | Why |
-| ----- | -------- | --- |
-| version manifest | `verasic-versions` | lock ↔ VERSION ↔ integrity on every PR |
-| skill regressions | path-filtered workflows | fast feedback per touched skill |
+| Check             | Workflow                | Why                                    |
+| ----------------- | ----------------------- | -------------------------------------- |
+| version manifest  | `verasic-versions`      | lock ↔ VERSION ↔ integrity on every PR |
+| skill regressions | path-filtered workflows | fast feedback per touched skill        |
 
 Optional after first green run: require `verasic-release` indirectly by only tagging
 commits that passed `main` checks.

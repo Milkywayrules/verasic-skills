@@ -3,16 +3,16 @@
 Copy into a GitHub Release when tagging `vX.Y.Z`. Generate skill deltas from `versions.lock`
 vs the previous tag (or `git diff` on `versions.lock`).
 
-```markdown
+````markdown
 ## verasic-skills vX.Y.Z
 
 Bundle snapshot. Per-skill versions:
 
-| Skill | Version | Notes |
-| ----- | ------- | ----- |
-| verasic-deep-research | X.Y.Z | … |
-| verasic-fusion | X.Y.Z | unchanged |
-| … | … | … |
+| Skill                 | Version | Notes     |
+| --------------------- | ------- | --------- |
+| verasic-deep-research | X.Y.Z   | …         |
+| verasic-fusion        | X.Y.Z   | unchanged |
+| …                     | …       | …         |
 
 ### Highlights
 
@@ -30,6 +30,7 @@ npx skills add Milkywayrules/verasic-skills@vX.Y.Z
 # Agent-only (no Cursor UX) — after skills install
 bash .agents/skills/verasic-init/scripts/init.sh --yes --profile agent
 ```
+````
 
 Then: `/verasic-init` (plan first), then apply:
 
@@ -44,7 +45,8 @@ Automated gate passed: `bash scripts/test-all.sh` on tag CI.
 
 After install: `bash .cursor/skills/verasic-init/scripts/init.sh --list` — check **versions**
 and integrity rows.
-```
+
+````
 
 ## Generate skill table quickly
 
@@ -53,7 +55,7 @@ and integrity rows.
 grep -v '^#' versions.lock | grep -v '^$' | while IFS='=' read -r name ver; do
   printf '| %s | %s | |\n' "$name" "$ver"
 done
-```
+````
 
 Keep notes short — link to skill READMEs for depth. Monorepo releases do not need
 essay-length notes unless a skill had a breaking protocol change.
