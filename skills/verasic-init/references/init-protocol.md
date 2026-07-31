@@ -76,7 +76,7 @@ Bootstrap step lines (`bootstrap: step: ran|skipped|cannot …`) feed the report
 After a successful wire (exit 0), init may run the manifest verify script for that skill when `--verify` is passed. Verify scripts are listed in the fourth manifest column; `-` skips.
 
 - `verasic-github-cli-init`: `scripts/check-gh.sh` — init orchestrates this on `--verify` even when bootstrap already verified on token presence.
-- `verasic-github-governance`: `scripts/doctor.sh` — soft-governance readiness check after wire-hooks.
+- `verasic-github-governance`: `scripts/doctor.sh` — soft-governance readiness check after wire-hooks; `scripts/detect-posture.sh` — read-only tier recommendation (plan report only).
 
 If any manifest verify script fails, init reports `verify: failed` in actions, tallies verify failures, and exits 3 (after the full report). Broken installs and wire failures still exit 1 first.
 
@@ -120,6 +120,7 @@ The full stdout of `init.sh` is the user-facing report. Agents relay it verbatim
 - external-invoker warning when applicable
 - **scope** — effective skill list and source (`--skills` or installed subset)
 - **install profile**, **profile checklist**, **usage** (omitted in `--list` only)
+- **governance posture** — when `verasic-github-governance` or `verasic-github-governance-init` is in effective scope, read-only tier from `detect-posture.sh` (`soft-incomplete` | `soft-ready` | `hard-eligible` | `hard-applied` | `unknown`); recommends hard apply when eligible; never mutates GitHub
 - **skill roots** — each discovered root with per-skill integrity summary (scoped when `--skills`)
 - **versions** — local `VERSION` per skill in effective scope; with `--check-updates`, upstream comparison
 - status table, per-skill **details** (wire script output), **actions** (integrity + steps + verify)

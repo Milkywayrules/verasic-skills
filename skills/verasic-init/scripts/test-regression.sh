@@ -430,6 +430,15 @@ out20="$(init_yes "$R19" --yes --profile cursor --skills verasic-secbot,verasic-
 [[ -f "$R19/.cursor/agents/verasic-secbot-reviewer.md" ]] && ok "T-security-ux fetches agent" || bad "T-security-ux fetches agent"
 [[ ! -d "$R19/.cursor/commands" ]] && ok "T-security-ux no legacy command" || bad "T-security-ux no legacy command"
 
+# --- governance posture section when governance in scope ---
+R21="$TMP/gov-posture"
+make_repo "$R21" verasic-init verasic-github-governance
+chmod +x "$R21/.cursor/skills/verasic-github-governance/scripts/"*.sh 2>/dev/null || true
+out21="$(cd "$R21" && VERASIC_GOVERNANCE_POSTURE_FIXTURE=hard-eligible bash "$INIT_REL" --profile agent)"
+grep -q '^ governance posture$' <<<"$out21" && ok "governance posture section heading" || bad "governance posture section heading"
+grep -q 'posture: hard-eligible' <<<"$out21" && ok "governance posture hard-eligible in plan" || bad "governance posture hard-eligible in plan"
+grep -q 'hard-eligible — apply branch protection' <<<"$out21" && ok "next line recommends hard when eligible" || bad "next line recommends hard when eligible"
+
 echo "---"
 echo "regression: $pass passed, $fail failed"
 [[ "$fail" -eq 0 ]]

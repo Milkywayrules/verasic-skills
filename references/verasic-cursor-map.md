@@ -3,7 +3,7 @@
 **Single source of truth** for slash entries, skill folders, subagents, and always-applied rules.
 README and skill docs link here — they do not duplicate this table.
 
-Bundle **v0.2.4** — skills-first; no `cursor/commands/`.
+Bundle **v0.2.5** — skills-first; no `cursor/commands/`.
 
 ## Skills (slash = folder name)
 

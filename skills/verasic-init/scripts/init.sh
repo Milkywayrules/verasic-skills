@@ -672,6 +672,18 @@ if $PROFILE_UX_FAILED; then
   failed=$((failed + 1))
 fi
 
+GOVERNANCE_POSTURE_LOG=""
+if ! $LIST_ONLY; then
+  if in_effective_scope verasic-github-governance || in_effective_scope verasic-github-governance-init; then
+    if gov_dir="$(resolve_skill_dir verasic-github-governance 2>/dev/null)"; then
+      if [[ -x "$gov_dir/scripts/detect-posture.sh" ]]; then
+        GOVERNANCE_POSTURE_LOG="$TMP/governance-posture.log"
+        bash "$gov_dir/scripts/detect-posture.sh" >"$GOVERNANCE_POSTURE_LOG" 2>/dev/null || true
+      fi
+    fi
+  fi
+fi
+
 RULE="────────────────────────────────────────────────────────────────"
 origin="$(git remote get-url origin 2>/dev/null || echo '(no origin remote)')"
 origin="$(printf '%s' "$origin" | sed -E 's#://[^/@]*@#://#')"
@@ -700,6 +712,12 @@ if ! $LIST_ONLY; then
     echo " profile actions"
     echo " ----------------"
     sed 's/^/   /' "$PROFILE_INSTALL_LOG"
+    echo
+  fi
+  if [[ -n "$GOVERNANCE_POSTURE_LOG" && -s "$GOVERNANCE_POSTURE_LOG" ]]; then
+    echo " governance posture"
+    echo " ------------------"
+    sed 's/^/   /' "$GOVERNANCE_POSTURE_LOG"
     echo
   fi
 fi
@@ -820,7 +838,9 @@ else
     printf ' · %d verify failed' "$verify_failed"
   fi
   echo
-  if $PLAN_ONLY; then
+  if [[ -n "$GOVERNANCE_POSTURE_LOG" && -s "$GOVERNANCE_POSTURE_LOG" ]] && grep -q '^posture: hard-eligible' "$GOVERNANCE_POSTURE_LOG"; then
+    echo " next: repo is hard-eligible — apply branch protection via OpenTofu (user confirm required); see posture_recommendation above and verasic-github-governance SKILL.md"
+  elif $PLAN_ONLY; then
     verasic_profile_plan_next false "$PROFILE"
   elif $PROFILE_UX_FAILED; then
     echo " next: fix Cursor UX fetch in profile actions (network or VERASIC_INIT_REMOTE_REPO_BASE), then re-run --yes --profile $PROFILE"
@@ -832,6 +852,8 @@ else
     echo " next: complete the manual steps in the details above, then re-run --yes --profile $PROFILE"
   elif ((unknown > 0)); then
     echo " next: fix the unknown skill name(s) above and re-run with corrected --skills"
+  elif [[ -n "$GOVERNANCE_POSTURE_LOG" && -s "$GOVERNANCE_POSTURE_LOG" ]] && grep -q '^posture: hard-eligible' "$GOVERNANCE_POSTURE_LOG"; then
+    echo " next: repo is hard-eligible — apply branch protection via OpenTofu (user confirm required); see posture_recommendation above and verasic-github-governance SKILL.md"
   else
     echo " next: follow any 'Next steps' lines in details above; re-run --yes anytime (idempotent)"
   fi

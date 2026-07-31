@@ -12,6 +12,7 @@ hooks/pre-commit
 scripts/bootstrap-repo.sh
 scripts/wire-hooks.sh
 scripts/doctor.sh
+scripts/detect-posture.sh
 scripts/test-regression.sh
 templates/AGENTS.md
 templates/CONTRIBUTING.md
