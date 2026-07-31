@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+unset GH_TOKEN GH_REPO GITHUB_TOKEN 2>/dev/null || true
+
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_HOOKS=".github/verasic-governance/hooks"
 TMP="$(mktemp -d)"
