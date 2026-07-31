@@ -78,35 +78,26 @@ else
   fi
 fi
 
-# Plan-gated / hard apply (informational)
+# Plan-gated / hard apply (informational — detect-posture is source of truth)
 echo "doctor: --- plan-gated (hard apply) ---"
-if command -v gh >/dev/null 2>&1; then
-  remote="$(git remote get-url origin 2>/dev/null || true)"
-  if [[ -n "$remote" ]]; then
-    repo=""
-    parse_script="$(dirname "$SKILL_ROOT")/verasic-github-cli-init/scripts/parse-gh-repo.sh"
-    if [[ -f "$parse_script" ]]; then
-      # shellcheck source=/dev/null
-      source "$parse_script"
-      repo="$(verasic_parse_gh_repo_from_remote "$remote" 2>/dev/null || true)"
-    fi
-    if [[ -z "$repo" ]]; then
-      repo="$(echo "$remote" | sed -nE 's#.*github\.com[:/]([^/]+/[^/.]+).*#\1#p')"
-    fi
-    if [[ -n "$repo" ]]; then
-      vis="$(gh repo view "$repo" --json visibility -q .visibility 2>/dev/null || true)"
-      if [[ "$vis" == "PRIVATE" ]]; then
-        echo "doctor: info — private repo: GitHub branch protection requires Team/Pro or public repo (see plan-matrix.md)"
-        warn+=("hard protection plan-gated")
+if [[ -x "$SCRIPT_DIR/detect-posture.sh" ]] || [[ -f "$SCRIPT_DIR/detect-posture.sh" ]]; then
+  posture_out="$(bash "$SCRIPT_DIR/detect-posture.sh" 2>/dev/null || true)"
+  if [[ -n "$posture_out" ]]; then
+    while IFS= read -r pline || [[ -n "$pline" ]]; do
+      [[ "$pline" == "note:"* ]] && continue
+      echo "doctor: $pline"
+      if [[ "$pline" == posture_recommendation:* ]]; then
+        warn+=("hard protection recommended")
       fi
-    fi
+    done <<< "$posture_out"
+  else
+    echo "doctor: posture: unknown"
+    echo "doctor: posture_reason: detect-posture produced no output"
   fi
 else
-  echo "doctor: info — gh not available; skip plan detection"
+  echo "doctor: info — detect-posture.sh missing — broken install"
+  missing+=("detect-posture")
 fi
-
-echo "doctor: info — hard apply requires OpenTofu enable_hard_protection=true when plan allows"
-echo "doctor: info — required check 'ci' must pass on default branch after first merged PR"
 
 if ((${#warn[@]} > 0)); then
   echo "doctor: warnings: ${warn[*]}"

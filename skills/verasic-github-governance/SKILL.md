@@ -47,11 +47,12 @@ Security: see `references/scanner-notes.md` and upstream [SECURITY.md](https://g
 | `scripts/bootstrap-repo.sh` | Copy CI/CONTRIBUTING/lefthook/AGENTS templates (idempotent) |
 | `scripts/wire-hooks.sh` | Wire lefthook or `core.hooksPath` |
 | `scripts/doctor.sh` | Soft-governance readiness (`0`) vs gaps (`2`) |
+| `scripts/detect-posture.sh` | Read-only posture tier; init/factory recommend hard when eligible |
 | Dogfood registry `infra/github-governance/` | OpenTofu scaffold for hard rules when plan allows — **not copied to product repos** |
 
 The Cursor subagent (`.cursor/agents/verasic-github-governor.md`) is a thin pointer — never duplicate the spec elsewhere.
 
-Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.2.4`.
+Registered in verasic-init manifest (wire-hooks + doctor). Install via `npx skills add Milkywayrules/verasic-skills` or bundle tag `@v0.2.5`.
 
 ## Hard rules
 

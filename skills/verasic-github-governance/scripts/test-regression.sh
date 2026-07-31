@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+unset GH_TOKEN GH_REPO GITHUB_TOKEN 2>/dev/null || true
+
 SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_HOOKS=".github/verasic-governance/hooks"
 TMP="$(mktemp -d)"
@@ -39,6 +41,8 @@ setup_repo() {
   cd "$dir"
   git init -q -b main
   git remote add origin git@github.com:Milkywayrules/governance-test.git
+  chmod +x .cursor/skills/verasic-github-governance/scripts/*.sh 2>/dev/null || true
+  chmod +x .cursor/skills/verasic-github-governance/hooks/* 2>/dev/null || true
 }
 
 BOOT=".cursor/skills/verasic-github-governance/scripts/bootstrap-repo.sh"
@@ -132,6 +136,21 @@ assert "pre-commit warns on main" \
 
 assert "templates integrity" \
   "test -f .cursor/skills/verasic-github-governance/templates/.github/workflows/ci-turborepo.yml"
+
+assert "detect-posture fixture soft-incomplete" \
+  "VERASIC_GOVERNANCE_POSTURE_FIXTURE=soft-incomplete bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q '^posture: soft-incomplete'"
+
+assert "detect-posture fixture hard-eligible" \
+  "VERASIC_GOVERNANCE_POSTURE_FIXTURE=hard-eligible bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q '^posture: hard-eligible'"
+
+assert "detect-posture fixture hard-eligible recommends OpenTofu" \
+  "VERASIC_GOVERNANCE_POSTURE_FIXTURE=hard-eligible bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q 'posture_recommendation:'"
+
+assert "detect-posture emits tier after bootstrap" \
+  "env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q '^posture:'"
+
+assert "doctor includes posture after bootstrap" \
+  "out=\$(env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/doctor.sh 2>&1); echo \"\$out\" | grep -q '^doctor: posture:' || { echo \"DEBUG doctor out:\"; echo \"\$out\"; false; }"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

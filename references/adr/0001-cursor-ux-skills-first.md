@@ -37,15 +37,15 @@ A repo config skill (`verasic-config`) scaffolded shared paths but added install
 
 ## Retired names (reference only)
 
-| Retired | Replacement |
-| --- | --- |
-| `/verasic-review` | `/verasic-bugbot` |
-| `/verasic-security-review` | `/verasic-secbot` |
-| `verasic-security-review` (folder) | `verasic-secbot` |
-| `verasic-github-env` | `verasic-github-cli-init` |
-| `verasic-git-commits` | `verasic-git-commits-convention` |
-| `verasic-config` | removed |
-| `cursor/commands/` | removed |
+| Retired                            | Replacement                      |
+| ---------------------------------- | -------------------------------- |
+| `/verasic-review`                  | `/verasic-bugbot`                |
+| `/verasic-security-review`         | `/verasic-secbot`                |
+| `verasic-security-review` (folder) | `verasic-secbot`                 |
+| `verasic-github-env`               | `verasic-github-cli-init`        |
+| `verasic-git-commits`              | `verasic-git-commits-convention` |
+| `verasic-config`                   | removed                          |
+| `cursor/commands/`                 | removed                          |
 
 ## Related
 

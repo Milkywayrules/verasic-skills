@@ -10,6 +10,27 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(none)_
 
+## v0.2.5
+
+**Bundle tag `v0.2.5`** — governance posture detection recommends hard protection when eligible; **`verasic-github-governance` `0.2.1`**, **`verasic-init` `0.2.3`**, **`verasic-github-governance-init` `0.2.1`**, other manifest skills unchanged at **`0.2.0`**.
+
+### Added
+
+- **verasic-github-governance** — read-only `scripts/detect-posture.sh` tiers: `soft-incomplete`, `soft-ready`, `hard-eligible`, `hard-applied`, `unknown`. Public repos with green `ci` on default branch and no branch protection get **`hard-eligible`** with OpenTofu recommendation (user confirm still required).
+- **verasic-init** — **governance posture** section in plan/apply reports when governance skills are in scope; `next:` line points to hard apply when `hard-eligible`.
+- **verasic-github-governance-init** — factory plan/apply prints posture after doctor.
+
+### Changed
+
+- **verasic-github-governance** — `doctor.sh` plan-gated section delegates to `detect-posture.sh` (single source of truth).
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills@v0.2.5 --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
+
 ## v0.2.4
 
 **Bundle tag `v0.2.4`** — canonical root `bundle.tag`; init defaults to **`main`** for Cursor UX fetch; **`verasic-init` `0.2.2`**, other manifest skills unchanged at **`0.2.0`**.

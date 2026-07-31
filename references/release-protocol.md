@@ -5,11 +5,11 @@ is the strict release manifest. `integrity.sha256` hashes `VERSION` — they mov
 
 ## Three layers
 
-| Layer | Location | Role |
-| ----- | -------- | ---- |
-| Per-skill semver | `skills/<name>/VERSION` | What changed in that skill |
-| Release manifest | `versions.lock` | Must match every manifest skill `VERSION` |
-| Bundle tag | root `bundle.tag` + git tag `vX.Y.Z` | Canonical bundle version; drives generated `@vX.Y.Z` pins |
+| Layer            | Location                             | Role                                                      |
+| ---------------- | ------------------------------------ | --------------------------------------------------------- |
+| Per-skill semver | `skills/<name>/VERSION`              | What changed in that skill                                |
+| Release manifest | `versions.lock`                      | Must match every manifest skill `VERSION`                 |
+| Bundle tag       | root `bundle.tag` + git tag `vX.Y.Z` | Canonical bundle version; drives generated `@vX.Y.Z` pins |
 
 Users verify installs with `verasic-init` (integrity hash check) and read the **versions**
 section. `--check-updates` compares local `VERSION` to upstream per skill.
@@ -44,6 +44,7 @@ section. `--check-updates` compares local `VERSION` to upstream per skill.
    ```
 
    This sets root `bundle.tag`, runs `sync-bundle-tag.sh` (governance `@vX.Y.Z` pins), and runs `check-bundle-pins.sh`.
+
 8. Commit, push `main`, tag `vX.Y.Z`, push tag — **`verasic-release` CI runs `test-all.sh`**.
 9. Apply [repo-meta.md](repo-meta.md) (branch protection, GitHub Release).
 
@@ -52,11 +53,11 @@ refreshing `integrity.sha256`. **`versions.lock` entry order must match `manifes
 
 ## Semver guidance
 
-| Change | Bump |
-| ------ | ---- |
-| New skill | Add to `manifest.txt`, `versions.lock`, tag minor or patch per team cadence |
-| Protocol / behavior change | Patch (or minor if breaking contract) for that skill only |
-| Docs-only inside skill | Patch optional — prefer patch when integrity-listed files change |
+| Change                     | Bump                                                                        |
+| -------------------------- | --------------------------------------------------------------------------- |
+| New skill                  | Add to `manifest.txt`, `versions.lock`, tag minor or patch per team cadence |
+| Protocol / behavior change | Patch (or minor if breaking contract) for that skill only                   |
+| Docs-only inside skill     | Patch optional — prefer patch when integrity-listed files change            |
 
 Repo tag patch (`v0.1.4`) is fine when only one skill patches. Tag does **not** have to equal
 every skill version.

@@ -106,6 +106,7 @@ plan_line "bootstrap-repo.sh ${bootstrap_args[*]:-(default)}"
 plan_line "wire-hooks.sh"
 plan_line "lefthook install (when lefthook available)"
 plan_line "doctor.sh"
+plan_line "detect-posture.sh (governance tier recommendation)"
 [[ "$OPEN_PR" -eq 1 ]] && plan_line "open PR on chore/governance-bootstrap"
 echo
 if [[ "$YES" -eq 0 ]]; then
@@ -141,6 +142,13 @@ set -e
 if [[ "$doc_rc" -ne 0 ]]; then
   echo "factory: doctor exit $doc_rc" >&2
   exit 3
+fi
+
+if [[ -x "$GOV_ROOT/scripts/detect-posture.sh" ]]; then
+  echo
+  echo " governance posture"
+  echo " ------------------"
+  bash "$GOV_ROOT/scripts/detect-posture.sh" 2>/dev/null | sed 's/^/   /' || true
 fi
 
 if [[ "$OPEN_PR" -eq 1 ]]; then
