@@ -150,7 +150,7 @@ assert "detect-posture emits tier after bootstrap" \
   "env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q '^posture:'"
 
 assert "doctor includes posture after bootstrap" \
-  "env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/doctor.sh 2>&1 | grep -q '^doctor: posture:'"
+  "out=\$(env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/doctor.sh 2>&1); echo \"\$out\" | grep -q '^doctor: posture:' || { echo \"DEBUG doctor out:\"; echo \"\$out\"; false; }"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

@@ -205,13 +205,17 @@ if [[ "$protection_rc" -eq 0 && -n "$protection_out" && "$protection_out" != *'"
   emit
 elif [[ "$protection_out" == *'Branch not protected'* || "$protection_out" == *'"status":404'* ]]; then
   BRANCH_PROTECTION="none"
+elif [[ "$protection_out" == *'Resource not accessible'* || "$protection_out" == *'"status":403'* ]]; then
+  BRANCH_PROTECTION="unknown"
 elif [[ "$protection_rc" -ne 0 ]]; then
   POSTURE="unknown"
   POSTURE_REASON="soft ready — branch protection API error (rc=$protection_rc); cannot classify posture"
   emit
 fi
 
-BRANCH_PROTECTION="none"
+if [[ "$BRANCH_PROTECTION" != "unknown" ]]; then
+  BRANCH_PROTECTION="none"
+fi
 
 CI_ON_DEFAULT="$(gh api "repos/$repo/commits/$DEFAULT_BRANCH/check-runs" \
   --jq '.check_runs[] | select(.name == "ci") | .conclusion' 2>/dev/null | head -1 || true)"
@@ -220,7 +224,11 @@ CI_ON_DEFAULT="$(gh api "repos/$repo/commits/$DEFAULT_BRANCH/check-runs" \
 if [[ "$VISIBILITY" == "PUBLIC" ]]; then
   if [[ "$CI_ON_DEFAULT" == "success" ]]; then
     POSTURE="hard-eligible"
-    POSTURE_REASON="public repo; soft ready; ci green on $DEFAULT_BRANCH; branch protection not applied"
+    if [[ "$BRANCH_PROTECTION" == "none" ]]; then
+      POSTURE_REASON="public repo; soft ready; ci green on $DEFAULT_BRANCH; branch protection not applied"
+    else
+      POSTURE_REASON="public repo; soft ready; ci green on $DEFAULT_BRANCH; branch protection unverified (insufficient token scope — confirm unprotected before apply)"
+    fi
     hard_apply_recommendation
     emit
   fi
