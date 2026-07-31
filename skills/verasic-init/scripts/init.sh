@@ -838,10 +838,11 @@ else
     printf ' · %d verify failed' "$verify_failed"
   fi
   echo
-  if [[ -n "$GOVERNANCE_POSTURE_LOG" && -s "$GOVERNANCE_POSTURE_LOG" ]] && grep -q '^posture: hard-eligible' "$GOVERNANCE_POSTURE_LOG"; then
-    echo " next: repo is hard-eligible — apply branch protection via OpenTofu (user confirm required); see posture_recommendation above and verasic-github-governance SKILL.md"
-  elif $PLAN_ONLY; then
+  if $PLAN_ONLY; then
     verasic_profile_plan_next false "$PROFILE"
+    if [[ -n "$GOVERNANCE_POSTURE_LOG" && -s "$GOVERNANCE_POSTURE_LOG" ]] && grep -q '^posture: hard-eligible' "$GOVERNANCE_POSTURE_LOG"; then
+      echo " next: repo is hard-eligible — apply branch protection via OpenTofu (user confirm required); see posture_recommendation above and verasic-github-governance SKILL.md"
+    fi
   elif $PROFILE_UX_FAILED; then
     echo " next: fix Cursor UX fetch in profile actions (network or VERASIC_INIT_REMOTE_REPO_BASE), then re-run --yes --profile $PROFILE"
   elif ((failed > 0 || broken_install > 0)); then

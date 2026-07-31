@@ -80,8 +80,8 @@ fi
 
 # Plan-gated / hard apply (informational — detect-posture is source of truth)
 echo "doctor: --- plan-gated (hard apply) ---"
-if [[ -x "$SCRIPT_DIR/detect-posture.sh" ]]; then
-  posture_out="$("$SCRIPT_DIR/detect-posture.sh" 2>/dev/null || true)"
+if [[ -x "$SCRIPT_DIR/detect-posture.sh" ]] || [[ -f "$SCRIPT_DIR/detect-posture.sh" ]]; then
+  posture_out="$(bash "$SCRIPT_DIR/detect-posture.sh" 2>/dev/null || true)"
   if [[ -n "$posture_out" ]]; then
     while IFS= read -r pline || [[ -n "$pline" ]]; do
       [[ "$pline" == "note:"* ]] && continue
@@ -91,7 +91,8 @@ if [[ -x "$SCRIPT_DIR/detect-posture.sh" ]]; then
       fi
     done <<< "$posture_out"
   else
-    echo "doctor: info — posture detection unavailable"
+    echo "doctor: posture: unknown"
+    echo "doctor: posture_reason: detect-posture produced no output"
   fi
 else
   echo "doctor: info — detect-posture.sh missing — broken install"

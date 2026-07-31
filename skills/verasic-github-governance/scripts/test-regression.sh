@@ -144,8 +144,11 @@ assert "detect-posture fixture hard-eligible" \
 assert "detect-posture fixture hard-eligible recommends OpenTofu" \
   "VERASIC_GOVERNANCE_POSTURE_FIXTURE=hard-eligible bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q 'posture_recommendation:'"
 
+assert "detect-posture emits tier after bootstrap" \
+  "env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/detect-posture.sh | grep -q '^posture:'"
+
 assert "doctor includes posture after bootstrap" \
-  "bash .cursor/skills/verasic-github-governance/scripts/doctor.sh 2>&1 | grep -q '^doctor: posture:'"
+  "env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO bash .cursor/skills/verasic-github-governance/scripts/doctor.sh 2>&1 | grep -q '^doctor: posture:'"
 
 echo "---"
 echo "regression: $pass passed, $fail failed"

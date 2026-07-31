@@ -39,6 +39,14 @@ emit() {
   exit 0
 }
 
+hard_apply_recommendation() {
+  if [[ "$VISIBILITY" == "PUBLIC" ]]; then
+    POSTURE_RECOMMENDATION="apply hard protection via OpenTofu (user confirm required) — Milkywayrules/verasic-github-governance-public-free → enable_hard_protection=true"
+  else
+    POSTURE_RECOMMENDATION=""
+  fi
+}
+
 fixture="${VERASIC_GOVERNANCE_POSTURE_FIXTURE:-}"
 if [[ -n "$fixture" ]]; then
   case "$fixture" in
@@ -104,7 +112,6 @@ if [[ -f ".github/workflows/ci.yml" ]]; then
   grep -qE '^[[:space:]]{2}ci:[[:space:]]*$' .github/workflows/ci.yml || soft_missing+=("ci job name")
 fi
 
-hooks_ok=0
 lefthook_file=""
 for f in lefthook.yml .lefthook.yml; do
   [[ -f "$f" ]] && lefthook_file="$f" && break
@@ -112,15 +119,13 @@ done
 if [[ -n "$lefthook_file" ]]; then
   if grep -q '\.github/verasic-governance/hooks/pre-push' "$lefthook_file" \
      && grep -q '\.github/verasic-governance/hooks/pre-commit' "$lefthook_file"; then
-    hooks_ok=1
+    :
   else
     soft_missing+=("lefthook governance hooks")
   fi
 else
   hp="$(git config core.hooksPath 2>/dev/null || true)"
-  if [[ "$hp" == *verasic-governance/hooks* || "$hp" == *verasic-github-governance/hooks* ]]; then
-    hooks_ok=1
-  else
+  if [[ "$hp" != *verasic-governance/hooks* && "$hp" != *verasic-github-governance/hooks* ]]; then
     soft_missing+=("hooks wired")
   fi
 fi
@@ -157,22 +162,28 @@ if [[ -z "$repo" ]]; then
   emit
 fi
 
-repo_json="$(gh repo view "$repo" --json visibility,isPrivate,defaultBranchRef 2>/dev/null || true)"
-if [[ -z "$repo_json" ]]; then
+VISIBILITY="$(gh repo view "$repo" --json visibility -q .visibility 2>/dev/null || true)"
+DEFAULT_BRANCH="$(gh repo view "$repo" --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null || true)"
+[[ -z "$DEFAULT_BRANCH" ]] && DEFAULT_BRANCH="main"
+
+if [[ -z "$VISIBILITY" ]]; then
   POSTURE="unknown"
   POSTURE_REASON="soft ready — gh repo view failed (auth or network); cannot detect eligibility"
   emit
 fi
 
-VISIBILITY="$(gh repo view "$repo" --json visibility -q .visibility 2>/dev/null || true)"
-DEFAULT_BRANCH="$(gh repo view "$repo" --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null || true)"
-[[ -z "$DEFAULT_BRANCH" ]] && DEFAULT_BRANCH="main"
+if [[ "$VISIBILITY" == "PRIVATE" ]]; then
+  POSTURE="soft-ready"
+  POSTURE_REASON="private repo — GitHub branch protection requires Team/Pro or public visibility (see plan-matrix.md)"
+  emit
+fi
 
-protection_json=""
+protection_out=""
 protection_rc=0
-protection_json="$(gh api "repos/$repo/branches/$DEFAULT_BRANCH/protection" 2>/dev/null)" || protection_rc=$?
+protection_out="$(gh api "repos/$repo/branches/$DEFAULT_BRANCH/protection" 2>&1)" || protection_rc=$?
 
-if [[ "$protection_rc" -eq 0 && -n "$protection_json" ]]; then
+if [[ "$protection_rc" -eq 0 && -n "$protection_out" && "$protection_out" != *'"message"'* ]]; then
+  protection_json="$protection_out"
   BRANCH_PROTECTION="applied"
   has_ci=0
   has_pr=0
@@ -190,38 +201,30 @@ if [[ "$protection_rc" -eq 0 && -n "$protection_json" ]]; then
   BRANCH_PROTECTION="partial"
   POSTURE="hard-eligible"
   POSTURE_REASON="branch protection present but missing Verasic floor (PR review + required check ci)"
-  POSTURE_RECOMMENDATION="align branch protection via OpenTofu (user confirm required) — Milkywayrules/verasic-github-governance-public-free → enable_hard_protection=true"
+  hard_apply_recommendation
+  emit
+elif [[ "$protection_out" == *'Branch not protected'* || "$protection_out" == *'"status":404'* ]]; then
+  BRANCH_PROTECTION="none"
+elif [[ "$protection_rc" -ne 0 ]]; then
+  POSTURE="unknown"
+  POSTURE_REASON="soft ready — branch protection API error (rc=$protection_rc); cannot classify posture"
   emit
 fi
 
 BRANCH_PROTECTION="none"
 
-ci_json="$(gh api "repos/$repo/commits/$DEFAULT_BRANCH/check-runs" 2>/dev/null || true)"
-if [[ -n "$ci_json" ]]; then
-  ci_conclusion="$(printf '%s' "$ci_json" | grep -o '"name"[[:space:]]*:[[:space:]]*"ci"[^}]*"conclusion"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -n 's/.*"conclusion"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
-  if [[ -n "$ci_conclusion" ]]; then
-    CI_ON_DEFAULT="$ci_conclusion"
-  else
-    CI_ON_DEFAULT="missing"
-  fi
-else
-  CI_ON_DEFAULT="unknown"
-fi
-
-if [[ "$VISIBILITY" == "PRIVATE" ]]; then
-  POSTURE="soft-ready"
-  POSTURE_REASON="private repo — GitHub branch protection requires Team/Pro or public visibility (see plan-matrix.md)"
-  emit
-fi
+CI_ON_DEFAULT="$(gh api "repos/$repo/commits/$DEFAULT_BRANCH/check-runs" \
+  --jq '.check_runs[] | select(.name == "ci") | .conclusion' 2>/dev/null | head -1 || true)"
+[[ -z "$CI_ON_DEFAULT" ]] && CI_ON_DEFAULT="missing"
 
 if [[ "$VISIBILITY" == "PUBLIC" ]]; then
   if [[ "$CI_ON_DEFAULT" == "success" ]]; then
     POSTURE="hard-eligible"
     POSTURE_REASON="public repo; soft ready; ci green on $DEFAULT_BRANCH; branch protection not applied"
-    POSTURE_RECOMMENDATION="apply hard protection via OpenTofu (user confirm required) — Milkywayrules/verasic-github-governance-public-free → enable_hard_protection=true"
+    hard_apply_recommendation
     emit
   fi
-  if [[ "$CI_ON_DEFAULT" == "missing" || "$CI_ON_DEFAULT" == "unknown" ]]; then
+  if [[ "$CI_ON_DEFAULT" == "missing" ]]; then
     POSTURE="soft-ready"
     POSTURE_REASON="public repo eligible for hard protection — merge a PR with green ci on $DEFAULT_BRANCH first"
     emit
