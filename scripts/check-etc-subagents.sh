@@ -23,7 +23,8 @@ catalog_slugs() {
 # Roster table is the documented source of truth for which agents must exist.
 roster_rows() {
   awk '/^## Author selection roster/,/^## Task inline/' "$SNAPSHOT" |
-    sed -n 's/^| `\(subagent-[^`]*\)` | `\([^`]*\)`.*/\1 \2/p'
+    sed -n 's/^| `\([^`]*\)`[[:space:]]*| `\([^`]*\)`.*/\1 \2/p' |
+    grep '^subagent-' || true
 }
 
 declare -A CATALOG=()
