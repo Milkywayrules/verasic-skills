@@ -11,6 +11,7 @@ pre-push:
   commands:
     governance-pre-push:
       run: bash .github/verasic-governance/hooks/pre-push {1}
+      use_stdin: true
 
 # commit-msg wired by wire-hooks.sh when verasic-git-commits-convention is present:
 #   .agents/skills/verasic-git-commits-convention/hooks/commit-msg (preferred)
