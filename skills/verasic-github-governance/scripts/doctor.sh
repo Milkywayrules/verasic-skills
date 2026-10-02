@@ -52,6 +52,10 @@ if [[ -n "$lefthook_file" ]]; then
      && grep -q '\.github/verasic-governance/hooks/pre-commit' "$lefthook_file"; then
     echo "doctor: ok — lefthook references repo-local governance hooks ($lefthook_file)"
     hooks_ok=1
+    if ! grep -qE 'use_stdin:[[:space:]]*true' "$lefthook_file"; then
+      echo "doctor: WARN — governance pre-push reads git stdin; set use_stdin: true on governance-pre-push"
+      warn+=("lefthook pre-push use_stdin")
+    fi
   elif grep -q 'verasic-github-governance/hooks/' "$lefthook_file"; then
     echo "doctor: MISSING — lefthook still references skill-local governance hooks (re-run bootstrap-repo.sh --force)"
     missing+=("lefthook repo-local hooks")

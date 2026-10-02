@@ -77,6 +77,9 @@ assert "bootstrap idempotent" \
 assert "lefthook uses repo-local paths" \
   "grep -q '$REPO_HOOKS/pre-push' lefthook.yml && grep -q '$REPO_HOOKS/pre-commit' lefthook.yml"
 
+assert "lefthook pre-push forwards stdin" \
+  "grep -qE 'use_stdin:[[:space:]]*true' lefthook.yml"
+
 assert "doctor passes with lefthook.yml" \
   "test -f lefthook.yml && bash .cursor/skills/verasic-github-governance/scripts/doctor.sh; rc=\$?; [[ \$rc -eq 0 ]]"
 

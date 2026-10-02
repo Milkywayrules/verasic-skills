@@ -10,6 +10,21 @@ Format: bundle tag → which skills changed. See [references/release-protocol.md
 
 _(none)_
 
+## v0.2.6
+
+**Bundle tag `v0.2.6`** — lefthook pre-push no longer hangs when governance hook reads git stdin; **`verasic-github-governance` `0.2.2`**, other manifest skills unchanged from **`v0.2.5`**.
+
+### Fixed
+
+- **verasic-github-governance** — `templates/lefthook.yml` sets `use_stdin: true` on `governance-pre-push` so lefthook forwards git ref lines (fixes indefinite hang on `git push`). `doctor.sh` warns when missing; regression test asserts the flag.
+
+### Install
+
+```bash
+npx skills add Milkywayrules/verasic-skills@v0.2.6 --skill '*' -y
+bash .agents/skills/verasic-init/scripts/init.sh --yes --profile cursor-hybrid
+```
+
 ## v0.2.5
 
 **Bundle tag `v0.2.5`** — governance posture detection recommends hard protection when eligible; **`verasic-github-governance` `0.2.1`**, **`verasic-init` `0.2.3`**, **`verasic-github-governance-init` `0.2.1`**, other manifest skills unchanged at **`0.2.0`**.
